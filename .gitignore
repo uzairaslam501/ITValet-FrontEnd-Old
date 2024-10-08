@@ -1,0 +1,95 @@
+# Ignore Visual Studio temporary files, build results, and
+# folder-based project outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# VS Code directories
+.vscode/
+.vscode-test/
+
+# Visual Studio 2019/2022 cache/options directory
+.vscode/
+
+# Visual Studio 2017/2019/2022 auto-generated files
+*.log
+.vs/
+.vscode/
+
+# Rider directories
+.idea/
+.idea_modules/
+
+# Coverage Analysis software
+*.coverage
+*.coveragexml
+*_UnitTestCoverage
+*.coverageinfo
+*.coverage.xml
+*.nvuser
+.coverage
+.coveragexml
+
+# ReSharper files
+_ReSharper.Caches
+*.DotSettings.user
+
+# TeamCity
+_builds/
+.tc/
+*.tcmsg
+*.tclog
+*.idea
+
+# DotNet core 
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# msbuild logs
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Publish Web Output
+*.Publish.xml
+.publish_output/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# custom Files
+itevaletclientside/.vs/
+itevaletclientside/bin/
+itevaletclientside/obj/
+itevaletclientside/appSettings.Development.json
+itevaletclientside/appSettings.Production.json

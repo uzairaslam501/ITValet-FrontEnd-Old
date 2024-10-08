@@ -1,0 +1,276 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "ViewUser";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@*<style>
+    .dataTable thead .sorting_asc::after {
+        display: none;
+    }
+
+    .dataTables_filter {
+        display: none;
+    }
+</style>*@
+
+<div class="modal fade" id="butlersDropdownModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Assign To Butler</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("PostUpdateUser","Admin")" id="myForm" method="post">
+
+                    <input type="hidden" name="Id" id="updId" />
+                    <input type="hidden" name="way" value="@ViewBag.Way" />
+
+                    <div class="form-group">
+                        <label class="text-bold">Skill Name <span class="text-danger">*</span></label>
+                        <select class="form-control" id="getSkillsDropdown" name="skillName" required>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Butler Name <span class="text-danger">*</span></label>
+                        <select class="form-control" id="getButlersDropdown" name="butlerName" required>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Project Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="projectTitle" name="projectTitle" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Start Date <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="projectStartDate" name="projectStartDate" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">End Date <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="projectEndDate" name="projectEndDate" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="projectDescription" row="4"></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" value="submit" onclick="validateForm()" class="btn btn-primary" id="updSubBtn">Assign</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-md-2 col-sm-12"></div>
+        <div class="col-md-8 col-sm-12 text-center">
+            <h3 class="h3 text-center"><u>Packages Lists</u></h3>
+            <input type="hidden" id="way" value="@ViewBag.Way" />
+        </div>
+        <div class="col-md-2 col-sm-12"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+                    <thead class="bg-indigo-800">
+                        <tr>
+                            <th class="text-bold text-center">
+                                Buyer Name
+                            </th>
+                            <th class="text-bold text-center">
+                                Package Type
+                            </th>
+                            <th class="text-bold text-center">
+                                Remaining Sessions
+                            </th>
+                            <th class="text-bold text-center">
+                                Package Start
+                            </th>
+                            <th class="text-bold text-center">
+                                Package End
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section CustomJs {
+<script>
+        $('#manageViewPackages').addClass('active');
+    var subscriptionType = -1;
+    loadTable(subscriptionType);
+    function loadTable(subscriptionType) {
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable(
+            {
+                "ajax":
+                {
+                    "url": "@ProjectVariables.BaseUrl" + "Admin/GetSubscriptionDatatable?subscriptionType=" + subscriptionType,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers":
+                    {
+                        'Authorization': Token
+                    },
+                    "data":
+                    {
+
+                    }
+                },
+                    'columns':
+                    [
+                        { "data": "customer", "name": "Customer" },
+                        { "data": "packageType", "name": "PackageType" },
+                        { "data": "remainingSessions", "name": "RemainingSessions" },
+                        { "data": "startDateTime", "name": "0" },
+                        { "data": "endDateTime", "name": "0" },
+                        //{ "data": "Action", "name": "0" },
+                    ],
+                    'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "searchable": true,
+                            "sortable": true,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                    return full.customer;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            "searchable": true,
+                            "sortable": true,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                var packageType = "";
+                                if (full.packageType == 1) {
+                                    packageType = "1 Year";
+                                }
+                                else {
+                                    packageType = "2 Year"
+                                }
+                                return packageType;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            "searchable": true,
+                            "sortable": true,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.remainingSessions;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            "searchable": false,
+                            "sortable": false,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.startDateTime;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            "searchable": false,
+                            "sortable": false,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.endDateTime;
+                            }
+                        },
+                    ],
+                    "serverSide": "true",
+                    "processing": "true",
+                    "language":
+                    {
+                        "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                        "search": "<span>Search :</span> _INPUT_",
+                        "searchPlaceholder": "Filter Data",
+                        "lengthMenu": "<span>Show :</span> _MENU_",
+                        "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                    }
+            });
+    }
+
+    function getSkillsList() {
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: "../Ajax/GetSkillsList",
+            dataType: "json",
+            data: {},
+            success: function (response) {
+                $("#getButlersDropdown").empty().append("");
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+                var appendDropdown = '<option value="">Select Butler</option>';
+                for (var item in response) {
+                    appendDropdown += '<option value=' + response[item].id + '>' + response[item].firstName + " " + response[item].lastName + '</option>';
+                }
+                $("#getButlersDropdown").append(appendDropdown);
+            },
+            error: function () {
+                alert("ajax Failed");
+            },
+            complete: function () {
+                $("#loadImg").hide();
+                $("#butlersDropdownModal").modal('show');
+            }
+        });
+    }
+
+    function AssignToButler() {
+        $("#loadImg").show();
+
+        $.ajax({
+            type: 'POST',
+            url: "../Ajax/GetButlers",
+            dataType: "json",
+            data: {},
+            success: function (response) {
+                $("#getButlersDropdown").empty().append("");
+                if (response == 0) {
+                    alert("Record not found, Please reload the page.");
+                }
+                var appendDropdown = '<option value="">Select Butler</option>';
+                for (var item in response) {
+                    appendDropdown += '<option value=' + response[item].id + '>' + response[item].firstName + " " + response[item].lastName + '</option>';
+                }
+                $("#getButlersDropdown").append(appendDropdown);
+            },
+            error: function () {
+                alert("ajax Failed");
+            },
+            complete: function () {
+                $("#loadImg").hide();
+                $("#butlersDropdownModal").modal('show');
+            }
+        });
+    }
+</script>
+}

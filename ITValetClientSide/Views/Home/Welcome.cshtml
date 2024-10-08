@@ -1,0 +1,191 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <title>IT Valet | All Services at one place</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="IT Valet, All Services at one place" />
+        <meta name="keywords" content="Startup, Business, Tech Servcies, Modern, Creative" />
+        <!-- favicon -->
+        <link href="images/favicon.ico" rel="shortcut icon">
+        <!-- Bootstrap and other css -->
+        <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/swiper.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/tobii.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/tiny-slider.css" rel="stylesheet" type="text/css" />
+        <link href="css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+        <link href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" rel="stylesheet">
+        <!-- Main Css -->
+        <link href="css/style.min.css" rel="stylesheet" type="text/css" id="theme-opt" />
+
+    </head>
+    
+    <body>        
+        <!-- Navbar STart -->
+        <header id="topnav" class="defaultscroll sticky">
+            <div class="container">
+                <a class="logo" href="../">
+                    <span class="logo-light-mode">
+                    <img src="images/tech-valet-logo.svg" class="l-dark" alt="" width="173px;">
+                    <img src="images/tech-valet-logo.svg" class="l-light" alt="" width="135px;">
+                    </span>
+                <img src="frontAssets/images/tech-valet-logo.svg" alt="" style="width: 60px;">
+                </a>
+                <div class="menu-extras">
+                    <div class="menu-item">
+                        <a class="navbar-toggle" id="isToggle" onclick="toggleMenu()">
+                            <div class="lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+
+                <div id="navigation">
+                    <ul class="navigation-menu nav-light">
+                        <li class="has-submenu parent-parent-menu-item">
+                            <a href="@Url.Action("Index","Home")">Home</a><span class="menu-arrow"></span>
+                        </li>
+                        <li class="has-submenu parent-parent-menu-item">
+                            <a href="@Url.Action("About","Home")">About Us</a><span class="menu-arrow"></span>
+                        </li>
+
+                        <li><a href="@Url.Action("Contact","Home")" class="sub-menu-item">Contact us</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+<style type="text/css">
+        .btn-success {
+            background: #2cdd9b !important;
+            background: -webkit-linear-gradient(legacy-direction(to right), #2cdd9b 0%, #1dc8cc 100%) !important;
+            background: -webkit-gradient(linear, left top, right top, from(#2cdd9b), to(#1dc8cc)) !important;
+            background: -webkit-linear-gradient(left, #2cdd9b 0%, #1dc8cc 100%) !important;
+            background: -o-linear-gradient(left, #2cdd9b 0%, #1dc8cc 100%) !important;
+            background: linear-gradient(to right, #2cdd9b 0%, #1dc8cc 100%) !important;
+            border-color: #2cdd9b !important;
+        }
+
+.btn-success:hover{
+        background-color: transparent !important;
+        border-color: #fff !important;
+        border-style: solid !important;
+        border-width: 1px !important;
+    }
+
+.shadow-sm {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 20%) !important;
+}
+
+    .backgroundImage {
+        background-image: url("images/bg/busi01.jpg");
+        background-position: center center;
+        /* Other background properties */
+    }    
+    .backgroundImage2 {
+        background-image: url("images/bg/busi01.jpg");
+        background-position: center center;
+        /* Other background properties */
+    }
+</style>
+<!-- btn Success Style Ends -->
+
+        <!-- Hero Start -->
+        <section class="swiper-slider-hero position-relative d-block" style="height:94vh !important;">
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide d-flex align-items-center overflow-hidden">
+                        <div class="slide-inner  slide-bg-image d-flex align-items-center" data-jarallax='{"speed": 0.4}' style="background: center center;" data-background="images/bg/busi01.jpg">
+                        <div class="bg-overlay" style="background: linear-gradient(to bottom, rgb(22 28 45 / 85%) 0%, rgba(60,72,88,0.3) 25%, rgba(60,72,88,0.3) 35%, #2cdd9bad 100%);"></div>
+                            <div class="container">
+                                <div class="row justify-content-center">
+                                    <div class="col-12">
+                                        <div class="title-heading text-center">
+                                            <h1 class="fw-semibold display-3 text-white title-dark mb-4">Need Help</h1>
+                                            <p class="para-desc mx-auto text-white" style="font-size:18px;">IT Valet that help people with everything to turn their ideas into reality.</p>
+                                            
+                                            <div class="mt-4 pt-2">
+                                            @*<a href="@Url.Action("Index","Home")" class="btn btn-success" style="border: solid #fff 1px;">Get Started</a>*@
+                                            <a href="@Url.Action("Register","Auth",new{value= "Customer"})" class="btn btn-success" style="border: solid #fff 1px;">Get Started</a>
+
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div  class="swiper-slide d-flex align-items-center overflow-hidden">
+                        <div class="slide-inner slide-bg-image d-flex align-items-center" data-jarallax='{"speed": 0.4}' style="background: center center;" data-background="images/bg/busi02a.jpg">
+                        <div class="bg-overlay" style="background: linear-gradient(to bottom, rgb(22 28 45 / 85%) 0%, rgba(60,72,88,0.3) 25%, rgba(60,72,88,0.3) 35%, #2cdd9bad 100%);"></div>
+                            <div class="container">
+                                <div class="row justify-content-center">
+                                    <div class="col-12">
+                                        <div class="title-heading text-center">
+                                            <h1 class="fw-semibold display-3 text-white title-dark mb-4">Provide Services</h1>
+                                            <p class="para-desc mx-auto text-white" style="font-size:20px;">Earn More by Selling Your Services On IT Valet.</p>
+                                            
+                                            <div class="mt-4 pt-2">
+                                                 <a href="@Url.Action("Register","Auth",new{value= "ITValet"})" class="btn btn-success" style="border: solid #fff 1px;">Get Started</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                </div>
+                <div hidden  class="swiper-button-next border rounded-circle text-center"></div>
+                <div hidden  class="swiper-button-prev border rounded-circle text-center"></div>
+            </div>
+        </section>
+   
+
+
+        <footer class="footer bg-footer">
+
+            <div class="footer-bar bg-footer" style="padding: 9px 0 !important;">
+                <div class="container">
+                    <div class="row">
+
+                        <div class="col-md-6 d-flex justify-content-md-start justify-content-center mb-0">
+                                <p class="mb-0 text-muted" style="font-size:13px !important;"><script>document.write(new Date().getFullYear())</script> © IT Valet</p>
+                        </div>
+
+                        <div class="col-md-6 d-flex justify-content-md-end justify-content-center mb-0">
+                            <ul class="list-inline mb-0" style="font-size:13px;">
+                                <li class="list-inline-item"><a class="text-muted" href="#">Privacy Policy</a> |</li>
+                                <li class="list-inline-item"><a class="text-muted" href="#">Terms of Service</a> |</li>
+                                <li class="list-inline-item"><a class="text-muted" href="../Home/Contact">Help & Support</a></li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- End -->
+
+        <!-- javascript -->
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script src="js/swiper.min.js"></script>
+        <script src="js/parallax.js"></script>
+        <script src="js/tobii.min.js"></script>
+        <script src="js/tiny-slider.js"></script>
+        <script src="js/feather.min.js"></script>
+        <!-- Main Js -->
+        <script src="js/plugins.init.js"></script>
+        <script src="js/app.js"></script>
+    </body>
+</html>

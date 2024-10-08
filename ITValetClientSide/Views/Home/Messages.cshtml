@@ -1,0 +1,1282 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "Messages";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+
+    bool checkPath = ViewBag.Way == "ViewUserProfile" ? true : false;
+    string getUserChatOnTop = "";
+    if (checkPath)
+    {
+        getUserChatOnTop = ViewBag.UserId;
+    }
+}
+@section CustomCss{
+    <style>
+        a:hover {
+            cursor: pointer;
+        }
+
+        .custom-stripe-button {
+            width: 465px !important; /* Adjust the width as needed */
+        }
+
+        #payBySession_btn {
+            background-color: lightgrey; /* Change to your preferred shade of light grey */
+        }
+
+        #useSessionsCheckbox {
+            margin-right: 10px; /* Add some space between the checkbox and the text */
+            /* Add any other styles you want for the checkbox */
+        }
+
+        .seller-offline {
+            border: 1px solid red;
+            border-radius: 12px;
+            color: red;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 10px;
+            padding: 3px 10px;
+            text-transform: capitalize;
+        }
+
+        .highlight-background {
+            background-color: #d7e2f7 !important;
+        }
+    </style>
+}
+<input id="getUserChatOnTop" value="@getUserChatOnTop" hidden />
+<input hidden id="OfferId_val" value="">
+
+
+<!--User Sessions Modal-->
+
+<div class="modal fade" id="userSessionsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="paymentSelectionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="paymentSelectionLabel">Pay By Package</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+
+                    <div id="package_Section" class="col-lg-12">
+                        <div class="bg-white rounded shadow-sm sidebar-page-right">
+                            <div>
+                                <div class="p-3">
+                                    <p class="text-muted font-weight-bold h6 mb-3">
+                                        Use Your Sessions
+                                        @*<input type="checkbox" id="useSessionsCheckbox"> <!-- Add the checkbox here -->*@
+
+                                    </p>
+                                    <p class="text-muted font-weight-bold mb-0">Project Title : <span id="project_Title"></span></p>
+                                    <div class="border mt-4 mb-2 rounded">
+
+                                        <div class="d-flex border-bottom">
+                                            <div class="p-3">
+                                                <p class="text-muted font-weight-bold mb-0" id="p1">1 Session =  </p>
+                                            </div>
+                                            <div class="p-3 ml-auto">
+                                                <p class="text-muted font-weight-bold mb-0" id="v1">1 Hour</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex border-bottom">
+                                            <div class="p-3">
+                                                <p class="text-muted font-weight-bold mb-0" id="p2">Total Working Hours =</p>
+                                            </div>
+                                            <div class="p-3 ml-auto">
+                                                <p class="text-muted font-weight-bold mb-0" id="v2"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex border-bottom">
+                                            <div class="p-3">
+                                                <p class="text-muted font-weight-bold mb-0" id="p3">Using Session</p>
+                                            </div>
+                                            <div class="p-3 ml-auto">
+                                                <p class="text-muted font-weight-bold mb-0" id="v3"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex border-bottom">
+                                            <div class="p-3">
+                                                <p class="text-muted font-weight-bold mb-0" id="p4">Remaining Sessions</p>
+                                            </div>
+                                            <div class="p-3 ml-auto">
+                                                <p class="text-muted font-weight-bold mb-0" id="v4"></p>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex border-bottom">
+                                            <div class="p-3">
+                                                <p class="text-muted font-weight-bold mb-0" id="p4">Remaining Sessions After Confirmation</p>
+                                            </div>
+                                            <div class="p-3 ml-auto">
+                                                <p class="text-muted font-weight-bold mb-0" id="v5"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-light d-flex border-bottom">
+                                            <div class="p-3">
+                                                <p class="text-muted font-weight-bold mb-0">PAY By</p>
+                                            </div>
+                                            <div class="border-left p-3 ml-auto">
+
+                                                <p class="text-muted font-weight-bold mb-0" id="v6">Package</p>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; justify-content: center;">
+
+                                        <form id="package-form" action="@Url.Action("ChargePayment","User")" method="post" style="margin-right: 20px;">
+                                            <input type="hidden" name="customerId" value="@ViewBag.LoggedInUserId.Id">
+                                            <input type="hidden" name="ValetId" value="">
+
+                                            <input type="hidden" name="PaymentTitle" value="">
+                                            <input type="hidden" name="PaymentDescription" value="">
+                                            <input type="hidden" name="TotalWorkCharges" value="">
+                                            <input type="hidden" name="ActualOrderPrice" value="">
+                                            <input type="hidden" name="FromDateTime" value="">
+                                            <input type="hidden" name="ToDateTime" value="">
+                                            <input hidden name="ActualOrderPrice" value="">
+                                            <input hidden id="WorkingHours" name="WorkingHours" value="">
+
+                                            <input hidden name="PackageId" id="userpackageId" value="">
+                                            <input hidden name="OfferId" id="OfferId" value="">
+                                            <input hidden name="PackagePaidBy" id="userPackagePaidBy" value="">
+
+                                            <button id="paypalbtn" class="btn btn-success btn-lg" value="PAY">Confirm Your Order</button>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--User Sessions Modal-->
+<!-- Payment Selection Modal -->
+<div class="modal fade" id="paymentSelectionModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="paymentSelectionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="paymentSelectionLabel">Choose How to Pay</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <button type="button" class="btn btn-primary btn-md btn-block mb-2" id="payBySession_btn" style="display:none">Pay By Package</button>
+                <form id="payPal-Form" action="@Url.Action("PostCheckoutForOrder","PayPalClientGateway")" method="post">
+                    <input type="hidden" name="ClientId" value="@ViewBag.LoggedInUserId.Id">
+                    <input type="hidden" name="ValetId" value="">
+                    <input type="hidden" name="OfferId" value="">
+                    <input type="hidden" name="OrderTitle" value="">
+                    <input type="hidden" name="TotalPrice" value="">
+                    <input type="hidden" name="OrderDescription" value="">
+                    <input type="hidden" name="OrderPrice" value="">
+                    <input type="hidden" name="StartDate" value="">
+                    <input type="hidden" name="EndDate" value="">
+                    <button type="submit" class="btn btn-primary btn-md btn-block mb-2" id="payWithPayPalBtn">Pay With PayPal</button>
+                </form>
+                <form id="stripe-form" action="@Url.Action("ChargePayment","User")" method="post" style="margin-right: 20px;">
+                    <input type="hidden" name="customerId" value="@ViewBag.LoggedInUserId.Id">
+                    <input type="hidden" name="ValetId" value="">
+                    <input type="hidden" id="offer_Id" name="OfferId" value="">
+                    <input type="hidden" name="PaymentTitle" value="">
+                    <input type="hidden" name="PaymentDescription" value="">
+                    <input type="hidden" name="TotalWorkCharges" value="">
+                    <input type="hidden" name="ActualOrderPrice" value="">
+                    <input type="hidden" name="FromDateTime" value="">
+                    <input type="hidden" name="ToDateTime" value="">
+                    <button class="btn btn-success btn-md btn-block custom-stripe-button" id="payWithStripeBtn">Pay With Stripe</button>
+                    <script src="//checkout.stripe.com/v2/checkout.js" id="sub2" class="stripe-button" style="margin-left:20px;" data-key="pk_test_51LdJU1JGItIO6che36z9ZVzXobOZwgqCGtjhNU1Xh5jj8rYrwrkjwl4ZvvpZvtEwygS5c51cl4abkLAliD9HZe0400fAG3WJm9" data-label="" data-description="Order Payment"></script>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Order -->
+<div class="modal fade" id="createOrderModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Create Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="projectSenderId" />
+                <input type="hidden" id="projectReceiverId" />
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <div class="input-group mb-2 col-md-12 p-0">
+                        <input type="text" class="form-control" id="projectTitle">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>From DateTime</label>
+                    <div class="input-group mb-2 col-md-12 p-0">
+                        <input type="datetime-local" name="FromDateTime" onchange="onchangeStartAndEndDates(1)" class="form-control" id="projectStartDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>To DateTime</label>
+                    <div class="input-group mb-2 col-md-12 p-0">
+                        <input type="datetime-local" name="ToDateTime" onchange="onchangeStartAndEndDates(2)" class="form-control" id="projectEndDate" required>
+                    </div>
+                </div>
+
+                <div class="border-bottom">
+                    <label>Describe the required services - please be as detailed as possible:</label>
+                    <div class="form-group">
+                        <textarea class="form-control" id="projectDescription" rows="5" placeholder="I'm looking for..." required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span class="text-danger" id="createOrderAlertMessages"></span>
+                <button type="button" class="btn btn-secondary" id="createOrderCloseBtn" data-dismiss="modal" onclick="closeModal()">Close</button>
+                <button type="button" class="btn btn-danger" id="createOrderSubmitBtn" onclick="CheckBookedSlots()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="py-5 homepage-search-block position-relative">
+    <div class="container">
+        <div class="row">
+            <main class="col col-xl-12 order-xl-2 col-lg-12 order-lg-1 col-md-12 col-sm-12 col-12">
+                <div class="box shadow-sm rounded bg-white mb-3 osahan-chat">
+                    <h5 class="pl-3 pt-3 pr-3 border-bottom mb-0 pb-3">Messaging</h5>
+                    <div class="row m-0">
+                        <div class="border-right col-lg-5 col-xl-4 px-0">
+                            <div class="osahan-chat-left">
+                                <div class="position-relative icon-form-control p-3 border-bottom">
+                                    <i class="fa fa-search position-absolute"></i>
+                                    <input placeholder="Search messages" onkeyup="getSideBarList(this.value,0)" type="text" class="form-control">
+                                </div>
+                                <div class="osahan-chat-list" id="messagesSideBar">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7 col-xl-8 px-0">
+                            <div class="p-3 d-flex align-items-center  border-bottom osahan-post-header">
+                                <div class="font-weight-bold mr-1 overflow-hidden">
+                                    <div class="text-truncate" id="chatUserName">
+                                    </div>
+                                </div>
+                                <div style="display:none" id="usrstatus" class="ml-2 small text-truncate overflow-hidden text-black-50">
+                                    <span id="statusDivId" class="ml-auto seller-card1   d-flex justify-content-end">
+
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="osahan-chat-box p-3 border-top border-bottom bg-light">
+                                <img id="ChatLoader" class="rounded-circle" src="../Images/loading4.gif" alt="" style="max-width: 30%; max-height: 50%; display: block; margin: 0 auto;">
+                                <div id="messageChatBoxArea"></div>
+                            </div>
+                            <div class="w-100 border-top border-bottom">
+                                <textarea placeholder="Write a message…"
+                                          class="form-control border-0 p-3 shadow-none"
+                                          rows="2"
+                                          id="messageTextArea"></textarea>
+                            </div>
+                            <div class="p-3 d-flex align-items-center">
+                                <div class="overflow-hidden">
+                                    <button onclick="createOrder()" type="button" class="btn btn-light btn-sm rounded">
+                                        <i class="mdi mdi-coin"> </i>
+                                        Create an Offer
+                                    </button>
+                                </div>
+                                <span class="ml-auto">
+                                    <button onclick="sendMessageToServer()" id="sendMessageButton" type="button" class="btn btn-success btn-sm rounded">
+                                        <i class="mdi mdi-send"></i> Send
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+</section>
+
+
+@section CustomJs
+    {
+
+    <script>
+        var getLoggedInUserId = "@ViewBag.LoggedInUserId.Id";
+        var getLoggedInUserRole = "@ViewBag.LoggedInUserId.Role";
+        getSideBarList("", 0);
+        var getDefaultChat = false;
+        var getDefaultChatHighlight = false;
+        var ChatHighlightedUserId = "";
+        var getDefaultChatUserId = "";
+        var getDefaultChatUserName = "";
+        var bookedSlots = [];
+
+        function linkify(text) {
+            var urlPattern = /((https:\/\/|http:\/\/)?(www\.)?[\w\.-]+\.\w{2,20}\S*)/gi;
+            return text.replace(urlPattern, function (url) {
+                // Check if the URL doesn't start with "http://" or "https://" and add "http://" if needed
+                if (!url.match(/^(https:\/\/|http:\/\/|www\.)\S*$/i)) {
+                    // If the URL doesn't match a valid pattern, return it as is
+                    return url;
+                } else if (url.startsWith("https//")) {
+                    url = 'http://' + url.substring(8); // Remove the extra '/' from "https//"
+                } else if (!url.match(/^(https:\/\/|http:\/\/)/i)) {
+                    if (url.startsWith("www.")) {
+                        return '<a href="' + 'http://' + url + '" target="_blank">' + url + '</a>';
+                    } else {
+                        url = 'http://www.' + url;
+                    }
+                }
+                return '<a href="' + url + '" target="_blank">' + url + '</a>';
+            });
+        }
+
+        function getSideBarList(value, showLoader) {
+            var getUserChatOnTop = '@getUserChatOnTop';
+            $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "Message/GetMessageSideBarList?loggedInUserId=" + getLoggedInUserId + "&Name=" + value +
+                    "&GetUserChatOnTop=" + getUserChatOnTop,
+                data: {
+
+                },
+                dataType: "json",
+                success: function (response) {
+                    $('#messagesSideBar').html("");
+                    var appendingSideBarMessageList = "";
+
+                    for (var item = 0; item < response.length; item++) {
+                        if (item == 0) {
+                            getDefaultChatUserId = response[item].userDecId;
+                            getDefaultChatUserName = response[item].username;
+                        }
+                        var addHighlightClass = "";
+                        if (getDefaultChatHighlight == false) {
+                            ChatHighlightedUserId = response[item].userDecId;
+                            addHighlightClass = "highlight-background";
+                            getDefaultChatHighlight = true;
+                        }
+                        var messageDescriptionLength = "";
+                        var LastMessageUsername = "You : ";
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+
+                        if (response[item].lastMessageUsername != null && response[item].lastMessageUsername != "") {
+                            LastMessageUsername = response[item].lastMessageUsername + ": ";
+                        }
+
+                        if (response[item].userImage != null && response[item].userImage != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + response[item].userImage;
+                        }
+
+                        messageDescriptionLength = LastMessageUsername + "" + response[item].messageDescription;
+
+                        if (messageDescriptionLength != null && messageDescriptionLength != "") {
+                            if (messageDescriptionLength.length > 32) {
+                                messageDescriptionLength = messageDescriptionLength.substring(0, 31);
+                                messageDescriptionLength = messageDescriptionLength + "...";
+                            }
+                            else {
+                                messageDescriptionLength = messageDescriptionLength;
+                            }
+                        }
+                        appendingSideBarMessageList += '<a onclick="GetMessagesForUser(\'' + response[item].userDecId + '\', \'' + response[item].username + '\',0)"><div id="highlightUser-' + response[item].userDecId + '" class="p-3 d-flex align-items-center border-bottom osahan-post-header overflow-hidden ' + addHighlightClass + '">' +
+                            '<div  class="dropdown-list-image mr-3">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="font-weight-bold mr-1 overflow-hidden">' +
+                            '<div class="text-truncate">' + response[item].username +
+                            '<span id="chatRoom-' + response[item].userDecId + '" style="display: none;"><sup class="badge badge-success ml-1" style="font - size: 8px;">New</sup></span></div>' +
+                            '<div class="small text-truncate overflow-hidden text-black-50">' +
+                            messageDescriptionLength +
+                            '</div>' +
+                            '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + response[item].messageTime + '</div>' +
+                            '</span>' +
+                            '</div></a>';
+                    }
+                    $("#messagesSideBar").html(appendingSideBarMessageList);
+                },
+                error: function (response) {
+                },
+                complete: function () {
+                    GetMessagesForUser(getDefaultChatUserId, getDefaultChatUserName, showLoader);
+                }
+            });
+        }
+
+        function GetMessagesForUser(userId, name, showLoader) {
+
+            $("#highlightUser-" + ChatHighlightedUserId).removeClass("highlight-background");
+            $("#highlightUser-" + userId).addClass("highlight-background");
+            ChatHighlightedUserId = userId;
+
+            getDefaultChatUserId = userId; // get the specific userId whose chat box is open on right side.
+
+            $("#chatUserName").html("");
+            $("#chatUserName").html(name);
+
+            $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "Message/GetReceiverStatus?userId=" + userId,
+                data: {
+
+                },
+                dataType: "json",
+                success: function (response) {
+                    var appendable = "";
+                    if (response != null && response == 1) {
+                        $("#statusDivId").addClass("seller-card1");
+                        $("#statusDivId").removeClass("seller-offline");
+                        appendable = '<span id="StatusId-' + userId + '" class="user-online-indicator is-online">Online</span>';
+                    }
+                    else if (response != null && response == 0) {
+                        $("#statusDivId").removeClass("seller-card1");
+                        $("#statusDivId").addClass("seller-offline");
+                        appendable = '<span id="StatusId-' + userId + '" class="user-online-indicator is-online">Offline</span>';
+                    }
+                    $("#statusDivId").empty();
+                    $("#statusDivId").append(appendable);
+                    $("#usrstatus").show();
+                },
+                error: function (response) {
+                },
+                complete: function () {
+
+                }
+            });
+
+            $('#messageChatBoxArea').html("");
+            if (showLoader == 0) {
+                $("#ChatLoader").show();
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "Message/GetMessagesForUser?loggedInUserId=" + getLoggedInUserId + "&userId=" + userId,
+                data: {
+
+                },
+                dataType: "json",
+                success: function (response) {
+
+
+                    var appendingSideBarMessageList = "";
+                    var appendingSideBarStartTag = "<span>";
+                    var appendingSideBarEndTag = "";
+                    for (var item = 0; item < response.length; item++) {
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+                        var RequestedOrder = "";
+                        var RequestOrderButton = "";
+
+                        if (response[item].profileImage != null && response[item].profileImage != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + response[item].profileImage;
+                        }
+
+                        messageDescriptionLength = response[item].messageDescription;
+
+                        //order work
+                        if (response[item].offerTitle != "" && response[item].offerTitle != null) {
+                            if (response[item].offerStatus == "1") {
+                                if (response[item].senderId == getLoggedInUserId) {
+                                    RequestOrderButton = '<p id="offerRequestText-' + response[item].offerTitleId + '" class="font-weight-bold font-italic">Offer Sent</p>';
+                                }
+                                else {
+                                    if (getLoggedInUserRole == 'Customer') {
+                                        RequestOrderButton = '<p id="offerRequestText-' + response[item].offerTitleId + '" class="font-weight-bold font-italic">Offer Requested</p>' +
+                                            '<button id="offerRequestBtnA-' + response[item].offerTitleId + '" class="btn btn-sm btn-primary btn-block" onclick="showPaymentModal(\'' + response[item].offerTitleId + '\')">Accept</button>' +
+                                            '<button id="offerRequestBtnR-' + response[item].offerTitleId + '" class="btn btn-sm btn-danger btn-block" onclick="orderStatus(\'' + response[item].offerTitleId + '\', \'Reject\')">Reject</button>';
+                                    } else {
+                                        RequestOrderButton = '<p id="offerRequestText-' + response[item].offerTitleId + '" class="font-weight-bold font-italic">Offer Requested</p>';
+                                    }
+                                }
+                            }
+                            if (response[item].offerStatus == "2") {
+                                RequestOrderButton = '<p id="offerRequestText-' + response[item].offerTitleId + '" class="font-weight-bold font-italic">Offer Accepted</p>';
+                            }
+                            if (response[item].offerStatus == "3") {
+                                RequestOrderButton = '<p id="offerRequestText-' + response[item].offerTitleId + '" class="font-weight-bold font-italic">Offer Cancelled</p>';
+                            }
+                            var transactionFeeColumn = '';
+                            if (getLoggedInUserRole == 'Customer') {
+                                transactionFeeColumn = '<p class="mb-1">Transaction Fee: <i class="mdi mdi-coin"></i> $<span id="transactionFee' + response[item].offerTitleId + '">' + response[item].transactionFee + '</span></p>';
+                            }
+                            RequestedOrder = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:fit-content">' +
+                                '<div class="p-3 border-bottom">' +
+                                '<h6 class="text-dark"><span style="word-break:break-all" class="font-weight-bold" id="offerTitle' + response[item].offerTitleId + '">' + response[item].offerTitle + '</span></h6>' +
+                                '<p class="mb-0 text-muted mb-3" style="word-break:break-all" id="offerDescription' + response[item].offerTitleId + '">' + response[item].offerDescription + '</p>' +
+                                '<p class="mb-1"> Offer price: <i class="mdi mdi-coin"></i> $<span id="offerPrice' + response[item].offerTitleId + '">' + response[item].offerPrice + '</span></p>' +
+                                transactionFeeColumn +
+                                '<p class="mb-1">Started From: <i class="mdi mdi-clock"></i> <span id="startedDateTime' + response[item].offerTitleId + '">' + response[item].startedDateTime + '</span></p>' +
+                                '<p class="mb-1">Ending Time: <i class="mdi mdi-clock"></i> <span id="endedDateTime' + response[item].offerTitleId + '">' + response[item].endedDateTime + '</span></p>' +
+
+                                '<div class="p-1">' +
+                                RequestOrderButton +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                            messageDescriptionLength = RequestedOrder;
+                        }
+                        //end
+
+                        appendingSideBarMessageList += '<div class="d-flex align-items-center osahan-post-header">' +
+                                '<div class="dropdown-list-image mr-3 mb-auto">' +
+                                    '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                                '</div>' +
+                                '<div class="mr-1" style="width:100%">' +
+                                    '<div>' +
+                                        '<span class="text-truncate h6 mb-3">' + response[item].name + '</span>' +
+                                        '<span class="ml-auto mb-auto" style="float:right">' +
+                                            '<span class="text-right text-muted pt-1 small">' + response[item].messageTime + '</span>' +
+                                        '</span>' +
+                                    '</div>' +
+                                    '<p style="word-break:break-all">' + messageDescriptionLength + '</p>' +
+                                '</div>' +
+                            '</div>';
+                    }
+
+                    $("#messageChatBoxArea").html('<span id="chatBoxDialogue-' + getDefaultChatUserId + '">' + appendingSideBarMessageList + '</span>');
+
+                },
+                error: function (response) {
+                },
+                complete: function () {
+                    $("#ChatLoader").hide();
+
+                    $('#messagesListSideBarLoader').hide();
+                    scrollToBottom();
+                }
+            });
+        }
+
+        // Function to scroll to the bottom of the chat box
+        function scrollToBottom() {
+            var chatBox = document.querySelector('.osahan-chat-box');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function CheckBookedSlots() {
+
+            var fromDateTime = $("#projectStartDate").val();
+            var toDateTime = $("#projectEndDate").val();
+
+            var startTime = new Date(fromDateTime);
+            var endTime = new Date(toDateTime);
+            var currentDateTime = new Date();
+
+            if (startTime < currentDateTime || endTime < currentDateTime) {
+                triggerSweetAlert("Please select a date and time in the future.", "@ProjectVariables.DangerColor");
+            } 
+            else {
+                var valetId;
+
+                if (getLoggedInUserRole === "Valet") {
+                    valetId = getLoggedInUserId;
+                } else if (getLoggedInUserRole === "Customer") {
+                    valetId = getDefaultChatUserId;
+                }
+
+                var minDuration = 60 * 60 * 1000; // 1 hour in milliseconds
+                if (endTime - startTime < minDuration) {
+                    triggerSweetAlert("The duration must be at least 60 minutes", "@ProjectVariables.DangerColor");
+                } 
+                else {
+                    $.ajax({
+                        type: 'GET',
+                        headers: {
+                            Authorization: Token,
+                        },
+                        url: projectBaseUrl + "Message/CheckAvailableSlot",
+                        data: {
+                            valetID: valetId,
+                            startDate: fromDateTime,
+                            endDate: toDateTime
+                        },
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status) {
+                                // Slot is available, proceed with creating the order
+                                postCreateOrder();
+                            } else {
+                                // Slot is not available, show an appropriate message
+                                handleUnavailableSlot(data);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function handleUnavailableSlot(data) {
+            if (data.statusCode === "400") {
+                triggerSweetAlert(data.message, "@ProjectVariables.DangerColor");
+            } else {
+                console.error("Unexpected response:", data);
+            }
+        }
+
+    </script>
+
+    <!-- signalR send message  -->
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        //Disable the send button until connection is established.
+        const notificationSound = document.getElementById("notificationSound");
+        document.getElementById("sendMessageButton").disabled = true;
+
+        connection.on("ReceiveMessage", function (senderId, receiverId, userName, userProfile, message, messageTime) {
+            $("#chatRoom-" + senderId).css("display", "inline");
+            var checkIfChatExist = document.getElementById('chatRoom-' + senderId);
+            if (checkIfChatExist) {
+                getSideBarList("", 0);
+            }
+            // agr sender ki chat receiver side pr open ha to append krwao msg
+            var element = document.getElementById('chatBoxDialogue-' + senderId);
+            if (element) {
+                var ProfileImage = "../frontAssets/images/user/s1.png";
+                if (userProfile != null && userProfile != "") {
+                    ProfileImage = "@ProjectVariables.BaseUrlForImages" + userProfile;
+                }
+                var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                    '<div class="dropdown-list-image mr-3 mb-auto">' +
+                    '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                    '</div>' +
+                    '<div class="mr-1">' +
+                    '<div class="text-truncate h6 mb-3">' +
+                    userName +
+                    '</div>' +
+                    '<p>' +
+                    message +
+                    '</p>' +
+                    '</div>' +
+                    '<span class="ml-auto mb-auto">' +
+                    '<div class="text-right text-muted pt-1 small">' + messageTime + '</div>' +
+                    '</span>' +
+                    '</div>';
+
+                $("#chatBoxDialogue-" + senderId).append(appendNewMessage);
+                // save curent user name
+                scrollToBottom();
+            }
+
+        });
+
+        connection.on("ReceiveOffer", function (offer, senderId, receiverId, userName, userProfile, messageTime) {
+            $("#chatRoom-" + senderId).css("display", "inline");
+            var checkIfChatExist = document.getElementById('chatRoom-' + senderId);
+            if (checkIfChatExist) {
+                getSideBarList("", 0);
+            }
+            // agr sender ki chat receiver side pr open ha to append krwao msg
+            var element = document.getElementById('chatBoxDialogue-' + senderId);
+            if (element) {
+                var messageDescriptionLength = "";
+                var RequestedOrder = "";
+                var RequestOrderButton = "";
+                var ProfileImage = "../frontAssets/images/user/s1.png";
+                if (userProfile != null && userProfile != "") {
+                    ProfileImage = "@ProjectVariables.BaseUrlForImages" + userProfile;
+                }
+
+                if (offer != "" && offer != null) {
+                    if (offer.offerStatus == "1") {
+                        if (getLoggedInUserRole == 'Customer') {
+                            RequestOrderButton = '<p id="offerRequestText-' + offer.id + '" class="font-weight-bold font-italic">Offer Requested</p>' +
+                                '<button id="offerRequestBtnA-' + offer.id + '" class="btn btn-sm btn-primary btn-block" onclick="showPaymentModal(\'' + offer.id + '\')">Accept</button>' +
+                                '<button id="offerRequestBtnR-' + offer.id + '" class="btn btn-sm btn-danger btn-block" onclick="orderStatus(\'' + offer.id + '\', \'Reject\')">Reject</button>';
+                        }
+                        else {
+                            RequestOrderButton = '<p id="offerRequestText-' + offer.id + '" class="font-weight-bold font-italic">Offer Requested</p>';
+                        }
+                    }
+                    if (offer.offerStatus == "2") {
+                        RequestOrderButton = '<p id="offerRequestText-' + offer.id + '" class="font-weight-bold font-italic">Offer Accepted</p>';
+                    }
+                    if (offer.offerStatus == "3") {
+                        RequestOrderButton = '<p id="offerRequestText-' + offer.id + '" class="font-weight-bold font-italic">Offer Cancelled</p>';
+                    }
+
+                    var transactionFeeColumn = '';
+                    if (getLoggedInUserRole == 'Customer') {
+                        transactionFeeColumn = '<p class="mb-1">Transaction Fee: <i class="mdi mdi-coin"></i> $<span id="transactionFee' + offer.id + '">' + offer.transactionFee + '</span></p>';
+                    }
+
+                    RequestedOrder = '<div class="box shadow-sm mb-3 rounded bg-white">' +
+                        '<div class="p-3 border-bottom">' +
+                        '<h6 class="text-dark"><span class="font-weight-bold" id="offerTitle' + offer.id + '">' + offer.offerTitle + '</span></h6>' +
+                        '<p class="mb-0 text-muted mb-3" id="offerDescription' + offer.id + '">' + offer.offerDescription + '</p>' +
+                        '<p class="mb-1"> Offer price: <i class="mdi mdi-coin"></i> $<span id="offerPrice' + offer.id + '">' + offer.offerPrice + '</span></p>' +
+                        transactionFeeColumn +
+                        '<p class="mb-1">Started From: <i class="mdi mdi-clock"></i> <span id="startedDateTime' + offer.id + '">' + offer.startedDateTime + '</span></p>' +
+                        '<p class="mb-1">Ending Time: <i class="mdi mdi-clock"></i> <span id="endedDateTime' + offer.id + '">' + offer.endedDateTime + '</span></p>' +
+
+                        '<div class="p-1">' +
+                        RequestOrderButton +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                    messageDescriptionLength = RequestedOrder;
+
+                    var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                        '<div class="dropdown-list-image mr-3 mb-auto">' +
+                        '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                        '</div>' +
+                        '<div class="mr-1">' +
+                        '<div class="text-truncate h6 mb-3">' +
+                        userName +
+                        '</div>' +
+                        '<p>' +
+                        messageDescriptionLength +
+                        '</p>' +
+                        '</div>' +
+                        '<span class="ml-auto mb-auto">' +
+                        '<div class="text-right text-muted pt-1 small">' + messageTime + '</div>' +
+                        '</span>' +
+                        '</div>';
+
+                    $("#chatBoxDialogue-" + senderId).append(appendNewMessage);
+                    scrollToBottom();
+                }
+            }
+
+        });
+
+        connection.on("ChangeOfferStatus", function (offerId, offerTitle, senderId, receiverId, acceptorName, offerStatus) {
+            if (getLoggedInUserId == senderId) {
+                alert("Your Offer '" + offerTitle + "' " + offerStatus + " by '" + acceptorName + "'");
+
+                var message = "";
+                if (offerStatus == "accepted") {
+                    message = "Offer Accepted";
+                }
+                if (offerStatus == "rejected") {
+                    message = "Offer Rejected";
+                }
+
+                $("#offerRequestText-" + offerId).text(message);
+            }
+        });
+        
+        connection.on("UpdateUserStatus", function (senderId, statusOfSender, reasonStatus) {
+            var element = document.getElementById('StatusId-' + senderId);
+            if (element) {
+                if (statusOfSender == "1") {
+                    $("#statusDivId").addClass("seller-card1");
+                    $("#statusDivId").removeClass("seller-offline");
+                    $('#StatusId-' + senderId).text("Online");
+                }
+                else {
+                    $("#statusDivId").removeClass("seller-card1");
+                    $("#statusDivId").addClass("seller-offline");
+                    $('#StatusId-' + senderId).text("Offline");
+
+                }
+            }
+        });
+
+    </script>
+
+    <script>
+        var recieverUserId = 0;
+        function sendMessageToServer() {
+            var $messageInput = $("#messageTextArea");
+            const senderId = getLoggedInUserId;
+            const receiverId = getDefaultChatUserId;
+            const message = $messageInput.val();
+            var trimmedMessage = message.trim();
+            // Check if the message is valid (not empty or null)
+            if (!message || trimmedMessage.length <= 0) {
+                alert("Invalid message: Message cannot be empty.");
+                $messageInput.val("");
+                return;
+            }
+
+            var data = {
+                SenderId: senderId,
+                ReceiverId: receiverId,
+                MessageDescription: message,
+            };
+
+            $.ajax({
+                type: "POST",
+                url: projectBaseUrl + "Message/PostAddMessage",
+                //url: projectBaseUrl + "Message/PostAddMessage?SenderId=" + senderId + "&ReceiverId=" + receiverId + "&MessageDescription=" + message,
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                success: function (data) {
+                    console.log("Message sent successfully!", data);
+                    $messageInput.val("");
+
+                    if (getLoggedInUserId == senderId) {
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+
+                        if (data.profile != null && data.profile != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + data.profile;
+                        }
+
+                        var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image mr-3 mb-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            data.userName +
+                            '</div>' +
+                            '<p>' +
+                            linkify(data.message) +
+                            '</p>' +
+                            '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + data.messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                        $("#chatBoxDialogue-" + getDefaultChatUserId).append(appendNewMessage);
+                        getSideBarList("", 1);
+                        scrollToBottom();
+                    }
+
+                },
+                error: function (error) {
+                    alert("Something' went wrong while sending message.");
+                    alert(error.responseText);
+                },
+                complete: function () { }
+            });
+        }
+    </script>
+
+    <script>
+        // order work
+        function createOrder() {
+            $("#projectSenderId").val(getLoggedInUserId);
+            $("#projectReceiverId").val(getDefaultChatUserId);
+            $("#createOrderModal").modal("show");
+        }
+
+        function closeModal() {
+            resetModalValues();
+            $("#createOrderModal").modal("hide");
+        }
+
+        function resetModalValues() {
+            $("#projectSenderId").val("");
+            $("#projectReceiverId").val("");
+            $("#projectTitle").val("");
+            $("#projectStartDate").val(null);
+            $("#projectEndDate").val(null);
+            $("#projectDescription").val("");
+        }
+
+        function postCreateOrder() {
+            var projectSenderId = $("#projectSenderId").val();
+            var projectReceiverId = $("#projectReceiverId").val();
+            var projectTitle = $("#projectTitle").val();
+            var projectStartDate = $("#projectStartDate").val();
+            var projectEndDate = $("#projectEndDate").val();
+            var projectDescription = $("#projectDescription").val();
+            $("#createOrderSubmitBtn").prop("disabled", true);
+
+            if (projectTitle == "" || projectTitle == null) {
+                $("#createOrderAlertMessages").text("All Fields are Required");
+                $("#createOrderSubmitBtn").prop("disabled", false);
+                return;
+            }
+            if (projectStartDate == "" || projectStartDate == null) {
+                $("#createOrderAlertMessages").text("All Fields are Required");
+                $("#createOrderSubmitBtn").prop("disabled", false);
+                return;
+            }
+            if (projectEndDate == "" || projectEndDate == null) {
+                $("#createOrderAlertMessages").text("All Fields are Required");
+                $("#createOrderSubmitBtn").prop("disabled", false);
+                return;
+            }
+            if (projectDescription == "" || projectDescription == null) {
+                $("#createOrderAlertMessages").text("All Fields are Required");
+                $("#createOrderSubmitBtn").prop("disabled", false);
+                return;
+            }
+            var data = {
+                MessageDescription: "Offer Send",
+                SenderId: projectSenderId,
+                ReceiverId: projectReceiverId,
+                CustomerId: projectSenderId,
+                ValetId: projectReceiverId,
+                OfferTitle: projectTitle,
+                OfferDescription: projectDescription,
+                StartedDateTime: projectStartDate,
+                EndedDateTime: projectEndDate,
+            };
+            var $messageInput = $("#messageTextArea");
+
+            $.ajax({
+                type: 'POST',
+                url: projectBaseUrl + "Message/PostAddMessage",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                dataType: "json",
+                success: function (data) {
+                    console.log("offer sent successfully!", data);
+                    $messageInput.val("");
+
+                    if (getLoggedInUserId == data.senderId) {
+                        var messageDescriptionLength = "";
+                        var RequestedOrder = "";
+                        var RequestOrderButton = "";
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+                        if (data.profile != null && data.profile != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + data.profile;
+                        }
+
+                        //
+                        if (data.offer != "" && data.offer != null) {
+                            if (data.offer.offerStatus == "1") {
+                                RequestOrderButton = '<p id="offerRequestText-' + data.offer.id + '" class="font-weight-bold font-italic">Offer Sent</p>';
+                            }
+                            if (data.offer.offerStatus == "2") {
+                                RequestOrderButton = '<p id="offerRequestText-' + data.offer.id + '" class="font-weight-bold font-italic">Offer Accepted</p>';
+                            }
+                            if (data.offer.offerStatus == "3") {
+                                RequestOrderButton = '<p id="offerRequestText-' + data.offer.id + '" class="font-weight-bold font-italic">Offer Cancelled</p>';
+                            }
+
+                            var transactionFeeColumn = '';
+                            if (getLoggedInUserRole == 'Customer') {
+                                transactionFeeColumn = '<p class="mb-1"> Transaction Fee: <i class="mdi mdi-coin"></i> $<span id="transactionFee' + data.offer.id + '">' + data.offer.transactionFee + '</span></p>';
+                            }
+                            RequestedOrder = '<div class="box shadow-sm mb-3 rounded bg-white">' +
+                                '<div class="p-3 border-bottom">' +
+                                '<h6 class="text-dark"><span class="font-weight-bold" id="offerTitle' + data.offer.id + '">' + data.offer.offerTitle + '</span></h6>' +
+                                '<p class="mb-0 text-muted mb-3" id="offerDescription' + data.offer.id + '">' + data.offer.offerDescription + '</p>' +
+                                '<p class="mb-1"> Offer price: <i class="mdi mdi-coin"></i> $<span id="offerPrice' + data.offer.id + '">' + data.offer.offerPrice + '</span></p>' +
+                                transactionFeeColumn +
+                                '<p class="mb-1">Started From: <i class="mdi mdi-clock"></i> <span id="startedDateTime' + data.offer.id + '">' + data.offer.startedDateTime + '</span></p>' +
+                                '<p class="mb-1">Ending Time: <i class="mdi mdi-clock"></i> <span id="endedDateTime' + data.offer.id + '">' + data.offer.endedDateTime + '</span></p>' +
+
+                                '<div class="p-1">' +
+                                RequestOrderButton +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                            messageDescriptionLength = RequestedOrder;
+                        }
+
+                        var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image mr-3 mb-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            data.userName +
+                            '</div>' +
+                            '<p>' +
+                            messageDescriptionLength +
+                            '</p>' +
+                            '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + data.messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                        $("#chatBoxDialogue-" + getDefaultChatUserId).append(appendNewMessage);
+
+                        scrollToBottom();
+                    }
+                },
+                error: function (error) {
+                    alert("fail to creare offer");
+                    alert(error.responseText);
+                },
+                complete: function () {
+                    $("#createOrderSubmitBtn").prop("disabled", false);
+                    $("#createOrderCloseBtn").click();
+                }
+            });
+        }
+
+        function onchangeStartAndEndDates(value) {
+            var projectStartDate = $("#projectStartDate").val();
+            var projectEndDate = $("#projectEndDate").val();
+            if ((projectStartDate != "" && projectStartDate != null) && (projectEndDate != "" && projectEndDate != null)) {
+                if (projectEndDate <= projectStartDate) {
+                    $("#createOrderAlertMessages").text("End Date Must Be Greater Than Start Date");
+                    $("#createOrderSubmitBtn").prop("disabled", true);
+                    $("#projectStartDate").val(null);
+                    $("#projectEndDate").val(null);
+                    return;
+                }
+                else {
+                    $("#createOrderSubmitBtn").prop("disabled", false);
+                }
+            }
+        }
+
+        function showPaymentModal(offerId) {
+
+            var offerTitle = $("#offerTitle" + offerId).text(); // Use .text() to retrieve the text content
+            var offerDescription = $("#offerDescription" + offerId).text();
+            var offerPrice = $("#offerPrice" + offerId).text();
+            var transactionFee = $("#transactionFee" + offerId).text();
+            var startedDateTime = $("#startedDateTime" + offerId).text();
+            var endedDateTime = $("#endedDateTime" + offerId).text();
+            var valetId = getDefaultChatUserId;
+
+            // Populate the hidden fields in the payment form
+            $('#payPal-Form [name="OrderTitle"]').val(offerTitle);
+            $('#payPal-Form [name="OrderDescription"]').val(offerDescription);
+            $('#payPal-Form [name="StartDate"]').val(startedDateTime);
+            $('#payPal-Form [name="EndDate"]').val(endedDateTime);
+            $('#payPal-Form [name="OfferId"]').val(offerId);
+            $('#payPal-Form [name="ValetId"]').val(valetId);
+            $('#payPal-Form [name="OrderPrice"]').val(offerPrice);
+            // Show the modal
+
+            //Calculate Offer's Actual Amount
+
+            var order = parseFloat(offerPrice);
+            var fee = parseFloat(transactionFee);
+            var totalCharges = order + fee;
+            $('#payPal-Form [name="TotalPrice"]').val(totalCharges);
+            console.log(totalCharges)
+
+            var numericOfferPrice = parseFloat(offerPrice); // Convert the string to a floating-point number
+            var StripePercentage = 4; // 4% Stripe Charges
+
+
+            var StripeAmount = numericOfferPrice * (StripePercentage / 100);
+            var OfferPrice = numericOfferPrice - StripeAmount;
+
+            var ActualOfferPrice = Math.ceil(OfferPrice).toString();
+            //PayPal Total Price
+            //  $('#payPal-Form [name="OrderPrice"]').val(ActualOfferPrice);
+
+            //End Calculate Offer's Actual Amount
+            // $("#OfferId_val").val(offerId);
+            var formFields = {
+                "PaymentTitle": offerTitle,
+                "PaymentDescription": offerDescription,
+                //"OrderPrice": offerPrice,
+                "FromDateTime": startedDateTime,
+                "ToDateTime": endedDateTime,
+                "ValetId": valetId,
+                "TotalWorkCharges": offerPrice,
+                "ActualOrderPrice": ActualOfferPrice
+
+            };
+
+            $("#offer_Id").val(offerId);
+            $.each(formFields, function (fieldName, fieldValue) {
+                $('#stripe-form [name="' + fieldName + '"]').val(fieldValue);
+            });
+
+            getuserPackage(offerId);
+            $('#paymentSelectionModal').modal('show');
+        }
+
+        function orderStatus(value, status) {
+            var offerTitle = $("#offerTitle" + value).val();
+            var offerDescription = $("#offerDescription" + value).val();
+            var offerPrice = $("#offerPrice" + value).val();
+            var startedDateTime = $("#startedDateTime" + value).val();
+            var endedDateTime = $("#endedDateTime" + value).val();
+            var data = {
+                OfferDetailId: value,
+                MessageDescription: status,
+                OfferTitle: offerTitle,
+                OfferDescription: offerDescription,
+                OfferPrice: offerPrice,
+                StartedDateTime: startedDateTime,
+                EndedDateTime: endedDateTime,
+            };
+            $.ajax({
+                type: 'PUT',
+                url: projectBaseUrl + "Message/UpdateOrderStatus",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == true) {
+                        var message = "";
+                        if (status == "Accept") {
+                            message = "Offer Accepted";
+                        }
+                        if (status == "Reject") {
+                            message = "Offer Rejected";
+                        }
+
+                        $("#offerRequestText-" + response.id).text(message);
+                        //hide both buttons
+
+                        $("#offerRequestBtnA-" + response.id).css("display", "none");
+                        $("#offerRequestBtnR-" + response.id).css("display", "none");
+
+                    }
+
+                },
+                error: function (error) {
+
+                },
+                complete: function () {
+
+                }
+            });
+        }
+    </script>
+
+    <script>
+        $(".stripe-button-el").hide();
+        $(document).ready(function () {
+            $('#customStripeButton').click(function () {
+                var stripeScript_btn = document.getElementById('sub2');
+                stripeScript_btn.click(); // Simulate click
+            });
+        });
+
+    </script>
+
+    <!--Getting user package-->
+
+    <script>
+        //getLoggedInUserRole
+        //getuserPackage();
+        function getuserPackage(offerId) {
+
+            var userpackageId = -1;
+            var totalSessions = -1;
+            var remainingPackage = -1;
+            var paidByPackage = "";
+
+            //Ofer Data
+            var offerTitle = $("#offerTitle" + offerId).text(); // Use .text() to retrieve the text content
+            var offerDescription = $("#offerDescription" + offerId).text();
+            var offerPrice = $("#offerPrice" + offerId).text();
+            var startedDateTime = $("#startedDateTime" + offerId).text();
+            var endedDateTime = $("#endedDateTime" + offerId).text();
+            var valetId = getDefaultChatUserId;
+
+            //Calculate Offer's Actual Amount
+
+            var numericOfferPrice = parseFloat(offerPrice); // Convert the string to a floating-point number
+            var StripePercentage = 4; // 4% Stripe Charges
+
+            var StripeAmount = numericOfferPrice * (StripePercentage / 100);
+            var OfferPrice = numericOfferPrice - StripeAmount;
+
+            var ActualOfferPrice = Math.ceil(OfferPrice).toString();
+
+            $.ajax({
+                type: 'GET',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "Customer/GetUserPackageByUserId?UserId=" + getLoggedInUserId,
+                dataType: "json",
+                data: {
+                },
+                success: function (response) {
+                    if (response.status == true && response.data != null) {
+                        var Data = response.data;
+
+                        userpackageId = Data.id
+                        totalSessions = Data.totalSessions;
+                        paidByPackage = Data.packagePaidBy;
+                        remainingPackage = Data.remainingSessions;
+                        $("#payBySession_btn").show();
+
+                        // Appending package values to package form
+                        $("#v4").text(remainingPackage);
+                        $("#userpackageId").val(userpackageId);
+                        $("#userPackagePaidBy").val(paidByPackage);
+                        $("#OfferId").val(offerId);
+                        $("#project_Title").text(offerTitle);
+
+                        var formFields = {
+                            "PaymentTitle": offerTitle,
+                            "PaymentDescription": offerDescription,
+                            //"OrderPrice": offerPrice,
+                            "FromDateTime": startedDateTime,
+                            "ToDateTime": endedDateTime,
+                            "ValetId": valetId,
+                            "TotalWorkCharges": offerPrice,
+                            "ActualOrderPrice": ActualOfferPrice
+
+                        };
+
+                        $.each(formFields, function (fieldName, fieldValue) {
+                            $('#package-form [name="' + fieldName + '"]').val(fieldValue);
+                        });
+
+                        const startDate = new Date(startedDateTime);
+                        const endDate = new Date(endedDateTime);
+                        const timeDifference = endDate - startDate; // Calculate the time difference in milliseconds
+                        const NoOfWorkingHour = timeDifference / (1000 * 60 * 60); // Convert milliseconds to hours
+
+                        if (NoOfWorkingHour <= remainingPackage) {
+                            var remainingSession = remainingPackage - NoOfWorkingHour;
+                            $("#payBySession_btn").prop("disabled", false);
+                            $("#v2").text(NoOfWorkingHour);
+                            $("#v3").text(NoOfWorkingHour);
+                            $("#v5").text(remainingSession);
+                            $("#WorkingHours").val(NoOfWorkingHour);
+                        }
+                        else {
+                            $("#payBySession_btn").prop("disabled", true);
+                        }
+                        console.log(`The difference in hours is: ${hoursDifference} hours`);
+                    }
+                },
+                error: function (response) {
+                    alert("Record Not Found");
+                }
+            });
+
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+          
+            $("#payBySession_btn").click(function () {
+                // Open the modal
+                $("#userSessionsModal").modal("show");
+                $('#paymentSelectionModal').modal('hide');
+
+            });
+
+            function closeModal() {
+                $("#userSessionsModal").modal("hide");
+            }
+        });
+    </script>
+
+
+
+}

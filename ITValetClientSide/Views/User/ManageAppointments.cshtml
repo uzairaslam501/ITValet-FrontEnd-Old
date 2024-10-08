@@ -1,0 +1,386 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+
+@{
+    ViewData["Title"] = "ManageAppointments";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+@section CustomCss{
+    <link href="https://cdn.datatables.net/v/dt/dt-1.13.4/datatables.min.css" rel="stylesheet" />
+    <style>
+        #getRequestedServicesTable_filter {
+            display: none;
+        }
+
+        #OrderTables_filter {
+            display: none;
+        }
+
+        table.dataTable thead > tr > th.sorting::before, table.dataTable thead > tr > th.sorting_asc::before, table.dataTable thead > tr > th.sorting_desc::before, table.dataTable thead > tr > th.sorting_asc_disabled::before, table.dataTable thead > tr > th.sorting_desc_disabled::before, table.dataTable thead > tr > td.sorting::before, table.dataTable thead > tr > td.sorting_asc::before, table.dataTable thead > tr > td.sorting_desc::before, table.dataTable thead > tr > td.sorting_asc_disabled::before, table.dataTable thead > tr > td.sorting_desc_disabled::before {
+            display: none !important;
+        }
+
+        table.dataTable thead > tr > th.sorting:after, table.dataTable thead > tr > th.sorting_asc:after, table.dataTable thead > tr > th.sorting_desc:after, table.dataTable thead > tr > th.sorting_asc_disabled:after, table.dataTable thead > tr > th.sorting_desc_disabled:after, table.dataTable thead > tr > td.sorting:after, table.dataTable thead > tr > td.sorting_asc:after, table.dataTable thead > tr > td.sorting_desc:after, table.dataTable thead > tr > td.sorting_asc_disabled:after, table.dataTable thead > tr > td.sorting_desc_disabled:after {
+            display: none !important;
+        }
+    </style>
+}
+
+@if (ViewBag.User.Role == "Customer")
+{
+    <div class="main-page second py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="osahan-table bg-white rounded p-4 text-center">
+                        @if (ViewBag.User.Role == "Customer")
+                        {
+                            <h2 class="">
+                                Manage appointments with your IT Valet
+                            </h2>
+                        }
+                        else
+                        {
+                            <h2 class="">
+                                Manage appointments with your Customers
+                            </h2>
+                        }
+                        <strong id="confirm_message" style="color:@ViewBag.color">@ViewBag.message</strong>
+                        <div class="tab-pane" id="all">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped text-center no-footer" id="getRequestedServicesTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">Appointment Created At</th>
+                                            <th class="text-center">Category Of Problems</th>
+                                            <th class="text-center">Sub Category Of Problem</th>
+                                            <th class="text-center">Appointment Time</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<!--Manage Orders-->
+<div class="main-page second pb-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="osahan-table bg-white rounded p-4 text-center">
+                    <h2 class="">
+                        Manage Orders
+                    </h2>
+                    <div class="tab-pane" id="all">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped text-center no-footer" id="OrderTables">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left:5px" class="text-center">Order Summary</th>
+                                        <th class="text-center">Order Date</th>
+                                        <th class="text-center">Due Date</th>
+                                        <th class="text-center">Total Price</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End Manage Orders-->
+
+@section CustomJs{
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/row_reorder.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/responsive.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_buttons_html5.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_row_reorder.js"></script>
+
+    <script>
+        var getLoggedInUserRole = '@ViewBag.User.Role';
+    </script>
+
+    <script>
+        if(getLoggedInUserRole=="Customer")
+        {
+            getRequestedServices();
+        }
+        else
+        {
+            loadOrderTables();
+        }
+        function getRequestedServices() {
+            $('#getRequestedServicesTable').DataTable().clear();
+            $('#getRequestedServicesTable').DataTable().destroy();
+            $('#getRequestedServicesTable').DataTable(
+                {
+                    "ajax":
+                    {
+                        "url": projectBaseUrl + 'User/GetRequestServicesDatatableByUserId',
+                        headers: {
+                            'Authorization': Token
+                        },
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": {},
+                    },
+                    'columns':
+                        [
+                            { "data": "createdAt", "name": "0" },
+                            { "data": "categoriesOfProblems", "name": "0" },
+                            { "data": "requestServiceSkills", "name": "0" },
+                            { "data": "appointmentTime", "name": "0" },
+                            { "data": "Action", "name": "0" },
+                        ],
+                    'columnDefs':
+                        [
+                            {
+                                "targets": 0,
+                                'className': 'col-md-2',
+                                'sortable': false,
+                                "render": function (data, type, full, meta) {
+                                    return full.createdAt;
+                                }
+                            },
+                            {
+                                "targets": 1,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.categoriesOfProblems;
+                                }
+                            },
+                            {
+                                "targets": 2,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    return full.requestServiceSkills;
+                                }
+                            },
+                            {
+                                "targets": 3,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    return full.appointmentTime;
+                                    if (full.requestServiceType != "1") {
+                                        return full.appointmentTime;
+                                    }
+                                    else {
+                                        var timePrefer = "N/A";
+                                        return timePrefer;
+
+                                    }
+                                }
+                            },
+                            {
+                                "targets": 4,
+                                'sortable': false,
+                                'className': 'col-md-1',
+                                "render": function (data, type, full, meta) {
+                                    var dropdown = "";
+                                    if (getLoggedInUserRole != "Valet") {
+                                        dropdown = '<ul class="icons-list text-center" > ' +
+                                            '<li class="dropdown" > ' +
+                                            '<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bars"></i></a >' +
+                                            '<ul class="dropdown-menu dropdown-menu-right p-1" > ' +
+                                            '<li class="p-1">' +
+                                            '<a style="display:none" title="Update" class="btn btn-info btn-md mr-1 text-white" onclick="Getrequestbyid(' + full.id + ')" data-toggle="modal" data-target="#BankModal">' +
+                                                '<i class="fa fa-pencil"></i> ' +
+                                            '</a>' +
+                                            '<a title="View" class="btn btn-primary mr-1 btn-md text-white" href="../User/UsersForRequestedService?requestServiceId=' + full.encId + '">' +
+                                                '<i class="fa fa-eye"></i>' +
+                                            '</a>' +
+                                            '<a title="Delete" class="btn btn-danger btn-md text-white" onclick="deleteService(' + full.id + ')">' +
+                                                '<i class="fa fa-trash-o"></i>' +
+                                            '</a>' +
+                                            '</li>' +
+                                            '</ul>' +
+                                            '</li>' +
+                                            '</ul>';
+                                    }
+                                    else{
+                                        dropdown = '<ul class="icons-list text-center" > ' +
+                                            '<li class="dropdown" > ' +
+                                            '<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-menu9"></i></a >' +
+                                            '<ul class="dropdown-menu dropdown-menu-right p-1" > ' +
+                                            '<a class="btn btn-success btn-sm p-2 btn-block text-white" href="../Home/Messages?Reciever=' + full.encUserId + '">' +
+                                            '<i class="fa fa-envelope"></i> Message Customer' +
+                                            '</a>' +
+                                            '</ul>' +
+                                            '</li>' +
+                                            '</ul>';
+                                    }
+                                    return dropdown;
+                                }
+                            },
+                        ],
+                    "serverSide": "true",
+                    "processing": "true",
+                    "searching": "false",
+                    "language":
+                    {
+                        "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                        "search": "<span>Search :</span> _INPUT_",
+                        "searchPlaceholder": "Filter Data",
+                        "lengthMenu": "<span>Show :</span> _MENU_",
+                        "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                    },
+                    "initComplete": function (response) {
+                        loadOrderTables();
+                    }
+                });
+        }
+        
+        function loadOrderTables() {
+            $('#OrderTables').DataTable().clear();
+            $('#OrderTables').DataTable().destroy();
+            $('#OrderTables').DataTable(
+                {
+                    "ajax":
+                    {
+                        "url": projectBaseUrl + 'User/GetOrdersDatatableByUserId',
+                        headers: {
+                            'Authorization': Token
+                        },
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": {
+                        },
+                    },
+                    'columns':
+                        [
+                            { "data": "orderTitle", "name": "0" },
+                            { "data": "startDateTime", "name": "0" },
+                            { "data": "endDateTime", "name": "0" },
+                            { "data": "orderPrice", "name": "0" },
+                            { "data": "status", "name": "0" },
+                        ],
+                    'columnDefs':
+                        [
+                            {
+                                "targets": 0,
+                                'className': 'col-md-3',
+                                'sortable': false,
+                                "render": function (data, type, full, meta) {
+                                    var messagesRecievedCount = "";
+                                    return '<a href="../User/OrderDetail?orderId=' + full.encId + '"><span class="order-proposal-title">' + full.orderTitle + " " + messagesRecievedCount + '</span></a>';
+                                }
+                            },
+                            {
+                                "targets": 1,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.startDateTime;
+                                }
+                            },
+                            {
+                                "targets": 2,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.endDateTime;
+                                }
+                            },
+                            {
+                                "targets": 3,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return "$" + full.orderPrice;
+                                }
+                            },
+                            {
+                                "targets": 4,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    var orderStatus = "";
+                                    if (full.orderReasonType == 3 && full.orderReasonIsActive == 1) {
+                                        orderStatus = '<td><a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Cancelled</a></td>';
+                                    }
+                                    else {
+                                        if (full.isDelivered == 0) {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-primary">In Progress</a>';
+                                        }
+                                        else if (full.isDelivered == 1) {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Delivered</a>';
+                                        }
+                                        else {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-success">Completed</a>';
+                                        }
+                                    }
+                                    return orderStatus;
+                                }
+                            },
+                        ],
+                    "serverSide": "true",
+                    "processing": "true",
+                    "searching": "false",
+                    "language":
+                    {
+                        "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                        "search": "<span>Search :</span> _INPUT_",
+                        "searchPlaceholder": "Filter Data",
+                        "lengthMenu": "<span>Show :</span> _MENU_",
+                        "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                    }
+                });
+        }
+    </script>
+
+    <script>
+        function deleteService(id){
+            $("#staticBackdropDeleteFunctionType").val("Request Service");
+            $("#staticBackdropLabel").text("Delete Service");
+            $("#staticBackdropDeleteId").val(id);
+            $("#deleteModal").modal("show");
+        }
+
+        function deleteFunction(id) {
+            var deleteId = $("#staticBackdropDeleteId").val();
+            if (deleteId != null && deleteId != "") {
+                $.ajax({
+                    type: 'DELETE',
+                    headers: {
+                        'Authorization': Token
+                    },
+                    dataType: "json",
+                    url: projectBaseUrl + "User/DeleteRequestService?requestServiceId=" + deleteId,
+                    data: {
+                    },
+                    success: function (response) {
+                        getRequestedServices();
+                    },
+                    error: function (response) {
+                        alert("Something went Wrong Please try again later, or check your internet connection");
+                    },
+                    complete : function(response){
+                        closeModal();
+                    }
+                });
+            }
+        }
+
+        function closeModal() {
+            $("#staticBackdropDeleteFunctionType").val("");
+            $("#staticBackdropDeleteId").val("");
+            $("#deleteModal").modal("hide");
+        }
+    </script>
+}

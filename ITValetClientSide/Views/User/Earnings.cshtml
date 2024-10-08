@@ -1,0 +1,257 @@
+﻿@using ITValetFrontEnd.HelperClasses
+@{
+    ViewBag.Title = "Manage Earnings";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+<div class="main-page second py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <h2 class="pull-left m-0 p-0 revenue-title">Revenue Earned</h2>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <p class="d-flex justify-content-end mb-0 mt-1 p-0 withdrawal-price">
+                    Available For Stripe Withdrawal: <span class="font-weight-bold text-success">$ @ViewBag.Earning.balanceAvailable</span>
+                </p>
+            </div>
+        </div>
+        <div class="col-md-12 p-0">
+            <ul class="nav nav-tabs" id="earningsTabs">
+                <li class="nav-item text-center" style="width: 50%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <a class="nav-link active" id="stripeTab" data-toggle="tab" href="#stripeContent">Stripe Account</a>
+                </li>
+                <li class="nav-item text-center" style="width: 50%;  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <a class="nav-link " id="paypalTab" data-toggle="tab" href="#paypalContent">Paypal Account</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div id="stripeContent" class="tab-pane fade active show">
+                    <div class="mb-3 border-0 bg-white shadow-sm rounded">
+                        <div class="card-body">
+                            <center>
+                                <small class="font-weight-bold" style="font-size: 13px;">4% of order's amount would be deducted by Stripe on every order</small>
+                            </center>
+                            <div class="row pt-3">
+                                <div class="col-md-4 col-4 text-center border-box">
+                                    <p>Total Earning</p>
+                                    <h1 class="font-weight-bold m-0">$ @ViewBag.Earning.payPalEarning.StripeTotalBalance</h1>
+                                </div>
+                                <div class="col-md-4 col-4 text-center border-box">
+                                    <p>Completed Order Balance</p>
+                                    <h1 class="font-weight-bold m-0">$ @ViewBag.Earning.payPalEarning.StripeCompletedOrderBalance</h1>
+                                </div>
+                                <div class="col-md-4 col-4 text-center border-box">
+                                    <p>Available Income For WithDraw</p>
+                                    <h1 class="font-weight-bold m-0">$ @ViewBag.Earning.balanceAvailable</h1>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <p class="pull-left my-2 mr-2">Withdraw To:</p>
+                            @if (ViewBag.Earning.balanceAvailable != "0")
+                            {
+                                <button title="Withdraw $@ViewBag.Earning.balanceAvailable" id="withdrawToBankButton" class="btn btn-success ml-2" onClick="StripeAmountWithDraw('@ViewBag.Earning.balanceAvailable')">
+                                    <i class="fa fa-university"></i> Bank Account
+                                </button>
+                            }
+                            else{
+                                <button title="Balance not availble to withdraw" class="btn btn-success ml-2" disabled>
+                                    <i class="fa fa-university"></i> Bank Account
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab 2: Available Income -->
+                <div id="paypalContent" class="tab-pane fade ">
+                    <div class="mb-3 border-0 bg-white shadow-sm rounded">
+                        <div class="card-body">
+                            <center>
+                                <small class="font-weight-bold" style="font-size: 13px;">4% of order's amount would be deducted by PayPal on every order</small>
+                            </center>
+                            <div class="row pt-3">
+                                <div class="col-md-4 col-4 text-center border-box">
+                                    <p>Total Earning</p>
+                                    <h1 class="font-weight-bold m-0">$ @ViewBag.Earning.payPalEarning.AvailableIncomeForWithDrawl</h1>
+                                </div>
+                                <div class="col-md-4 col-4 text-center border-box">
+                                    <p>Completed Order Balance</p>
+                                    <h1 class="font-weight-bold m-0">$ @ViewBag.Earning.payPalEarning.TotalEarnedAmount</h1>
+                                </div>
+                                <div class="col-md-4 col-4 text-center border-box">
+                                    <p>Pending Clearance</p>
+                                    <h1 class="font-weight-bold m-0">$ @ViewBag.Earning.payPalEarning.PendingClearance</h1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive box-table mt-4 bg-white rounded shadow-sm p-2">
+            <table class="table table-bordered m-0" id="userTable">
+                <thead>
+                    <tr>
+                        <th hidden>...</th>
+                        <th>OrderTitle</th>
+                        <th>OrderPrice</th>
+                        <th>EarnedAmount</th>
+                        <th>OrderPaidBy</th>
+                        <th>Date/Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/row_reorder.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/responsive.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_buttons_html5.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_row_reorder.js"></script>
+    <script>
+        var valetId = '@ViewBag.Earning.UserId';
+        loadTable();
+        function loadTable() {
+
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable({
+                "ajax": {
+                    "url": "@ProjectVariables.BaseUrl" + "User/GetAllCompletedOrders?ValetId=" + valetId,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers":
+                    {
+                        'Authorization': Token
+                    },
+                    "data":
+                    {
+
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "orderTitle", "name": "OrderTitle" },
+                        { "data": "orderPrice", "name": "OrderPrice" },
+                        { "data": "earnedFromOrder", "name": "EarnedFromOrder" },
+                        { "data": "orderPaidBy", "name": "OrderPaidBy" },
+                        { "data": "completedAt", "name": "CompletedAt" },
+                        { "data": "Action", "name": "0" },
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function (data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                var orderId = full.encOrderId;
+
+                                // Construct the URL with the orderId
+                                var url = "../User/OrderDetail?orderId=" + orderId;
+
+                                // Create the hyperlink HTML
+                                var linkHtml = '<a href="' + url + '">' + full.orderTitle + '</a>';
+
+                                // Return the HTML
+                                return linkHtml;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.orderPrice;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.earnedFromOrder;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            "className": '',
+                            "render": function (data, type, full, meta) {
+                                return full.orderPaidBy;
+                            }
+                        },
+                        {
+                            "targets": 5,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.completedAt;
+                            }
+                        },
+                        {
+                           "targets": 6,
+                           "className": '',
+                           "render": function (data, type, full, meta){
+                                var orderDetailLink = '<a href="../User/OrderDetail?orderId=' + full.encOrderId + '" class="btn btn-sm btn-primary" style="padding: 4px 8px; font-size: 12px;">View</a>';
+                                return orderDetailLink;
+                           }
+                        }
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+        }
+    </script>
+    <script>
+        var userId = '@ViewBag.Earning.UserId';
+        function StripeAmountWithDraw(stripeAmount){
+
+            $.ajax({
+                type: 'POST',
+                url: "@ProjectVariables.BaseUrl" + "StripePayment/StripeWithdrawAsync?amount=" + stripeAmount + "&userId=" + userId,
+                dataType: "json",
+                headers: {
+                    'Authorization': Token
+                },
+                success: function (response) {
+                    console.log("Response:", response);
+                    if (response.status === true) {
+                        triggerSweetAlert("Withdrawl Successful ! Kindly Check Your Bank for further details !", "@ProjectVariables.SuccessColor")
+                    } else {
+                        triggerSweetAlert("Can't Withdraw! Kindly Add Your Valid Bank Details First!", "@ProjectVariables.DangerColor");
+                    }
+                },
+                error: function (response) {
+                    triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                },
+                complete: function () {
+
+                }
+            });
+        }
+
+    </script>
+}

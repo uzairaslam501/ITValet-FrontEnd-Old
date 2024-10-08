@@ -1,0 +1,936 @@
+﻿@using System.Security.Claims;
+@using ITValetFrontEnd.HelperClasses;
+@using Microsoft.Extensions.Options
+@{
+    var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
+
+    ViewBag.Title = "IT Valet Details";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+
+    int maxSkillsToShow = 5; // Maximum number of skills to show initially
+    int skillCount = 0; // Counter for the number of skills displayed
+}
+
+
+<!-- Modal Create Order -->
+<div class="modal fade" id="createOrderModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Create Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@Url.Action("CheckoutPayment","User")" method="post" id="placeOrd">
+                    <input type="text" class="form-control" name="customerId" value="@ViewBag.loggedinUser.Id" hidden>
+                    <input type="text" class="form-control" name="ValetId" value="@ViewBag.UserRecord.Id" hidden>
+                    <div class="form-group">
+                        <label>Project Title<span class="text-danger">*</span></label>
+                        <div class="input-group mb-2 col-md-12 p-0">
+                            <input type="text" class="form-control" name="PaymentTitle" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="mb-1">From Date Time<span class="text-danger">*</span></label>
+                        <div class="input-group mb-2 col-md-12 p-0">
+                            <input type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" name="FromDateTime" class="form-control" id="projectStartDate" required>
+                        </div>
+                        <strong id="starttime_validate" style="color:red"></strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="mb-1">To Date Time<span class="text-danger">*</span></label>
+                        <div class="input-group mb-2 col-md-12 p-0">
+                            <input type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" name="ToDateTime" class="form-control" id="projectEndDate" required>
+                        </div>
+                        <strong id="endtime_validate" style="color:red"></strong>
+                    </div>
+
+                    <div class="border-bottom">
+                        <label>Describe the required services - please be as detailed as possible:</label>
+                        <div class="form-group">
+                            <textarea class="form-control" id="prodes" name="PaymentDescription" rows="5" placeholder="I'm looking for..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="createOrderCloseBtn" data-dismiss="modal" onclick="closeModal()">Close</button>
+                        <button type="submit" class="btn btn-danger" id="createOrderSubmitBtn">Place Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-page second py-5">
+    <div class="container">
+        @if (ViewBag.msg != "" && ViewBag.msg != null)
+        {
+            <div class="h5 alert alert-info" id="alertMsg" role="alert">
+                <span>@ViewBag.msg</span>
+            </div>
+        }
+        <div class="row">
+            <div class="col-lg-4 left">
+                <div class="profile_info">
+                    <div class="seller-card">
+                        <div>
+                            @if (ViewBag.UserRecord.Status == "1")
+                            {
+                                <div class="user-online-indicator is-online" data-user-id="1152855">
+                                    <i class="fa fa-circle"></i>Online
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="user-online-indicator is-online" style="border-color:red;color:red !important" data-user-id="1152855">
+                                    <i class="fa fa-circle"></i>Offline
+                                </div>
+                            }
+                        </div>
+
+                        <div class="user-profile-info">
+                            <div>
+                                <div>
+                                    <label class="user-pict" style="height:300px">
+                                        @if (ViewBag.UserRecord.ProfilePicture == "" || @ViewBag.UserRecord.ProfilePicture == null)
+                                        {
+                                            <img src="/FrontAssets/images/user/s4.png" width=256 height=256
+                                                 class="img-fluid rounded-circle" onerror="this.error=null;this.src='../frontAssets/images/user/s4.png';" id="imgprev" alt="Responsive img" />
+                                        }
+                                        else
+                                        {
+                                            <img src="@ViewBag.UserRecord.ProfilePicture"
+                                                 class="img-fluid rounded-circle" style="height:inherit;" alt="Responsive img" onerror="this.error=null;this.src='../frontAssets/images/user/s4.png';" />
+                                        }
+                                        <a href="#"
+                                           class="user-badge-round user-badge-round-med locale-en-us top-rated-seller"></a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="user-profile-label pt-3">
+                                <div class="username-line">
+                                    <a href="#" id="name" class="seller-link">@ViewBag.UserRecord.FirstName @ViewBag.UserRecord.LastName</a>
+                                </div>
+
+                                @if (@ViewBag.UserRecord.Availability == "1")
+                                {
+                                    <p class="mt-1 oneliner text-success">Available</p>
+                                }
+                                else
+                                {
+                                    <p class="mt-1 oneliner text-danger">Not Available</p>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="buttons-wrapper">
+                            @if (ViewBag.loggedInUser.Role == "Customer")
+                            {
+                                <button id="contactUser" onclick="contactUser()" class="btn-lrg-standard btn-contact-me js-contact-me js-open-popup-join">
+                                    Contact Me
+                                </button>
+                            }
+
+                            @if (@ViewBag.UserRecord != null && @ViewBag.UserRecord.Id == @ViewBag.loggedinUser.Id)
+                            {
+                                <button class="btn btn-outline-danger ml-2"><i class="fa fa-solid fa-gift" style="font-size:20px;" title="Share User Refferal"></i></button>
+                            }
+                            else
+                            {
+                                <button onclick="copyToClipboard()" class="btn btn-outline-danger ml-2"><i class="fa fa-solid fa-gift" style="font-size:20px;" title="Share User Refferal"></i></button>
+                            }
+                        </div>
+
+                        <div class="user-stats-desc">
+                            <ul class="user-stats">
+                                <li class="">From :<strong> @ViewBag.UserRecord.Country</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box shadow-sm rounded bg-white mb-3">
+                    <div class="box-title border-bottom p-3">
+                        <div class="row">
+                            <div class="col-md-12 col-12 d-flex justify-content-start">
+                                <h6 class="m-0">Education</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <div class="box-body">
+                            @{
+                                var userEducations = ViewBag.UserRecord.UserEducations as List<UserEducationViewModel>;
+                                if (userEducations != null && userEducations.Any())
+                                {
+                                    <div class="mr-2 py-3">
+                                        @foreach (var education in userEducations)
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="p-3 d-flex align-items-center  border-bottom osahan-post-header">
+                                                        <div class="font-weight-bold mr-1 overflow-hidden">
+                                                            <div class="mr-2">
+                                                                <h6 class="font-weight-bold text-dark mb-0"> @education.InstituteName </h6>
+                                                                <div class="text-truncate text-primary"> @education.DegreeName </div>
+                                                                <div class="small text-gray-500"> @(education.FromDate + " - " + education.ToDate)</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box shadow-sm rounded bg-white mb-3">
+                    <div class="box-title border-bottom p-3">
+                        <div class="row">
+                            <div class="col-md-12 col-12 d-flex justify-content-start">
+                                <h6 class="m-0">Services Offered</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <div class="box-body">
+                            @{
+                                var userExperienced = ViewBag.UserRecord.UserExperienced as List<UserExperiencedViewModel>;
+                                if (userExperienced != null && userExperienced.Any())
+                                {
+                                    @foreach (var experience in userExperienced)
+                                    {
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="p-3 d-flex align-items-center border-bottom osahan-post-header">
+                                                    <div class="mr-2">
+                                                        <p style="max-height: 100px; overflow-y: scroll; word-break: break-all;"> @experience.Description</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 right">
+                <div class="stats-desc" style="margin-top: 0px !important; margin-bottom: 24px !important;">
+                    <div class="row">
+                        <div class="col-lg-4" >
+                            <label class="font-weight-bold"> From: </label>
+                            @ViewBag.UserRecord.Country
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="font-weight-bold"> Language </label>
+                            @ViewBag.UserRecord.Language
+                        </div>
+                        <div class="col-lg-4 text-right">
+                            <button type="button" class="btn btn-sm btn-primary float-right" onclick="checkAvailability()">Check Availability</button>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2 py-2">
+                        <div class="col-md-12">
+                            <b>IT Valet's Current Time:</b>
+                            <strong class="text-danger">@ViewBag.UserRecord.CurrentTime</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+                @if (@ViewBag.UserRecord.Description != null)
+                {
+                    <div class="stats-desc" style="margin-top: 0px !important; margin-bottom: 24px !important;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p class="font-weight-bold">About</p>
+                                <p>@ViewBag.UserRecord.Description</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="seller-profile">
+                    <div class="description">
+                        <div class="skills">
+                            <h3>Providing Services</h3>
+                            <ul id="skillsList">
+                                @if (ViewBag.UserSkillsList != null)
+                                {
+                                    foreach (var x in @ViewBag.UserSkillsList)
+                                    {
+                                        string split = @x.SkillName;
+                                        if (!@String.IsNullOrEmpty(split))
+                                        {
+                                            <li class="skill-item" style="background:#138496 !important;">
+                                                <a style="color:white !important;">@split</a>
+                                            </li>
+                                        }
+                                    }
+                                }
+                            </ul>
+                            @if (skillCount > maxSkillsToShow)
+                            {
+                                <div id="seeMoreBtn" class="see-more-btn">See Less</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (ViewBag.loggedInUser.Role == "Customer" || ViewBag.loggedInUser.Role == "Admin")
+                {
+                    <div class="shadow-sm rounded bg-white mb-3">
+                        <div class="seller-profile p-2 p-md-3">
+                            <h4 class="font-weight-bold text-dark text-center">Appointment Booking Scheduler</h4>
+                            <div style="padding: 5px !important;">
+                                <!--Loader-->
+                                <div class="d-flex justify-content-center">
+                                    <div class="spinner-border" role="status" id="calanderV-loader" style="display: none;">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                                <div id="calendar">
+                                    <!-- Your calendar content goes here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="shadow-sm rounded bg-white mb-3">
+                        <div class="review-section text-center">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <h4 class="m-0">
+                                    Reviews as Seller
+                                    <small>
+                                        <span class="star-rating-s15"></span>
+                                        <span>
+                                            @if (ViewBag.ValetRatingRecord != null)
+                                            {
+                                                <span class="total-rating-out-five header-average-rating"
+                                                      data-impression-collected="true">@ViewBag.ValetRatingRecord.AverageStars</span>
+                                                <span class="total-rating header-total-rating"
+                                                      data-impression-collected="true">(@ViewBag.TotalReviewsCount)</span>
+                                            }
+                                        </span>
+                                    </small>
+                                </h4>
+                            </div>
+
+                        </div>
+
+                        <div class="review-list" style="max-height: 300px; overflow-y: auto;">
+                            <ul>
+                                @if (ViewBag.ValetRatingRecord != null)
+                                {
+                                    foreach (var ratingRecord in ViewBag.ValetRatingRecord.Rating)
+                                    {
+                                        <li class="p-3">
+                                            <div class="d-flex">
+                                                <div class="left">
+                                                    <span>
+                                                        <img src="@ratingRecord.Customer?.ProfilePic" class="profile-pict-img img-fluid" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="right">
+                                                    <h4>
+                                                        @ratingRecord.Customer?.Name
+                                                        <span class="gig-rating text-body-2">
+                                                            @for (int i = 0; i < ratingRecord.Stars; i++)
+                                                            {
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1792 1792" width="15" height="15">
+                                                                    <path fill="currentColor"
+                                                                          d="M1728 647q0 22-26 48l-363 354 86 500q1 7 1 20 0 21-10.5 35.5t-30.5 14.5q-19 0-40-12l-449-236-449 236q-22 12-40 12-21 0-31.5-14.5t-10.5-35.5q0-6 2-20l86-500-364-354q-25-27-25-48 0-37 56-46l502-73 225-455q19-41 49-41t49 41l225 455 502 73q56 9 56 46z">
+                                                                    </path>
+                                                                </svg>
+                                                            }
+                                                        </span>
+                                                    </h4>
+                                                    <div class="review-description">
+                                                        <p>@ratingRecord.Reviews</p>
+                                                    </div>
+                                                    <span class="publish py-3 d-inline-block w-100">Published at @ratingRecord.PublishDate</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script>
+        async function getFirstAndLastDayOfMonth() {
+            var now = new Date(); // Get the current date
+            var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            var monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            const firstAndLastDates = {
+                monthStart: monthStart.toISOString().slice(0, 10),
+                monthEnd: monthEnd.toISOString().slice(0, 10),
+                currentDay: now.toISOString().slice(0, 10),
+            }
+
+            return firstAndLastDates;
+        }
+    </script>
+
+    <script>
+        var events = [];
+        var bookedSlots = [];
+        var firstAndLastDateOfCurrentMonth = {};
+
+        $(document).ready(function () {
+            var valetId = '@ViewBag.Id';
+            initCalendarProcess(valetId);
+        });
+
+        async function initCalendarProcess(valetId) {
+            firstAndLastDateOfCurrentMonth = await getFirstAndLastDayOfMonth();
+            console.log("firstAndLastDateOfCurrentMonth", firstAndLastDateOfCurrentMonth);
+            try {
+                await checkValetAvailability(valetId);
+                await fetchEventsAndGenerateCalendar(valetId);
+            } catch (error) {
+                console.error("Error initializing calendar process:", error);
+                triggerSweetAlert("An error occurred during initialization", "@ProjectVariables.DangerColor");
+            }
+        }
+
+        async function fetchEventsAndGenerateCalendar(valetId) {
+            $('#calanderV-loader').show();
+            var eventColors = ['#2CDD9B', '#FF876E', '#3498DB', '#E75480', '#9B59B6'];
+            var colorIndex = 0;
+
+            try {
+                let response = await $.ajax({
+                    type: 'GET',
+                    url: projectBaseUrl + "User/GetOrderEventsOfValet?Id=" + valetId,
+                    headers: { 'Authorization': Token },
+                    cache: false
+                });
+
+                if (response.status && response.data) {
+                    events = response.data.map(eventData => ({
+                        id: eventData.orderEncId,
+                        title: "Already Booked",
+                        start: moment(eventData.startDateTime).format(),
+                        end: eventData.endDateTime ? moment(eventData.endDateTime).format() : null,
+                        color: eventColors[colorIndex++ % eventColors.length]
+                    }));
+                } else {
+                    //console.error("Error:", response.message);
+                }
+            } catch (error) {
+                console.error("Error fetching events:", error);
+                triggerSweetAlert("An error occurred while loading events", "@ProjectVariables.DangerColor");
+            }
+
+            generateCalendar(events);
+            $('#calanderV-loader').hide();
+        }
+
+        function generateCalendar(events) {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                initialView: 'dayGridMonth',
+                validRange: {
+                    start: `${firstAndLastDateOfCurrentMonth.currentDay}`,
+                    end: `${firstAndLastDateOfCurrentMonth.monthEnd}`
+                },
+                navLinks: true,
+                selectable: true,
+                events: [], // Initialize with an empty array
+                dateClick: function (info) {
+                    // Navigate to the clicked day with all time slots shown
+                    calendar.gotoDate(info.date);
+                    calendar.changeView('timeGridDay');
+                },
+                views: {
+                    timeGridDay: {
+                        // This is the day view
+                        type: 'timeGridDay',
+                        eventMaxStack: 3,
+                        // Add the date validation logic here
+                        select: function (info) {
+                            var currentDate = new Date();
+                            var selectedDate = new Date(info.start);
+                            if (!isTimeSlotAllowed(info.start, info.end, events)) {
+                                triggerSweetAlert("This time slot is already booked or unavailable", "@ProjectVariables.DangerColor");
+                                calendar.unselect();
+                            }
+                            else if (!isDateAvailable(selectedDate, bookedSlots)) {
+                               triggerSweetAlert("Valet is not available at this slot time. Please check valet availability.", "@ProjectVariables.DangerColor");
+                               calendar.unselect();
+                            }
+                            else {
+                                var startDateTime = info.start;
+                                // Format the date and time to match your modal input format
+                                var formattedStartDateTime = moment(startDateTime).format('YYYY-MM-DDTHH:mm:ss');
+                                // Set the input values in the modal
+                                $('#projectStartDate').val(formattedStartDateTime);
+                                // Show the "createOrderModal"
+                                $('#createOrderModal').modal('show');
+                            }
+                        }
+                    }
+                },
+                eventClick: function (info) {
+                    // Prevent any action when clicking on an event
+                    return false;
+                }
+            });
+            calendar.addEventSource(events.concat());
+            calendar.render();
+        }
+
+        async function checkValetAvailability(valetId) {
+            let response = await $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "User/GetBookedAvailabilitySlot?Id=" + valetId,
+                headers: { 'Authorization': Token }
+            });
+            
+            if (response.status && response.data) {
+                bookedSlots = response.data.map(slot => ({
+                    title: "Booked",
+                    start: slot.startDateTime,
+                    end: slot.endDateTime,
+                    color: '#ff9f89',
+                    rendering: 'background'
+                }));
+            } else {
+                console.error("No available slots");
+            }
+        }
+        
+        function isTimeSlotAllowed(startTime, endTime, events) {
+            // Check if the selected time slot conflicts with booked time slots
+            for (var i = 0; i < events.length; i++) {
+                var event = events[i];
+                var eventStart = moment(event.start);
+                var eventEnd = event.end ? moment(event.end) : null;
+                if (
+                    // Check if the selected time slot partially overlaps with the booked time slot
+                    (
+                        (startTime >= eventStart && startTime < eventEnd) ||
+                        (endTime > eventStart && endTime <= eventEnd)
+                    ) ||
+                    // Check if the booked time slot is entirely within the selected time slot
+                    (
+                        startTime <= eventStart && endTime >= eventEnd
+                    )
+                ) {
+                    return false; // Conflict found, time slot is not allowed
+                }
+            }
+            return true; // No conflicts, time slot is allowed
+        }
+
+        function isDateAvailable(selectedDate, bookedSlots) {
+            var selectedTimestamp = selectedDate.getTime(); // Convert selected date to timestamp
+            for (var i = 0; i < bookedSlots.length; i++) {
+                var startTimestamp = new Date(bookedSlots[i].start).getTime(); // Convert startDateTime to timestamp
+                var endTimestamp = new Date(bookedSlots[i].end).getTime(); // Convert endDateTime to timestamp
+                // Check if the selected time is on the same day as the booked slot
+                var isSameDay = selectedDate.toDateString() === new Date(startTimestamp).toDateString();
+                if (isSameDay && selectedTimestamp >= startTimestamp && selectedTimestamp < endTimestamp) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    </script>
+
+    <script>
+        // Attach event handler when the modal is shown
+        $('#createOrderModal').on('show.bs.modal', function () {
+            // Function to calculate the time difference in minutes
+            function calculateTimeDifferenceInMinutes(startDate, endDate) {
+                const diffMilliseconds = endDate - startDate;
+                return Math.floor(diffMilliseconds / (1000 * 60)); // Convert to minutes
+            }
+
+            // Event handler for the "To Date Time" input field change
+            $("#projectEndDate").on("change", function () {
+                var startDate = new Date($("#projectStartDate").val());
+                var endDate = new Date($("#projectEndDate").val());
+
+                // Check if the end date and time is greater than the start date and time
+                if (endDate <= startDate) {
+                    $("#endtime_validate").text("End date and time must be greater than the start date and time.");
+                    // Disable the "Place Order" button
+                    $("#createOrderSubmitBtn").prop("disabled", true);
+                } else {
+                    var timeDifference = calculateTimeDifferenceInMinutes(startDate, endDate);
+                    if (timeDifference < 60) {
+                        $("#endtime_validate").text("The duration must be at least 60 minutes.");
+                        // Disable the "Place Order" button
+                        $("#createOrderSubmitBtn").prop("disabled", true);
+                    } 
+                    else if (!isTimeSlotAllowed(startDate, endDate, events)) {
+                        $("#endtime_validate").text("This time slot is already booked or unavailable");
+                        // Disable the "Place Order" button
+                        $("#createOrderSubmitBtn").prop("disabled", true);
+                    }
+                    else if (endDate > new Date(firstAndLastDateOfCurrentMonth.monthEnd)) {
+                        $("#endtime_validate").text("This time slot is unavailable, Please Select the Time within Valid Days");
+                        // Disable the "Place Order" button
+                        $("#createOrderSubmitBtn").prop("disabled", true);
+                    }
+                    else {
+                        $("#endtime_validate").text("");
+                        // Enable the "Place Order" button
+                        $("#createOrderSubmitBtn").prop("disabled", false);
+                    }
+                }
+            });
+
+            // Event handler for the "From Date Time" input field change
+            $("#projectStartDate").on("change", function () {
+                var startDate = new Date($("#projectStartDate").val());
+                var currentDate = new Date();
+
+                // Check if the selected start date and time is in the past
+                if (startDate < currentDate) {
+                    $("#starttime_validate").text("Start date and time cannot be in the past.");
+                    $("#projectStartDate").val("");
+                    // Disable the "Place Order" button
+                    $("#createOrderSubmitBtn").prop("disabled", true);
+                } else {
+                    $("#starttime_validate").text("");
+                    // Enable the "Place Order" button
+                    $("#createOrderSubmitBtn").prop("disabled", false);
+                }
+            });
+        });
+
+    </script>
+
+    <script>
+        function timecomp_instantorder() {
+            var fromdatetime = new Date(document.getElementById('projectStartDate').value);
+            var todatetime = new Date(document.getElementById('projectEndDate').value);
+
+            var start_time = fromdatetime.getTime();
+            var end_time = todatetime.getTime();
+
+
+            if (end_time < start_time) {
+
+                $("#endtime_validate").html("Kindly select a time greater than your start time!");
+                $("#projectEndDate").val("");
+                $("#endtime_validate").fadeOut(6000);
+            }
+            else {
+                var butlerId = $("#butler_id").val();
+                var start = $("#projectStartDate").val();
+                var end = $("#projectEndDate").val();
+                $.ajax({
+                    type: 'POST',
+
+                    url: "../Home/GetOrdersData",
+                    data: {
+                        butlerId: butlerId,
+                        StartDateTime: start,
+                        EndDateTime: end,
+                    },
+                    cache: false,
+                    success: function (data) {
+                        if (data == true) {
+                            $("#to_instantdatetime").val("");
+                            alert("IT Valet is booked");
+                        }
+                    },
+                    error: function (error) {
+                        alert("Error");
+                    }
+
+                });
+            }
+        }
+    </script>
+
+    <script>
+        function checkDateTime() {
+            debugger;
+            var startDateTimeSelectFromCalender = $("#startDateTimeSelectFromCalender").val();
+            var endDateTimeSelectFromCalender = $("#endDateTimeSelectFromCalender").val();
+
+            if (endDateTimeSelectFromCalender == null || endDateTimeSelectFromCalender == "" ||
+                endDateTimeSelectFromCalender == undefined) {
+                alert("Wrong Input");
+                $("#endDateTimeSelectFromCalender").val("").change();
+                return false;
+            }
+
+            let getStartDate = new Date(startDateTimeSelectFromCalender);
+            let getEndDate = new Date(endDateTimeSelectFromCalender);
+            let getStartTime = new Date(startDateTimeSelectFromCalender).getTime();
+            let getEndtime = new Date(endDateTimeSelectFromCalender).getTime();
+            
+            //Check if Start Date is Small
+            if (getStartDate < getEndDate) {
+                if (getStartTime < getEndtime) {
+                    console.log(`${getStartTime} is less than ${getEndtime}`);
+                } else if (getStartTime > getEndDate) {
+                    console.log(`${getStartTime} is greater than ${getEndtime}`);
+                } else {
+                    console.log(`Both dates are equal`);
+                }
+                checkDatesOrder();
+            }
+            else if (getStartDate > getEndDate) { //Check if Start Date is Large
+                alert("End Date Must be Greater Than or Equal to Start Date");
+                $("#endDateTimeSelectFromCalender").val("");
+                return false;
+            }
+            else {//Check if Both dates are equal
+                if (getStartTime < getEndtime) {
+                    console.log(`${getStartTime} is less than ${getEndtime}`);
+                    checkDatesOrder();
+                } else if (getStartTime > getEndtime) {
+                    alert("End Time Must be Greater Than Start Time");
+                    $("#endDateTimeSelectFromCalender").val("");
+                    return false;
+                } else {
+                    alert("End Time Must be Greater Than Start Time");
+                    $("#endDateTimeSelectFromCalender").val("");
+                    return false;
+                }
+            }
+        }
+
+        function checkDatesOrder() {
+            var butlerId = $("#butler_id").val();
+            var start = $("#startDateTimeSelectFromCalender").val();
+            var end = $("#endDateTimeSelectFromCalender").val();
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("GetOrdersData","Home")",
+                data: {
+                    butlerId: butlerId,
+                    StartDateTime: start,
+                    EndDateTime: end,
+                },
+                cache: false,
+                success: function (data) {
+                    if (data == true) {
+                        alert("IT Valet is booked");
+                        location.reload();
+                    }
+                },
+                error: function (error) {
+                    alert("Error");
+                }
+
+            });
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var maxSkillsToShow = 5; // Maximum number of skills to show initially
+            var skillItems = $('.skill-item');
+            var seeMoreBtn = $('#seeMoreBtn');
+
+            skillItems.slice(0, maxSkillsToShow).show();
+
+            if (skillItems.length > maxSkillsToShow) {
+                seeMoreBtn.on('click', function () {
+                    skillItems.slice(maxSkillsToShow).toggle();
+                    seeMoreBtn.text(function (_, text) {
+                        return text === 'See Less' ? 'See More' : 'See Less';
+                    });
+                });
+            }
+        });
+    </script>
+
+    <script>
+        function contactUser() {
+            $("#contactUser").prop("disabled", true);
+            var message = "";
+            var data = {
+                SenderId: '@ViewBag.loggedinUser.Id',
+                ReceiverId: '@ViewBag.UserRecord.Id',
+                Way: "ViewUserProfile",
+            };
+            $.ajax({
+                type: 'POST',
+                url: projectBaseUrl + "Message/PostAddMessage",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                dataType: "json",
+                success: function (data) {
+                    console.log("success! ", data);
+                    if (data.message == "Exist") {
+                        window.location.href = '../Home/Messages?Way=ViewUserProfile&UserId=' + data.id;
+                    }
+                    else {
+                        window.location.href = '../Home/Messages?Way=ViewUserProfile&UserId=' + data.id;
+                    }
+                },
+                error: function (error) {
+                    alert(error.responseText.message);
+                },
+                complete: function () {
+                    $("#contactUser").prop("disabled", false);
+                }
+            });
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $("#to_instantdatetime").on("change", function () {
+                debugger;
+                var startDate = new Date($("#from_instantdatetime").val());
+                var endDate = new Date($(this).val());
+
+                if (endDate <= startDate) {
+                    alert("End date should be greater than start date.");
+                    $(this).val(""); // Clear the end date input
+                    endtime_validate
+                }
+                else {
+                    // Calculate the time difference in minutes
+                    var timeDiffMinutes = (endDate - startDate) / (1000 * 60);
+
+                    if (timeDiffMinutes < 30) {
+                        $("#to_instantdatetime").val("");
+                        $("#endtime_validate").text("Order must be atleast 30 minutes or above");
+                       $(this).val(""); // Clear the end date input
+                        $("#endtime_validate").fadeOut(6000);
+
+                    }
+                }
+
+            });
+        });
+    </script>
+
+    <script>
+        var vID = '@ViewBag.UserRecord.Id';
+        function checkAvailability() {
+            $("#checkAvailabilityLoader").css("display", "block");
+            $("#addWeeklyAvailability").css("display", "none");
+            $("#checkWeeklyAvailability").css("display", "none");
+            // Show the "Close" button
+            $(".modal-footer button[data-dismiss='modal']").show();
+            // Change the modal title to "Weekly Available slots"
+            $(".modal-header #staticBackdropLabel").text("Available slots");
+            // Hide the "Set Availability" button
+            $("#addAvailabilityBtn").hide();
+            $.ajax({
+                type: 'GET',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "User/GetUserAvailableSlotByUserId?userId=" + vID,
+                dataType: "json",
+                success: function (response) {
+                    $("#availabilityBody").empty();
+
+                    var createTagsBadge = '';
+
+                    for (var i = 0; i < response.data.length; i++) {
+                        var Slot1 = '';
+                        var Slot2 = '';
+                        var Slot3 = '';
+                        var Slot4 = '';
+
+                        if (response.data[i].slot1 == "1") {
+                            Slot1 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots1' + response.data[i].id + '" checked="checked" disabled>' +
+                                '<label id="userSlotLabel1' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots1' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        } else {
+                            Slot1 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots1' + response.data[i].id + '" disabled>' +
+                                '<label id="userSlotLabel1' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots1' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+                        if (response.data[i].slot2 == "2") {
+                            Slot2 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots2' + response.data[i].id + '" checked="checked" disabled>' +
+                                '<label id="userSlotLabel2' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots2' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+                        else {
+                            Slot2 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots2' + response.data[i].id + '" disabled>' +
+                                '<label id="userSlotLabel2' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots2' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+                        if (response.data[i].slot3 == "3") {
+                            Slot3 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots3' + response.data[i].id + '" checked="checked" disabled>' +
+                                '<label id="userSlotLabel3' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots3' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+                        else {
+                            Slot3 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots3' + response.data[i].id + '" disabled>' +
+                                '<label id="userSlotLabel3' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots3' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+                        if (response.data[i].slot4 == "4") {
+                            Slot4 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots4' + response.data[i].id + '" checked="checked" disabled>' +
+                                '<label id="userSlotLabel4' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots4' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+                        else {
+                            Slot4 = '<div class="custom-control custom-switch">' +
+                                '<input type="checkbox" class="custom-control-input" id="customSwitchesForSlots4' + response.data[i].id + '" disabled>' +
+                                '<label id="userSlotLabel4' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots4' + response.data[i].id + '"></label>' +
+                                '</div>';
+                        }
+
+                        createTagsBadge += '<tr><td>' + response.data[i].dayName + ' (' + response.data[i].dateTimeOfDay + ')</td>' +
+                            '<td>' + Slot1 + '</td>' +
+                            '<td>' + Slot2 + '</td>' +
+                            '<td>' + Slot3 + '</td>' +
+                            '<td>' + Slot4 + '</td>' +
+                            '</tr>';
+                    }
+
+                    $("#addWeeklyAvailability").css("display", "none");
+                    $("#checkAvailabilityLoader").css("display", "none");
+                    $("#checkWeeklyAvailability").css("display", "block");
+                    $("#availabilityBody").append(createTagsBadge);
+                    $("#AvailabilityModal").modal("show");
+                },
+                error: function (response) {
+                    alert("Something went wrong. Please try again later, or check your internet connection");
+                },
+                complete: function (response) {
+                    // Any cleanup or additional actions can go here if needed
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,244 @@
+﻿@using ITValetFrontEnd.Models
+@model CheckOutDTO
+@{
+    ViewData["Title"] = "CheckoutPayment";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+ @*<style >
+    .stripe-button {
+        height: 35px!important; 
+    }
+
+</style>*@
+<style>
+    .paypalButton-customclass {
+        font-size: 11px!important;
+        font-weight: bold!important;
+        height: 34px!important;
+        font-family: Helvetica; 
+    }
+</style>
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 mb-2">
+                @if (ViewBag.sessionDetails != null)
+                {
+                    <div class="bg-white rounded shadow-sm py-3 mt-3" id="paymentMethod">
+                        <div class="dropdown-menu-show">
+                            <label class="dropdown-item pt-2" for="defaultCheck1">
+                                <input class="mr-2" type="radio" onclick="ShowSessionsDetail(1)" name="paymentOption" value="200" id="defaultCheck1" checked>Pay By Card
+                            </label>
+                            @if (ViewBag.InsufficientSession != "")
+                            {
+                                <p class="dropdown-item pt-2"><input class="mr-2" type="radio" disabled>@ViewBag.InsufficientSession</p>
+
+                            }
+                            else
+                            {
+                                <label class="dropdown-item pt-2" for="defaultCheck2">
+                                    <input class="mr-2" type="radio" onclick="ShowSessionsDetail(2)" name="paymentOption" value="200" id="defaultCheck2">Use Free Session (@ViewBag.sessionDetails.RemainingSessions sessions left)
+                                </label>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div id="CardPayment_Section" class="col-lg-9">
+                <div class="bg-white rounded shadow-sm sidebar-page-right">
+                    <div>
+                        <div class="p-3">
+                            <p class="text-muted font-weight-bold h6 mb-3">Pay to Your IT Valet</p>
+                            <p class="text-muted font-weight-bold mb-0">Project Title : @Model.PaymentTitle</p>
+                            <div class="border mt-4 mb-2 rounded">
+                                <div class="d-flex border-bottom">
+                                    <div class="p-3">
+                                        <p class="text-muted font-weight-bold mb-0" id="p1">Amount You Pay = @Model.WorkingHours * @ViewBag.hourlyRate</p>
+                                    </div>
+                                    <div class="p-3 ml-auto">
+                                        <p class="text-muted font-weight-bold mb-0" id="v1">$@ViewBag.PayableOrderCharges</p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex border-bottom">
+                                    <div class="p-3">
+                                        <p class="text-muted font-weight-bold mb-0" id="p2">Credit card processing fee (4 %)</p>
+                                    </div>
+                                    <div class="p-3 ml-auto">
+                                        <p class="text-muted font-weight-bold mb-0" id="v2">$@Model.StripeFee</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex" id="Reimbursements">
+                                    <div class="p-3">
+                                        <p class="text-muted font-weight-bold mb-0">Your Reimbursements <span data-toggle="tooltip" data-placement="right" title="Funds credited back to your account for canceled orders."><i class="fa fa-question-circle" aria-hidden="true"></i></span></p>
+                                        <p class="mb-0 text-muted">Funds that were credited back to your account for canceled orders.Stripe refund charges may be applicable.</p>
+                                    </div>
+                                    <div class="p-3 ml-auto">
+                                        <p class="text-muted font-weight-bold mb-0">$@ViewBag.PayableOrderCharges</p>
+                                    </div>
+                                </div>
+
+
+                                <div class="bg-light d-flex border-bottom">
+                                    <div class="p-3">
+                                        <p class="text-muted font-weight-bold mb-0">PAYING</p>
+                                    </div>
+                                    <div class="border-left p-3 ml-auto">
+
+                                        <p class="text-muted font-weight-bold mb-0" id="v5">TOTAL $@Model.TotalWorkCharges</p>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: center;">
+                                <form id="stripe-form" action="@Url.Action("ChargePayment","User")" method="post" style="margin-right: 20px;">
+                                    <input type="text" id="wCharges" class="form-control" name="TotalWorkCharges" value="@Model.TotalWorkCharges" hidden>
+                                    <input type="text" class="form-control" name="FromDateTime" value="@Model.FromDateTime" hidden>
+                                    <input type="text" class="form-control" name="ToDateTime" value="@Model.ToDateTime" hidden>
+                                    <input type="text" class="form-control" name="PaymentTitle" value="@Model.PaymentTitle" hidden>
+                                    <input type="text" class="form-control" name="PaymentDescription" value="@Model.PaymentDescription" hidden>
+                                    <input type="text" class="form-control" name="customerId" value="@ViewBag.UserRecord.Id" hidden>
+                                    <input type="text" class="form-control" name="ValetId" value="@Model.ValetId" hidden>
+                                    <input type="text" id="sessionUsed" class="form-control" name="WorkingHours" value="@Model.WorkingHours" hidden disabled>
+                                    <input hidden name="ActualOrderPrice" value="@Model.ActualOrderPrice">
+                                    <!-- Add space between the buttons -->
+                                    <script src="//checkout.stripe.com/v2/checkout.js"  class="stripe-button" style="margin-left:20px;" data-key="pk_test_51LdJU1JGItIO6che36z9ZVzXobOZwgqCGtjhNU1Xh5jj8rYrwrkjwl4ZvvpZvtEwygS5c51cl4abkLAliD9HZe0400fAG3WJm9" data-label="Pay with Stripe" data-description="@Model.PaymentTitle" data-amount="@ViewBag.PayableAmount"></script>
+                                    <p class="text-danger" id="msg"></p>
+                                </form>
+                                <form id="payPal-Form" action="@Url.Action("PostCheckoutForOrder","PayPalClientGateway")" method="post">
+                                    <input type="text" id="wCharges" class="form-control" name="TotalPrice" value="@Model.TotalWorkCharges" hidden>
+                                    <input type="text" class="form-control" name="StartDate" value="@Model.FromDateTime" hidden>
+                                    <input type="text" class="form-control" name="EndDate" value="@Model.ToDateTime" hidden>
+                                    <input type="text" class="form-control" name="OrderTitle" value="@Model.PaymentTitle" hidden>
+                                    <input type="text" class="form-control" name="OrderDescription" value="@Model.PaymentDescription" hidden>
+                                    <input type="text" class="form-control" name="OrderPrice" value="@ViewBag.PayableOrderCharges" hidden>
+                                    <input type="text" class="form-control" name="ClientId" value="@ViewBag.UserRecord.Id" hidden>
+                                    <input type="text" class="form-control" name="ValetId" value="@Model.ValetId" hidden>
+                                    <button id="paypalbtn" class="btn btn-success btn-lg paypalButton-customclass" value="PAY">Pay With PayPal</button>
+                                    <p class="text-danger" id="msg"></p>
+                                </form>
+                                @*<form id="payPal-Form" action="@Url.Action("PostCheckoutForOrder","PayPalClientGateway")" method="post">
+                                    <input type="text" id="wCharges" class="form-control" name="OrderPrice" value="@Model.TotalWorkCharges" hidden>
+                                    <input type="text" class="form-control" name="EndDate" value="@Model.FromDateTime" hidden>
+                                    <input type="text" class="form-control" name="StartDate" value="@Model.ToDateTime" hidden>
+                                    <input type="text" class="form-control" name="OrderTitle" value="@Model.PaymentTitle" hidden>
+                                    <input type="text" class="form-control" name="OrderDescription" value="@Model.PaymentDescription" hidden>
+                                    <input type="text" class="form-control" name="ClientId" value="@ViewBag.UserRecord.Id" hidden>
+                                    <input type="text" class="form-control" name="ValetId" value="@Model.ValetId" hidden>
+                                    <button id="paypalbtn" class="btn btn-success btn-lg" value="PAY">Pay With PayPal</button>
+                                    <p class="text-danger" id="msg"></p>
+                                </form>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.sessionDetails != null)
+            {
+                <div id="package_Section" class="col-lg-9" style="display:none">
+                    <div class="bg-white rounded shadow-sm sidebar-page-right">
+                        <div>
+                            <div class="p-3">
+                                <p class="text-muted font-weight-bold h6 mb-3">Use Your Sessions</p>
+                                <p class="text-muted font-weight-bold mb-0">Project Title : @Model.PaymentTitle</p>
+                                <div class="border mt-4 mb-2 rounded">
+
+                                    <div class="d-flex border-bottom">
+                                        <div class="p-3">
+                                            <p class="text-muted font-weight-bold mb-0" id="p1">1 Session =</p>
+                                        </div>
+                                        <div class="p-3 ml-auto">
+                                            <p class="text-muted font-weight-bold mb-0" id="v1">1 Hour</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex border-bottom">
+                                        <div class="p-3">
+                                            <p class="text-muted font-weight-bold mb-0" id="p1">Total Working Hours =</p>
+                                        </div>
+                                        <div class="p-3 ml-auto">
+                                            <p class="text-muted font-weight-bold mb-0" id="v1">@Model.WorkingHours</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex border-bottom">
+                                        <div class="p-3">
+                                            <p class="text-muted font-weight-bold mb-0" id="p2">Using Session</p>
+                                        </div>
+                                        <div class="p-3 ml-auto">
+                                            <p class="text-muted font-weight-bold mb-0" id="v2">@Model.WorkingHours</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex border-bottom">
+                                        <div class="p-3">
+                                            <p class="text-muted font-weight-bold mb-0" id="p2">Remaining Sessions After Confirmation</p>
+                                        </div>
+                                        <div class="p-3 ml-auto">
+                                            @*<p class="text-muted font-weight-bold mb-0" id="v2">@ViewBag.sessionDetails.RemainingSessions</p>*@
+                                            <p class="text-muted font-weight-bold mb-0" id="v2">@ViewBag.RemainingSessionsAfterOrderConfirm</p>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="bg-light d-flex border-bottom">
+                                        <div class="p-3">
+                                            <p class="text-muted font-weight-bold mb-0">PAY By</p>
+                                        </div>
+                                        <div class="border-left p-3 ml-auto">
+
+                                            <p class="text-muted font-weight-bold mb-0" id="v5">Package</p>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: center;">
+
+                                    <form id="stripe-form" action="@Url.Action("ChargePayment","User")" method="post" style="margin-right: 20px;">
+                                        <input type="text" id="wCharges" class="form-control" name="TotalWorkCharges" value="@Model.TotalWorkCharges" hidden>
+                                        <input type="text" class="form-control" name="FromDateTime" value="@Model.FromDateTime" hidden>
+                                        <input type="text" class="form-control" name="ToDateTime" value="@Model.ToDateTime" hidden>
+                                        <input type="text" class="form-control" name="PaymentTitle" value="@Model.PaymentTitle" hidden>
+                                        <input type="text" class="form-control" name="PaymentDescription" value="@Model.PaymentDescription" hidden>
+                                        <input type="text" class="form-control" name="customerId" value="@ViewBag.UserRecord.Id" hidden>
+                                        <input type="text" class="form-control" name="ValetId" value="@Model.ValetId" hidden>
+                                        <input type="text" id="sessionUsed" class="form-control" name="WorkingHours" value="@Model.WorkingHours" hidden disabled>
+                                        <input hidden name="ActualOrderPrice" value="@Model.ActualOrderPrice">
+                                        <input hidden name="WorkingHours" value="@Model.WorkingHours">
+                                        <input hidden name="PackagePaidBy" value="@ViewBag.sessionDetails.PackagePaidBy">
+                                        <input hidden name="PackageId" value="@ViewBag.sessionDetails.Id">
+
+                                        <button id="paypalbtn" class="btn btn-success btn-lg" value="PAY">Confirm Your Order</button>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@section CustomJs{
+
+<script>
+
+    function ShowSessionsDetail(selectedValue) {
+        if (selectedValue == 1) {
+            $("#CardPayment_Section").show();
+            $("#package_Section").hide();
+        } else if (selectedValue == 2) {
+            $("#CardPayment_Section").hide();
+            $("#package_Section").show();
+        }
+    }
+
+        $(".stripe-button-el").addClass("btn btn-success btn-lg");
+
+</script>
+}

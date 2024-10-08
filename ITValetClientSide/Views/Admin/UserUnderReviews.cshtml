@@ -1,0 +1,294 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "UserUnderReviews";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+</style>
+<div class="modal fade" id="confirmActivateModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary py-4 text-left">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="modal-title">Activation</h3>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="userActiveReadyForActive" />
+                <h6 class="text-semibold" id="confirmActivateModalText" style="font-size:17px">
+                    Do you really want to Activate this user?
+                </h6>
+            </div>
+            <div class="modal-footer border-top-1 border-top-grey-300 pt-10">
+                <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary btn-sm" onclick="updateStatus()" id="confirmActiveModalAction">Proceed</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Name:</strong></label>
+                        <input type="text" class="form-control" placeholder="Search User Name Here" id="searchName" style="background-color:white">
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Email:</strong></label>
+                        <input type="text" class="form-control" id="searchEmail" style="background-color:white" placeholder="Search User Email Here">
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <u><h3>@(ViewBag.ValetOrCustomer == 3 ? "Customer Reviews Record" : "IT Valet Reviews Record")</h3></u>
+        </div>
+    </div>
+
+    <input type="hidden" id="way" value="" />
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">First Name</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Last Name</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Username</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">Email</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Action</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section CustomJs {
+    <script src="~/adminAssets//assets/js/custom.js"></script>
+    <script>
+        var role = "@ViewBag.ValetOrCustomer";
+        var pendingRec = "PendingRecord";
+        loadTable();
+
+        $(document).ready(function () {
+            if (Message != "") {
+                triggerSweetAlert(Message, Color);
+            }
+            $("#AddUserSideBarTabLi").css('background-color', '#0150A1');
+            $("#AddUserSideBarTabText").css('color', '#FFFFFF');
+
+        });
+
+
+        function loadTable() {
+            var searchName = $('#searchName').val();
+            var searchEmail = $('#searchEmail').val();
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable({
+                "ajax": {
+                    "url": projectBaseUrl + "Admin/GetUserList?Role=" + role + "&pendingRec=Hold" + "&Email=" + searchEmail + "&Name=" + searchName,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers": {
+                        'Authorization': Token
+                    },
+                    "data": {
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "firstName", "name": "FirstName" },
+                        { "data": "lastName", "name": "LastName" },
+                        { "data": "userName", "name": "UserName" },
+                        { "data": "email", "name": "Email" },
+                        { "data": "Action", "name": "0" },
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function (data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.firstName;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.lastName;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.userName;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.email;
+                            }
+                        },
+                        {
+                            "targets": 5,
+                            "className": '',
+                            "sortable": false,
+                            "render": function (data, type, full, meta) {
+                                var x = '';
+
+                                var userActions = '<button class="btn btn-sm bg-primary icon-check mr-5" onclick="AccountActivate(' + full.id + ')" title="Activate Account"></button>';
+
+                                var y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:98px;padding-left:5px !important;">';
+                                return '<ul class="icons-list"> ' +
+                                    '<li class="dropdown" >' +
+                                    '			<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                    '				<i class="icon-menu9"></i>' +
+                                    '			</a>' +
+                                    y +
+                                    '				<li>' +
+                                    '                   <button class="btn btn-sm bg-danger icon-bin mr-5" onclick="DeleteUser(' + full.id + ')" title="Delete"></button>' + userActions;
+                                    x +
+                                    '               </li>' +
+                                    '			</ul>' +
+                                    '		</li >' +
+                                    '	</ul >';
+                            }
+                        },
+
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+        }
+
+        function searchTable() {
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+        
+        var DeleteUserId = 0;
+        function DeleteUser(id) {
+            $('#confirmModalHeading').text('Warning!');
+            $('#confirmModalHeader').addClass('bg-danger');
+            $('#confirmModalText').empty();
+            $('#confirmModalText').append('Do you really want to delete this Customer?');
+            $('#confirmModalId').hide();
+            $('#ActivateUserButton').hide();
+            $('#DeleteUserButton').show();
+
+            DeleteUserId = id;
+
+            $('#confirmModal').modal('show');
+        }
+
+        function PostDeleteUser() {
+            $('#DeleteUserButton').attr('disabled', true);
+            $.ajax({
+                type: 'PUT',
+                url: "@ProjectVariables.BaseUrl" + "Admin/DeleteUser?UserId=" + DeleteUserId,
+                dataType: "json",
+                headers:
+                {
+                    'Authorization': Token
+                },
+                success: function (response) {
+                    if (response == true) {
+                        triggerSweetAlert("Deleted Successfully", "@ProjectVariables.SuccessColor");
+                    }
+                    else {
+                        triggerSweetAlert("Failed To Delete", "@ProjectVariables.DangerColor");
+                    }
+                },
+                error: function (response) {
+                    triggerSweetAlert("There is an error while Deleting ", "@ProjectVariables.DangerColor");
+                },
+                complete: function () {
+                    $('#DeleteUserButton').attr('disabled', false);
+                    DeleteUserId = 0;
+                    $('#confirmModal').modal('hide');
+                    loadTable();
+                }
+            });
+        }
+    </script>
+
+    @if (ViewBag.ValetOrCustomer == 3)
+    {
+        <script>
+            $('#manageCustomerUnderReview').addClass('active');
+            scrollToPosition(200);
+        </script>
+    }
+    else if (ViewBag.ValetOrCustomer == 4)
+    {
+        <script>
+            $('#manageValetUnderReview').addClass('active');
+        </script>
+    }
+
+
+
+
+
+
+}

@@ -1,0 +1,143 @@
+﻿@using ITValetFrontEnd.HelperClasses
+@{
+    ViewData["Title"] = "ScheduledTask";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+<style>
+    .responsive-calendar {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+    }
+</style>
+<div class="main-page second py-5">
+    <div class="container">
+        <div class="row bg-white rounded p-3 p-md-5">
+            <!-- Adjust padding for mobile view -->
+            <div class="col-12">
+                <!-- Use "col-12" for full width on mobile -->
+                <h4 class="font-weight-bold text-dark text-center">Appointment Scheduling</h4>
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status" id="calanderS-loader" style="display: none;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <div id="calendar" class="responsive-calendar">
+                    <!-- Add a class for responsiveness -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script>
+        $(document).ready(function () {
+            var UserId = '@ViewBag.UserId';
+            fetchEventsAndGenerateCalendar(UserId);
+        });
+
+        function fetchEventsAndGenerateCalendar(UserId) {
+            $('#calanderS-loader').show();
+            var events = [];
+            var eventColors = ['#2cdd9b', '#3498db', '#9b59b6', '#ffc107', '#56ccf2', '#f39c12', '#1abc9c','#ff6b81'];
+            var colorIndex = 0;
+
+            $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "User/GetOrderEventsByUserId?Id=" + UserId,
+                headers: {
+                    'Authorization': Token
+                },
+                cache: false,
+                success: function (response) {
+                    if (response.status && response.data) {
+                        events = response.data.map(function (eventData) {
+                            var eventColor = eventColors[colorIndex % eventColors.length];
+                            // Increment the color index for the next event
+                            colorIndex++;
+                            return {
+                                id: eventData.orderEncId,
+                                title: eventData.orderTitle,
+                                start: moment(eventData.startDateTime).format(),
+                                end: eventData.endDateTime ? moment(eventData.endDateTime).format() : null,
+                                color: eventColor,
+                                url: eventData.orderDetailUrl,
+                                description: eventData.orderStatusDescription
+                            };
+                        });
+
+                        // Generate the calendar with fetched events
+                        generateCalendar(events);
+                        $('#calanderS-loader').hide();
+                    } else {
+                        console.error("Error:", response.message);
+                        generateCalendar(events);
+                        $('#calanderS-loader').hide();
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    triggerSweetAlert("An error occurred while loading events", "@ProjectVariables.DangerColor");
+                    $('#calanderS-loader').hide();
+                }
+            });
+        }
+
+        function generateCalendar(events) {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                initialView: 'dayGridMonth',
+                navLinks: true,
+                selectable: true,
+                events: [], // Initialize with an empty array
+                eventMaxStack: 3,
+                dateClick: function (info) {
+                    // Navigate to the clicked day with all time slots shown
+                    calendar.gotoDate(info.date);
+                    calendar.changeView('timeGridDay');
+                },
+                eventMouseEnter: function (mouseEnterInfo) {
+                    // Customize the behavior when hovering over an event
+                    var event = mouseEnterInfo.event;
+                    var el = mouseEnterInfo.el;
+
+                    // Create a popover or tooltip to display event details
+                    $(el).popover({
+                        title: event.title,
+                        content: 'Start Date: ' + event.start.toLocaleString() +
+                            '<br>End Date: ' + (event.end ? event.end.toLocaleString() : 'N/A') +
+                            '<br>Order Status: ' + event.extendedProps.description, // Display the OrderStatusDescription
+                        placement: 'auto',
+                        trigger: 'hover',
+                        html: true,
+                    });
+                    $(el).popover('show');
+                },
+                eventMouseLeave: function () {
+                    // Hide the popover or tooltip when leaving the event
+                    $('.popover').popover('dispose');
+                },
+                eventClick: function (event) {
+                    if (event.url) {
+                        window.location.href = event.url;
+                    }
+                }
+            });
+            // If events are found, add them to the calendar
+            if (events.length > 0) {
+                calendar.addEventSource(events);
+            }
+            calendar.render();
+        }
+
+    </script>
+}
+
+

@@ -1,0 +1,1601 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+
+@{
+    ViewData["Title"] = "OrderDetail";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+@section CustomCss{
+    <style>
+        .rate {
+            float: left;
+        }
+
+            .rate:not(:checked) > input {
+                position: absolute;
+                top: -9999px;
+            }
+
+            .rate:not(:checked) > label {
+                float: right;
+                width: 1em;
+                overflow: hidden;
+                white-space: nowrap;
+                cursor: pointer;
+                font-size: 30px;
+                color: #ccc;
+            }
+
+                .rate:not(:checked) > label:before {
+                    content: '★ ';
+                }
+
+            .rate > input:checked ~ label {
+                color: #ffc700;
+            }
+
+            .rate:not(:checked) > label:hover,
+            .rate:not(:checked) > label:hover ~ label {
+                color: #deb217;
+            }
+
+            .rate > input:checked + label:hover,
+            .rate > input:checked + label:hover ~ label,
+            .rate > input:checked ~ label:hover,
+            .rate > input:checked ~ label:hover ~ label,
+            .rate > label:hover ~ input:checked ~ label {
+                color: #c59b08;
+            }
+
+        .sticky-top {
+            align-self: flex-start;
+            top: 20px;
+            z-index: 2;
+        }
+
+        .seller-offline {
+            border: 1px solid red;
+            border-radius: 12px;
+            color: red;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 10px;
+            padding: 3px 10px;
+            text-transform: capitalize;
+        }
+    </style>
+}
+
+<!-- Modal Order Revision -->
+<div class="modal fade" id="OrderRevisionModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Confirm Order Revision</h5>
+                <button type="button" class="close" aria-label="Close" onclick="closeOrderRevisionModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>Are you sure to send order revision?</label>
+                <div class="border-bottom">
+                    <label>Reason</label>
+                    <div class="form-group">
+                        <textarea class="form-control" id="RevisionExplanation" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="closeOrderRevisionModal()">Close</button>
+                <button type="button" class="btn btn-success" id="orderRevision_btn" onclick="SendorderRevision()"> Confirm </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Order Reason -->
+<div class="modal fade" id="orderStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Order Reason</h5>
+                <button type="button" class="close" aria-label="Close" onclick="closeOrderStatus()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="reasonType" />
+                <div class="form-group" style="display:none" id="extendedDateTimeSection">
+                    <label>Extnded Date</label>
+                    <div class="input-group mb-2 col-md-12 p-0">
+                        <input type="datetime-local"
+                               id="extendedDateTime"
+                               class="form-control" />
+
+                    </div>
+                </div>
+
+                <div class="border-bottom">
+                    <label>Reason</label>
+                    <div class="form-group">
+                        <textarea class="form-control" id="reasonExplanation" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+            <span class="text-danger" id="alertMessagesForOrderStatus"></span>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="closeOrderStatus()">Close</button>
+                <button type="button" class="btn btn-success" id="postOrderStatusBtn" onclick="postOrderStatus()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Project Delivery Modal-->
+<div class="modal fade" id="projectDeliveryModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" id="projectDelieveryModalHeader">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" id="projectDelieveryModalBodyForValet" style="display:none">
+                    <form id="UploadWork_Form" method="post" action="@Url.Action("UploadOrderWork","User")" enctype="multipart/form-data">
+                        <input hidden name="ValetId" value="@ViewBag.UserRecord.ValetId" />
+                        <input hidden name="CustomerId" value="@ViewBag.UserRecord.CustomerId" />
+                        <input hidden name="OrderId" value="@ViewBag.UserRecord.EncId" />
+
+                        <label>Please enter description (max 2000 characters) : </label>
+                        <textarea class="form-control" id="description" name="Description" rows="4" required></textarea>
+                        <button type="button" class="btn btn-outline-success btn-sm rounded mt-3">
+                            <i class="mdi mdi-paperclip"></i><input class="pl-2" name="File" type="file" id="upload_work" required>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="row px-3 mt-4" id="projectDelieveryModalBodyForCustomer" style="display:none">
+
+                    @if (ViewBag.UserRecord.CapturedId != null || ViewBag.UserRecord.PackageBuyFrom == "PAYPAL")
+                    {
+                    //For PayPal
+                        <form id="AcceptOrder_Form" method="post" action="@Url.Action("AcceptedOrderOfPayPal","PayPalClientGateway")">
+                            <input hidden name="ValetId" value="@ViewBag.UserRecord.ValetId" />
+                            <input hidden name="CustomerId" value="@ViewBag.UserRecord.CustomerId" />
+                            <input hidden name="OrderId" value="@ViewBag.UserRecord.EncId" />
+
+                            <div class="rate">
+                                <input type="radio" id="star5" name="Stars" value="5" />
+                                <label for="star5" title="Excellent">5 stars</label>
+                                <input type="radio" id="star4" name="Stars" value="4" />
+                                <label for="star4" title="Good">4 stars</label>
+                                <input type="radio" id="star3" name="Stars" value="3" />
+                                <label for="star3" title="Normal">3 stars</label>
+                                <input type="radio" id="star2" name="Stars" value="2" />
+                                <label for="star2" title="Average">2 stars</label>
+                                <input type="radio" id="star1" name="Stars" value="1" />
+                                <label for="star1" title="Bad">1 star</label>
+                            </div>
+                            <textarea class="form-control" placeholder="Enter your experience with seller..." name="Reviews" rows="4"></textarea>
+
+                        </form>
+                    }
+                    else
+                    {
+                    //For Stripe
+                        <form id="AcceptOrder_Form" method="post" action="@Url.Action("AcceptOrder","User")">
+                            <input hidden name="ValetId" value="@ViewBag.UserRecord.ValetId" />
+                            <input hidden name="CustomerId" value="@ViewBag.UserRecord.CustomerId" />
+                            <input hidden name="OrderId" value="@ViewBag.UserRecord.EncId" />
+
+                            <div class="rate">
+                                <input type="radio" id="star5" name="Stars" value="5" />
+                                <label for="star5" title="Excellent">5 stars</label>
+                                <input type="radio" id="star4" name="Stars" value="4" />
+                                <label for="star4" title="Good">4 stars</label>
+                                <input type="radio" id="star3" name="Stars" value="3" />
+                                <label for="star3" title="Normal">3 stars</label>
+                                <input type="radio" id="star2" name="Stars" value="2" />
+                                <label for="star2" title="Average">2 stars</label>
+                                <input type="radio" id="star1" name="Stars" value="1" />
+                                <label for="star1" title="Bad">1 star</label>
+                            </div>
+                            <textarea class="form-control" placeholder="Enter your experience with seller..." name="Reviews" rows="4"></textarea>
+                        </form>
+                    }
+
+                </div>
+
+                <span id="ErrMsg" class="text-danger"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeProjectDeliverModal" onclick="closeProjectDeliverModal()" class="btn btn-danger btn-sm">Cancel</button>
+                <button type="button" id="projectDeliveryModalBtn" class="btn btn-success btn-sm">Upload Work</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (ViewBag.UserRecord != null)
+{
+    <div class="main-page second py-5">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8 left">
+                    <div class="profile_info">
+                        <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm h5 mb-3">
+                            <div class="user-profile-info mb-5" style="width: 7%;height:0">
+                                <div>
+                                    <div class="user-profile-image">
+                                        <label class="user-pict">
+                                            <img src="/FrontAssets/images/user/s4.png" class="img-fluid user-pict-img" style="width:50px;height:50px;" onerror="this.error=null;this.src='/FrontAssets/images/user/s4.png';" alt="Askbootstrap">
+                                            <a href="#" class="user-badge-round user-badge-round-med locale-en-us top-rated-seller"></a>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @{
+                                var isCustomer = (@ViewBag.User.Role == "Customer");
+                                var isOnline = (isCustomer ? @ViewBag.UserRecord.ValetStatus == "1" : @ViewBag.UserRecord.CustomerStatus == "1");
+                                var statusText = (isOnline ? "online" : "offline");
+                                var statusClass = (isOnline ? "seller-card1" : "seller-offline");
+                                var statusId = (isCustomer ? "StatusId-" + @ViewBag.UserRecord.ValetId : "StatusId-" + @ViewBag.UserRecord.CustomerId);
+                            }
+                            <div id="statusDivId" class="ml-auto @statusClass">
+                                <div id="@statusId" class="user-online-indicator is-online" data-user-id="1152855">
+                                    @statusText
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="profile_info my-3">
+                        <div class="p-3 bg-white rounded shadow-sm m-0">
+                            <div class="filters-body">
+                                <div id="accordion">
+                                    <div class="filters-card">
+                                        <div class="filters-card-header" id="headingOne">
+                                            <h6 class="mb-0">
+                                                <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                    Your Order details: <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                </a>
+                                            </h6>
+                                        </div>
+
+                                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                                            <div class="filters-card-body card-shop-filters">
+                                                @if (ViewBag.User.Role == "Valet")
+                                                {
+                                                    <p>Customer: <span class="text-danger pr-2">@ViewBag.UserRecord.UserName</span> | <span class="pl-2">Order Date</span> <i>@ViewBag.UserRecord.CreatedAt</i></p>
+                                                }
+                                                else
+                                                {
+                                                    <p>Valet: <span class="text-danger pr-2">@ViewBag.UserRecord.UserName</span> | <span class="pl-2">Order Date</span> <i>@ViewBag.UserRecord.CreatedAt</i></p>
+                                                }
+                                            </div>
+                                            <div class="table">
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Title</th>
+                                                            <th scope="col">Duration</th>
+                                                            <th scope="col">Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">@ViewBag.UserRecord.OrderTitle</th>
+                                                            <td><span id="order_duration">@ViewBag.UserRecord.StartDateTime to @ViewBag.UserRecord.EndDateTime</span>  </td>
+                                                            <td>$<span>@ViewBag.UserRecord.OrderPrice</span></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile_info my-3">
+                        <div class="p-3 bg-white rounded shadow-sm m-0">
+                            <div class="filters-body">
+                                <div id="accordion2">
+                                    <div class="filters-card">
+                                        <div class="filters-card-header" id="headingOne">
+                                            <h6 class="mb-0">
+                                                <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                                                    Current Project Discussion: <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                </a>
+                                            </h6>
+                                        </div>
+                                        <div id="collapse2" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion2">
+                                            <div class="comments">
+                                                <div class="col-lg-12 col-xl-12 px-0">
+                                                    <div class="d-flex align-items-center mt-4 mb-2  osahan-post-header">
+                                                        <div class="font-weight-bold mr-1 overflow-hidden">
+                                                            <div class="dropdown-list-image mr-3 mb-auto text-truncate">
+                                                                <img class="rounded-circle" onerror="this.error=null;this.src='/FrontAssets/images/user/s4.png';" src="/FrontAssets/images/user/s4.png" alt="">
+                                                            </div>
+                                                            <div class="filters-card-body card-shop-filters">
+                                                                <p>Customer: <span class="text-danger pr-2">@ViewBag.UserRecord.UserName</span><b>Placed Order</b><i class="pl-2">@ViewBag.UserRecord.CreatedAt</i></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="messageChatBoxArea" class="osahan-chat-box p-3 border-top border-bottom bg-light">
+
+                                                        <div class="messageChatBoxArea"></div>
+                                                    </div>
+                                                    <div class="w-100 border-top border-bottom">
+                                                        <textarea id="messageTextArea" style="background-color: #F2F2F2 ;color:black"
+                                                                  placeholder="Write a message…"
+                                                                  class="form-control border-0 p-3 shadow-none"
+                                                                  rows="3"></textarea>
+                                                    </div>
+                                                    <div class="p-3 d-flex align-items-center">
+                                                        <div class="overflow-hidden">
+                                                            <input id="uploadFile" type="file" name="FileUpload" title="upload your working file" class="btn btn-success btn-sm rounded">
+
+                                                            <p id="FileErr" class="text-danger"></p>
+                                                            <p colspan="2"><progress id="fileProgress" style="display: none"></progress></p>
+                                                        </div>
+
+
+                                                        <span class="ml-auto">
+                                                            <button onclick="sendMessageToServer(1)" id="sendMessageButton" type="button" class="btn btn-success btn-sm rounded ml-2 mb-3">
+                                                                <i class="mdi mdi-send mr-2"></i>Send
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 sticky-top right">
+                    <div class="profile_info">
+                        <div class="p-3 bg-white rounded shadow-sm m-0">
+                            <div class="filters-body">
+                                <div id="accordion3">
+                                    <div class="filters-card">
+                                        <div class="filters-card-header" id="headingOne">
+                                            <h6 class="mb-0">
+                                                <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapse3" aria-expanded="true" aria-controls="collapse3">
+                                                    Order details: <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                </a>
+                                            </h6>
+                                        </div>
+                                        <div id="collapse3" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion3">
+                                            <p class="mb-1 mt-2" style="font-size: 15px;">
+                                                @ViewBag.UserRecord.OrderTitle
+                                            </p>
+                                            @if (ViewBag.UserRecord.IsDelivered == "0" && ViewBag.UserRecord.OrderStatus == "0")
+                                            {
+                                                <h6><span id="inprogress" class="badge badge-success p-1 my-1">IN PROGRESS</span></h6>
+                                            }
+                                            else if (ViewBag.UserRecord.IsDelivered == "1")
+                                            {
+                                                <h6><span id="inprogress" class="badge badge-success p-1 my-1">DELIVERED</span></h6>
+                                            }
+                                            else if (ViewBag.UserRecord.IsDelivered == "2" || ViewBag.UserRecord.OrderStatus == "1" || ViewBag.UserRecord.OrderStatus == "2")
+                                            {
+                                                <h6><span id="inprogress" class="badge badge-success p-1 my-1">COMPLETED</span></h6>
+                                            }
+                                            else if( ViewBag.UserRecord.OrderStatus == "4" )
+                                            {
+                                                <h6><span id="inprogress" class="badge badge-danger p-1 my-1">CANCELED</span></h6>
+                                            }
+                                            <div class="border-top border-bottom py-3">
+
+                                                <div class="d-flex align-items-center py-1">
+                                                    <h6>Delivery date</h6>
+                                                    <div class="font-weight-bold ml-auto d-flex align-items-center">
+                                                        <span> @ViewBag.UserRecord.EndDateTime</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-center py-1">
+                                                    <h6>Order Price</h6>
+                                                    <div class="font-weight-bold ml-auto d-flex align-items-center">
+                                                        $<span>@ViewBag.UserRecord.OrderPrice</span>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center py-1">
+                                                    <h6>Order ID</h6>
+                                                    <div class="msgl font-weight-bold ml-auto d-flex align-items-center">
+                                                        <span class="msgl">#@ViewBag.UserRecord.OrderTrackingId</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @if ((ViewBag.UserRecord.IsDelivered == "0" || ViewBag.UserRecord.OrderStatus == "0") && ViewBag.User.Role == "Valet")
+                                            {
+                                                <button id="deliverNow" onclick="orderStatus('Deliver')" class="btn btn-success w-100 mt-2">DELIVER NOW</button>
+                                            }
+                                            else if ((ViewBag.UserRecord.IsDelivered == "1" || ViewBag.UserRecord.OrderStatus == "0") && ViewBag.User.Role == "Valet")
+                                            {
+                                                <button id="deliverNow" onclick="orderStatus('Deliver')" class="btn btn-success w-100 mt-2">DELIVER AGAIN</button>
+                                            }
+                                            else if ((ViewBag.UserRecord.IsDelivered == "1" || ViewBag.UserRecord.OrderStatus == "0") && ViewBag.User.Role != "Valet")
+                                            {
+                                                <button id="deliverNow" onclick="orderStatus('Deliver')" class="btn btn-success w-100 mt-2">ACCEPT ORDER</button>
+                                            }
+                                            else if (ViewBag.UserRecord.IsDelivered == "2" || ViewBag.UserRecord.OrderStatus == "2" || ViewBag.UserRecord.OrderStatus == "1")
+                                            {
+                                                <button id="deliverNow" disabled class="btn btn-success w-100 mt-2">ORDER COMPLETED</button>
+                                            }
+                                            <button id="AcceptOrderHiddenButton" onclick="orderStatus('Deliver')" style="display:none" class="btn btn-success w-100 mt-2">ACCEPT ORDER</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (ViewBag.UserRecord.IsDelivered == "1" && ViewBag.User.Role != "Valet")
+                    {
+                        <div id="RevisionButtonDivForSignalR" class="profile_info" style="margin-top:4%;">
+                            <div class="p-3 bg-white rounded shadow-sm m-0">
+                                <div class="filters-body">
+                                    <div id="accordion4">
+                                        <div class="filters-card">
+                                            <div class="filters-card-header" id="headingOne">
+                                                <h6 class="mb-0">
+                                                    <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                                                        Revise Order :  <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                    </a>
+                                                </h6>
+                                            </div>
+                                            <div id="collapse4" class="collapse show">
+                                                <button id="revisionsend_btn" type="button" data-toggle="modal" data-target="#OrderRevisionModal" class="btn btn-success w-100 mt-2 text-uppercase"><i class="fa fa-repeat mr-2" aria-hidden="true"></i>Order Revision</button>
+                                            </div>
+                                            <p style="color:green" id="revision_sended"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div id="RevisionButtonDivForSignalR" class="profile_info" style="margin-top:4%; display:none;">
+                        <div class="p-3 bg-white rounded shadow-sm m-0">
+                            <div class="filters-body">
+                                <div id="accordion4">
+                                    <div class="filters-card">
+                                        <div class="filters-card-header" id="headingOne">
+                                            <h6 class="mb-0">
+                                                <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                                                    Revise Order :  <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                </a>
+                                            </h6>
+                                        </div>
+                                        <div id="collapse4" class="collapse show">
+                                            <button id="revisionsend_btn" type="button" data-toggle="modal" data-target="#OrderRevisionModal" class="btn btn-success w-100 mt-2 text-uppercase"><i class="fa fa-repeat mr-2" aria-hidden="true"></i>Order Revision</button>
+                                        </div>
+                                        <p style="color:green" id="revision_sended"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    @if (ViewBag.UserRecord.IsDelivered == "0")
+                    {
+                        @if (ViewBag.UserRecord.OrderReasonType != "3")
+                        {
+                            <div id="ZoomMeetingDiv" class="profile_info" style="margin-top:4%;">
+                                <div class="p-3 bg-white rounded shadow-sm m-0">
+                                    <div class="filters-body">
+                                        <div id="accordion14">
+                                            <div class="filters-card">
+                                                <div class="filters-card-header" id="headingZoom">
+                                                    <h6 class="mb-0">
+                                                        <a onclick="RequestMeeting()" class="btn-link">
+                                                            Zoom Meeting :  <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                        </a>
+
+                                                    </h6>
+                                                </div>
+                                                <div id="collapse14" class="collapse show" aria-labelledby="headingZoom">
+                                                    <button id="ZoomMeetingBtn" onclick="RequestMeeting()" type="button" class="btn btn-outline-success w-100 mt-2 text-uppercase">Zoom meeting</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @if (ViewBag.UserRecord.IsDelivered == "0" || ViewBag.UserRecord.IsDelivered == "1" || ViewBag.UserRecord.OrderStatus == "0")
+                    {
+                        <div id="ResolutionCenterDiv" class="profile_info" style="margin-top:4%;">
+                            <div class="p-3 bg-white rounded shadow-sm m-0">
+                                <div class="filters-body">
+                                    <div id="accordion4">
+                                        <div class="filters-card">
+                                            <div class="filters-card-header" id="headingOne">
+                                                <h6 class="mb-0">
+                                                    <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                                                        Resolution Center :  <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                    </a>
+                                                </h6>
+                                            </div>
+                                            <div id="collapse4" class="collapse show">
+                                                <button id="ExtendDeadLine" type="button" onclick="orderStatus('Extend')" class="btn btn-success w-100 mt-2 text-uppercase"><i class="fa fa-repeat mr-2" aria-hidden="true"></i>Extend Deadline Date</button>
+                                                <button id="cancelOrder" type="button" onclick="orderStatus('Cancel')" class="btn btn-outline-danger w-100 mt-2 text-uppercase">Cancel Order</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (ViewBag.UserRecord.Rating != null)
+                    {
+                        <div class="profile_info" style="margin-top:4%">
+                            <div class="p-3 bg-white rounded shadow-sm m-0">
+                                <div class="filters-body">
+                                    <div id="accordion7">
+                                        <div class="filters-card">
+                                            <div class="filters-card-header" id="heading">
+                                                <h6 class="mb-0 my-2">
+                                                    <a href="#" class="btn-link" data-toggle="collapse" data-target="#collapse7" aria-expanded="false" aria-controls="collapse7">
+                                                        Customer review: <i class="mdi mdi-chevron-down float-right" style="font-size: 12px;"></i>
+                                                    </a>
+                                                </h6>
+                                            </div>
+                                            <div id="collapse7" class="collapse show" aria-labelledby="heading2" data-parent="#accordion7">
+                                                @if (!string.IsNullOrWhiteSpace(ViewBag.UserRecord.Rating.Reviews))
+                                                {
+                                                    <strong id="review_added" style="color:green"></strong>
+                                                    <div class="border-top border-bottom py-3">
+                                                        <p class="text-justify mb-0" id="show_review1">
+                                                            @ViewBag.UserRecord.Rating.Reviews
+                                                        </p>
+                                                        <p>
+                                                         @*   <span class="mr-1">@ViewBag.UserRecord.Rating.Stars Star</span>*@
+                                                            @for (int i = 0; i < ViewBag.UserRecord.Rating.Stars; i++)
+                                                            {
+                                                                <span style="color:gold;" class="fa fa-star checked"></span>
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                   
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section CustomJs{
+
+    <script>
+        var getLoggedInUserId = "@ViewBag.User.Id";
+        var getLoggedInUserRole = "@ViewBag.User.Role";
+        var getSenderId = "";
+        var getRecieverId = "";
+        var getCustomerId = "@ViewBag.UserRecord.CustomerId";
+        var getValetId = "@ViewBag.UserRecord.ValetId";
+        var getOrderId = "@ViewBag.UserRecord.Id";
+        var getOrderReasonType = "@ViewBag.UserRecord.OrderReasonType";
+        var getOrderReasonId = "@ViewBag.UserRecord.OrderReasonId";
+        var getOrderReasonIsActive = "@ViewBag.UserRecord.OrderReasonIsActive";
+        if (getLoggedInUserId == getCustomerId) {
+            getRecieverId = getValetId;
+        }
+        else {
+            getRecieverId = getCustomerId;
+        }
+
+        if (getOrderReasonType == "3" && getOrderReasonIsActive == "1") {
+            $("#messageTextArea").css("display", "none");
+            $("#sendMessageButton").css("display", "none");
+            $("#uploadFile").css("display", "none");
+            $("#deliverNow").css("display", "none");
+            $("#ExtendDeadLine").css("display", "none");
+            $("#cancelOrder").css("display", "none");
+            $("#RevisionButtonDivForSignalR").hide();
+            $("#AcceptOrderHiddenButton").hide();
+        }
+        // Function to scroll to the bottom of the chat box
+        function scrollToBottom() {
+            var chatBox = document.querySelector('.osahan-chat-box');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        setMinDateTime();
+        function setMinDateTime() {
+            var endDateTime = '@ViewBag.UserRecord.EndDateTime'; // Get the value from ViewBag
+
+            // Convert the endDateTime to a suitable format (e.g., "YYYY-MM-DDTHH:mm:ss")
+            var formattedEndDateTime = new Date(endDateTime);
+            formattedEndDateTime = formattedEndDateTime.toISOString().slice(0, 16);
+
+            // Set the min attribute for the extendedDatetime input
+            document.getElementById('extendedDateTime').min = formattedEndDateTime;
+            var currentDateTime = new Date().toISOString().slice(0, 16);
+            if (currentDateTime > formattedEndDateTime) {
+                $("#ExtendDeadLine").hide();
+            }
+        }
+
+        function linkify(text) {
+            var urlPattern = /((https:\/\/|http:\/\/)?(www\.)?[\w\.-]+\.\w{2,20}\S*)/gi;
+            return text.replace(urlPattern, function (url) {
+                // Check if the URL doesn't start with "http://" or "https://" and add "http://" if needed
+                if (!url.match(/^(https:\/\/|http:\/\/|www\.)\S*$/i)) {
+                    // If the URL doesn't match a valid pattern, return it as is
+                    return url;
+                } else if (url.startsWith("https//")) {
+                    url = 'http://' + url.substring(8); // Remove the extra '/' from "https//"
+                } else if (!url.match(/^(https:\/\/|http:\/\/)/i)) {
+                    if (url.startsWith("www.")) {
+                        return '<a href="' + 'http://' + url + '" target="_blank">' + url + '</a>';
+                    } else {
+                        url = 'http://www.' + url;
+                    }
+                }
+                return '<a href="' + url + '" target="_blank">' + url + '</a>';
+            });
+        }
+
+
+    </script>
+    <!-- signalR send message  -->
+
+    <script>
+
+        //"use strict";
+
+        //var baseURL = "@ProjectVariables.BaseUrl";
+        //var signalURL = "@ProjectVariables.SignalR_Url";
+        //var connection = new signalR.HubConnectionBuilder().withUrl(signalURL).build();
+
+        //Disable the send button until connection is established.
+        document.getElementById("sendMessageButton").disabled = true;
+
+        // connection.on("ReceiveOrderMessage", function (senderId, receiverId, userName, userProfile, message, messageTime, newOrderReasonId, filePath, IsDelivery, reasonType) {
+        connection.on("ReceiveOrderMessage", function (Obj) {
+            // agr sender ki chat receiver side pr open ha to append krwao msg
+            var element = document.getElementById('chatBoxDialogue-' + Obj.senderId);
+            if (element) {
+                var ProfileImage = "../frontAssets/images/user/s1.png";
+                if (Obj.userProfile != null && Obj.userProfile != "") {
+                    ProfileImage = "@ProjectVariables.BaseUrlForImages" + Obj.userProfile;
+                }
+                var requestButtons = "";
+                if (getLoggedInUserRole == "Customer") {
+                    if (Obj.newOrderReasonId != getOrderReasonId) {
+                        $("#offerRequestBtnA-" + getOrderReasonId).css("display", "none");
+                        $("#offerRequestBtnR-" + getOrderReasonId).css("display", "none");
+                    }
+
+                    getOrderReasonId = Obj.newOrderReasonId;
+
+                    requestButtons = '<button id="offerRequestBtnA-' + getOrderReasonId + '" class="btn btn-sm btn-primary btn-block" onclick="orderReasonStatus(\'Accept\')">Accept</button>' +
+                        '<button id="offerRequestBtnR-' + getOrderReasonId + '" class="btn btn-sm btn-danger btn-block" onclick="orderReasonStatus(\'Reject\')">Reject</button>';
+                }
+
+                var FilePath = "";
+                var FileUrl = "";
+                if (Obj.filePath != null && Obj.filePath.trim() != "") {
+                    FileUrl = '@ProjectVariables.BaseUrlForImages' + Obj.filePath;
+                    if (Obj.filePath.includes(".png") || Obj.filePath.includes(".jpeg") ||
+                        Obj.filePath.includes(".jpg") || Obj.filePath.includes(".svg") ||
+                        Obj.filePath.includes(".webp")) {
+                        FilePath = '<a href=' + FileUrl + ' target="_blank"> <img src=' + FileUrl + ' class="img-fluid mt-2" style="width:150px; height:150px"></a>';
+                    }
+                    else {
+                        FilePath = '<a class="btn btn-success btn-sm mt-2" target="_blank" href=' + FileUrl + ' attr="download" title="Download">Download File</a>';
+                    }
+                }
+                var appendtype = "";
+                if (Obj.reasonType != "Cancel" && Obj.reasonType != "Extend" && Obj.reasonType != "Zoom" && Obj.reasonType != "Revision") {
+                    appendtype = '<p>' + Obj.message + '</p>' + '<br/>' + FilePath;
+                }
+                else {
+                    var StatusType = "";
+                    var StatusDescript = "";
+                    if (Obj.reasonType == "Cancel") {
+                        StatusType = "Cancellation";
+                        StatusDescript = '<i class="fa fa - exclamation - triangle"></i> If you do not respond, the order would be cancelled within the next 48 hours';
+                    }
+                    else if (Obj.reasonType == "Revision") {
+                        StatusType = "Revision";
+                        StatusDescript = "";
+                    }
+                    else if (Obj.reasonType == "Zoom") {
+                        StatusType = "Zoom Meeting";
+                        StatusDescript = "";
+                    }
+                    else {
+                        StatusType = "Days Extension ";
+                        StatusDescript = '<i class="fa fa - exclamation - triangle"></i>If you do not respond, the date would be extended within the next 48 hours';
+                    }
+
+                    // For Repitive Requests on signalr Hiding display of previous request buttons
+
+                    $("#spanTextReason-" + PreviousSpanButtonId).hide();
+                    $("#rejectReasonButton-" + PreviousRejectButtonId).hide();
+                    $("#acceptReasonButton-" + PreviousAcceptButtonId).hide();
+
+                    PreviousSpanButtonId = Obj.newOrderReasonId + "-" + getRecieverId;
+                    PreviousRejectButtonId = Obj.newOrderReasonId + "-" + getRecieverId;
+                    PreviousAcceptButtonId = Obj.newOrderReasonId + "-" + getRecieverId;
+                    var AppendButton = "";
+                    if (Obj.reasonType != "Revision" && Obj.reasonType != "Zoom") {
+                        $("#deliverNow").text("DELIVER NOW");
+                        AppendButton = '<button id="acceptReasonButton-' + Obj.newOrderReasonId + '-' + getRecieverId + '" onclick="AcceptOrRejectOrderReason(\'' + Obj.reasonType + '\', \'Accept\', \'' + Obj.newOrderReasonId + '\')" class="btn btn-success btn-sm pl-4 pr-4 font-weight-bold w-100">Accept</button>' +
+                            '<button id="rejectReasonButton-' + Obj.newOrderReasonId + '-' + getRecieverId + '" onclick="AcceptOrRejectOrderReason(\'' + Obj.reasonType + '\', \'Reject\' , \'' + Obj.newOrderReasonId + '\')" class="btn btn-outline-danger my-1 w-100 btn-sm pl-4 pr-4 font-weight-bold">Reject</button>' +
+                            '<button id="OrderRequestStatusButton-' + Obj.newOrderReasonId + '-' + getRecieverId + '" style="display:none;" type="button" class="ml-1 btn btn-success btn-block" disabled="">Requested</button>';
+                    }
+                    else if (Obj.reasonType == "Zoom") {
+                        AppendButton = '<button onclick="AcceptZoomOrder(\'' + Obj.joinUrl + '\')" type="button" class="ml-1 btn btn-success btn-block" >Join Meeting</button>';
+                    }
+                    else {
+                        AppendButton = '<button type="button" class="ml-1 btn btn-success btn-block" disabled="">Revision Requested</button>';
+                    }
+
+                    appendtype = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:350px">' +
+                        '<div class="p-3 border-bottom">' +
+                        '<h6 class="text-dark"><span class="font-weight-bold">' + StatusType + ' Request: </span></h6>' +
+                        '<p class="mb-0 text-muted mb-3"><span><b>Reason: </b></span>' + Obj.message + '</p>' +
+                        AppendButton +
+                        '<div><span class="ml-3 text-danger" id="spanTextReason-' + Obj.newOrderReasonId + '-' + getRecieverId + '"> ' + StatusDescript + '</span></div>' +
+                        '</div>' +
+                        '</div>';
+
+
+                }
+
+                var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                    '<div class="dropdown-list-image mr-3 mb-auto">' +
+                    '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                    '</div>' +
+                    '<div class="mr-1">' +
+                    '<div class="text-truncate h6 mb-3">' +
+                    Obj.userName +
+                    '</div>' +
+                    appendtype
+                '</div>' +
+                    '<span class="ml-auto mb-auto">' +
+                    '<div class="text-right text-muted pt-1 small">' + Obj.messageTime + '</div>' +
+                    '</span>' +
+                    '</div>';
+
+                $("#chatBoxDialogue-" + Obj.senderId).append(appendNewMessage);
+                if (Obj.isDelivery == "2") {
+                    $("#RevisionButtonDivForSignalR").show();
+                    $("#AcceptOrderHiddenButton").show();
+                    $("#deliverNow").hide();
+
+                }
+                scrollToBottom();
+            }
+
+        });
+        connection.on("UpdateUserStatus", function (senderId, statusOfSender, reasonStatus) {
+            var element = document.getElementById('StatusId-' + senderId);
+            if (element) {
+                if (statusOfSender == "1") {
+                    $("#statusDivId").addClass("seller-card1");
+                    $("#statusDivId").removeClass("seller-offline");
+                    $('#StatusId-' + senderId).text("Online");
+                }
+                else {
+                    $("#statusDivId").removeClass("seller-card1");
+                    $("#statusDivId").addClass("seller-offline");
+                    $('#StatusId-' + senderId).text("Offline");
+
+                }
+            }
+        });
+        connection.on("UpdateOrderStatus", function (senderId, orderReasonId, reasonStatus, orderReason, DeliveryStatus, ReceiverId) {
+            if (getLoggedInUserId == ReceiverId && DeliveryStatus == "2") {
+                $("#ZoomMeetingDiv").hide();
+                $("#ResolutionCenterDiv").hide();
+                $("#deliverNow").prop("disabled", true);
+                $("#deliverNow").text("ORDER COMPLETED");
+                $("#inprogress").text("COMPLETED");
+            }
+            else {
+                var element = document.getElementById("OrderRequestStatusButton-" + orderReasonId + "-" + senderId);
+                if (element) {
+
+
+                    $("#OrderRequestStatusButton-" + orderReasonId + "-" + senderId).text(reasonStatus);
+                    scrollToBottom();
+                    if (orderReason == "Cancel" && reasonStatus == "Accepted") {
+                        $("#messageTextArea").css("display", "none");
+                        $("#sendMessageButton").css("display", "none");
+                        $("#uploadFile").css("display", "none");
+                        $("#deliverNow").css("display", "none");
+                        $("#ExtendDeadLine").css("display", "none");
+                        $("#cancelOrder").css("display", "none");
+                        $("#RevisionButtonDivForSignalR").hide();
+                        $("#AcceptOrderHiddenButton").hide();
+                    }
+                }
+            }
+
+        });
+        //connection.start().then(function ()
+        //{
+        //    document.getElementById("sendMessageButton").disabled = false;
+        //}).catch(function (err) {
+        //    return console.error(err.toString());
+        //});
+
+    </script>
+
+    <script>
+        var PreviousAcceptButtonId = "";
+        var PreviousRejectButtonId = "";
+        var PreviousSpanButtonId = "";
+        GetMessagesForOrder();
+        function GetMessagesForOrder() {
+            $.ajax({
+                type: 'GET',
+                url: "@ProjectVariables.BaseUrl" + "Message/GetMessagesForOrder?orderId=" + getOrderId,
+                "headers": {
+                    'Authorization': Token
+                },
+                dataType: "json",
+                success: function (response) {
+
+                    $('#messageChatBoxArea').html("");
+                    var appendingSideBarMessageList = "";
+                    var appendingSideBarStartTag = "<span>";
+                    var appendingSideBarEndTag = "";
+                    var orderReasonId = "";
+                    for (var item = 0; item < response.length; item++) {
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+                        var FilePath = "";
+                        var FileUrl = "";
+                        var RequestedOrder = "";
+                        var appendtype = "";
+
+
+                        orderReasonId = response[item].orderReasonId;
+
+                        if (response[item].profileImage != null && response[item].profileImage != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + response[item].profileImage;
+                        }
+                        if (response[item].filePath != null && response[item].filePath.trim() != "") {
+                            FileUrl = '@ProjectVariables.BaseUrlForImages' + response[item].filePath;
+                            if (response[item].filePath.includes(".png") || response[item].filePath.includes(".jpeg") ||
+                                response[item].filePath.includes(".jpg") || response[item].filePath.includes(".svg") ||
+                                response[item].filePath.includes(".webp")) {
+                                FilePath = '<a href=' + FileUrl + ' target="_blank"> <img src=' + FileUrl + ' class="img-fluid mt-2" style="width:150px; height:150px"></a>';
+                            }
+                            else {
+                                FilePath = '<a class="btn btn-success btn-sm mt-2" target="_blank" href=' + FileUrl + ' attr="download" title="Download">Download File</a>';
+                            }
+                        }
+
+                        var requestButtons = "";
+                        var getSetValueToUnique = "";
+                        if (getLoggedInUserRole == "Customer" && response[item].orderReasonId == getOrderReasonId) {
+                            if (getOrderReasonType != "3" && getOrderReasonIsActive == "1") {
+                                getSetValueToUnique = getOrderReasonId;
+                                requestButtons = '<button id="offerRequestBtnA-' + getOrderReasonId + '" class="btn btn-sm btn-primary btn-block" onclick="orderReasonStatus(\'Accept\')">Accept</button>' +
+                                    '<button id="offerRequestBtnR-' + getOrderReasonId + '" class="btn btn-sm btn-danger btn-block" onclick="orderReasonStatus(\'Reject\')">Reject</button>';
+                            }
+                        }
+
+                        var messageDescriptionLength = linkify(response[item].messageDescription);
+
+                        if ((response[item].orderReasonType == "Cancel" || response[item].orderReasonType == "Extend" || response[item].orderReasonType == "Revision" || response[item].orderReasonType == "Zoom") && (response[item].orderReasonType != null && response[item].orderReasonType != "")) {
+                            var StatusType = "";
+                            var StatusDescript = "";
+                            if (response[item].orderReasonType == "Cancel") {
+                                StatusType = "Cancellation";
+                                StatusDescript = "If you do not respond, the order would be cancelled within the next 48 hours";
+                                if (response[item].orderReasonIsActive != null && response[item].orderReasonIsActive == 1) {
+                                    $("#messageTextArea").css("display", "none");
+                                    $("#sendMessageButton").css("display", "none");
+                                    $("#uploadFile").css("display", "none");
+                                    $("#deliverNow").css("display", "none");
+                                    $("#ExtendDeadLine").css("display", "none");
+                                    $("#cancelOrder").css("display", "none");
+                                    $("#RevisionButtonDivForSignalR").hide();
+                                    $("#AcceptOrderHiddenButton").hide();
+                                }
+                            }
+                            else if (response[item].orderReasonType == "Revision") {
+                                StatusType = "Revision";
+                                StatusDescript = "";
+                            }
+                            else if (response[item].orderReasonType == "Zoom") {
+                                StatusType = "Zoom Meeting";
+                                StatusDescript = "";
+                            }
+                            else {
+                                StatusType = "Days Extension ";
+                                StatusDescript = "If you do not respond, the date would be extended within the next 48 hours";
+                            }
+
+
+                            if (response[item].senderId != getLoggedInUserId) {
+                                var displayButton = ""
+
+                                if (response[item].orderReasonIsActive == 1) {
+                                    displayButton = '<button id="OrderRequestStatusButton-' + response[item].orderReasonId + '-' + getRecieverId + '"  type="button" class="ml-1 btn btn-success btn-block" disabled="">Accepted</button>';
+                                    PreviousAcceptButtonId = "";
+                                    PreviousRejectButtonId = "";
+                                    PreviousSpanButtonId = "";
+                                }
+
+                                else if (response[item].orderReasonIsActive == 3) {
+                                    displayButton = '<button id="OrderRequestStatusButton-' + response[item].orderReasonId + '-' + getRecieverId + '"  type="button" class="ml-1 btn btn-success btn-block" disabled="">Rejected</button>';
+                                    PreviousAcceptButtonId = "";
+                                    PreviousRejectButtonId = "";
+                                    PreviousSpanButtonId = "";
+                                }
+                                else {
+
+
+                                    displayButton = '<button id="acceptReasonButton-' + response[item].orderReasonId + '-' + getRecieverId + '" onclick="AcceptOrRejectOrderReason(\'' + response[item].orderReasonType + '\', \'Accept\' , \'' + response[item].orderReasonId + '\')"  style="display:none;" class="btn btn-success btn-sm pl-4 pr-4 font-weight-bold w-100">Accept</button>' +
+                                        '<button id="rejectReasonButton-' + response[item].orderReasonId + '-' + getRecieverId + '" onclick="AcceptOrRejectOrderReason(\'' + response[item].orderReasonType + '\', \'Reject\' , \'' + response[item].orderReasonId + '\')"  style="display:none;" class="btn btn-outline-danger my-1 w-100 btn-sm pl-4 pr-4 font-weight-bold">Reject</button>' +
+                                        '<button id="OrderRequestStatusButton-' + response[item].orderReasonId + '-' + getRecieverId + '" style="display:none;" type="button" class="ml-1 btn btn-success btn-block" disabled="">Rejected</button>' +
+                                        '<div><span id="spanTextReason-' + response[item].orderReasonId + '-' + getRecieverId + '"  style="display:none;"  class="ml-3 text-danger"><i class="fa fa-exclamation-triangle"></i>' + StatusDescript + '</span></div>';
+
+                                    PreviousSpanButtonId = response[item].orderReasonId + "-" + getRecieverId;
+                                    PreviousRejectButtonId = response[item].orderReasonId + "-" + getRecieverId;
+                                    PreviousAcceptButtonId = response[item].orderReasonId + "-" + getRecieverId;
+                                }
+                                if (response[item].orderReasonType == "Revision") {
+                                    displayButton = '<button  type="button" class="ml-1 btn btn-success btn-block" disabled="">Revision Requested</button>';
+                                }
+                                if (response[item].orderReasonType == "Zoom") {
+                                    displayButton = '<button id="AcceptZoomOrder" onclick="AcceptZoomOrder(\'' + response[item].joinUrl + '\')" type="button" class="ml-1 btn btn-success btn-block" >Join Meeting</button>';
+                                }
+                                appendtype = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:350px">' +
+                                    '<div class="p-3 border-bottom">' +
+                                    '<h6 class="text-dark"><span class="font-weight-bold">' + StatusType + ' Request: </span></h6>' +
+                                    '<p class="mb-0 text-muted mb-3"><span><b>Reason: </b></span>' + messageDescriptionLength + '</p>' +
+                                    '<div id="appendButtons">' + displayButton + '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                            }
+                            else {
+                                if (response[item].orderReasonIsActive != null) {
+                                    PreviousAcceptButtonId = "";
+                                    PreviousRejectButtonId = "";
+                                    PreviousSpanButtonId = "";
+                                }
+                                var displayButton = "";
+                                if (response[item].orderReasonIsActive == 1) {
+                                    displayButton = '<button id="OrderRequestStatusButton-' + response[item].orderReasonId + '-' + getRecieverId + '"  type="button" class="ml-1 btn btn-success btn-block" disabled="">Accepted</button>';
+                                }
+                                else if (response[item].orderReasonIsActive == 3) {
+                                    displayButton = '<button id="OrderRequestStatusButton-' + response[item].orderReasonId + '-' + getRecieverId + '"  type="button" class="ml-1 btn btn-success btn-block" disabled="">Rejected</button>';
+                                }
+                                else {
+                                    displayButton = '<button id="OrderRequestStatusButton-' + response[item].orderReasonId + '-' + getRecieverId + '"  type="button" class="ml-1 btn btn-success btn-block" disabled="">Requested</button>';
+
+                                }
+                                if (response[item].orderReasonType == "Revision") {
+                                    displayButton = '<button  type="button" class="ml-1 btn btn-success btn-block" disabled="">Revision Requested</button>';
+                                }
+                                if (response[item].orderReasonType == "Zoom") {
+                                    displayButton = '';
+                                }
+                                appendtype = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:350px">' +
+                                    '<div class="p-3 border-bottom" bis_skin_checked="1">' +
+                                    '<h6 class="text-dark"><span class="font-weight-bold">' + StatusType + ' Request: </span></h6>' +
+                                    '<p class="mb-0 text-muted mb-3"><span><b>Reason: </b></span>' + messageDescriptionLength + '</p>' +
+                                    '</div>' +
+                                    '<div class="p-3" bis_skin_checked="1">' +
+                                    '<div id="extra" bis_skin_checked="1">' +
+                                    displayButton +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                            }
+                        }
+                        if (appendtype != "") {
+                            messageDescriptionLength = appendtype;
+                        }
+
+                        appendingSideBarMessageList += '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image mr-3 mb-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1 mb-4">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            response[item].username +
+                            '</div>' +
+                            '<p>' + messageDescriptionLength + '</p>' + FilePath +
+                            '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + response[item].messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                    }
+                    $("#messageChatBoxArea").html('<span id="chatBoxDialogue-' + getRecieverId + '">' + appendingSideBarMessageList + '</span>');
+
+                },
+                error: function (response) {
+                },
+                complete: function () {
+                    //$("#spanTextReason-" + PreviousSpanButtonId).css("display", "block");
+                    //$("#rejectReasonButton-" + PreviousRejectButtonId).css("display", "block");
+                    //$("#acceptReasonButton-" + PreviousAcceptButtonId).css("display", "block");
+                    $("#spanTextReason-" + PreviousSpanButtonId).show();
+                    $("#rejectReasonButton-" + PreviousRejectButtonId).show();
+                    $("#acceptReasonButton-" + PreviousAcceptButtonId).show();
+                    scrollToBottom();
+                }
+            });
+        }
+
+        function sendMessageToServer(id) {
+            var $messageInput = "";
+            var wayOfMessage = "";
+            var uploadFileContentSelected = "";
+            if (id == 2) {
+                $messageInput = $("#description");
+                var uploadFileContent = document.getElementById("upload_work");
+                uploadFileContentSelected = uploadFileContent.files[0];
+                document.getElementById("projectDeliveryModalBtn").disabled = true;
+                wayOfMessage = "2"
+            }
+            else {
+                $("#sendMessageButton").prop("disabled", true);
+                $messageInput = $("#messageTextArea");
+                var uploadFileContent = document.getElementById("uploadFile");
+                uploadFileContentSelected = uploadFileContent.files[0];
+            }
+            const senderId = getLoggedInUserId;
+            const receiverId = getRecieverId;
+            const message = $messageInput.val();
+            var trimmedMessage = message.trim();
+            // Check if the message is valid (not empty or null)
+            if ((!message || trimmedMessage.length <= 0) && uploadFileContent.files.length === 0) {
+                alert("Invalid message: Message cannot be empty.");
+                $messageInput.val("");
+                $("#sendMessageButton").prop("disabled", false);
+                document.getElementById("projectDeliveryModalBtn").disabled = false;
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("SenderId", senderId);
+            formData.append("ReceiverId", receiverId);
+            formData.append("MessageDescription", message);
+            formData.append("OrderId", getOrderId);
+            formData.append("IFilePath", uploadFileContentSelected);
+            formData.append("Way", wayOfMessage);
+
+            $.ajax({
+                type: "POST",
+                url: projectBaseUrl + "Message/PostAddOrderMessage",
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (data) {
+                    console.log("Message sent successfully!", data);
+                    $messageInput.val("");
+                    $("#upload_work").val("");
+                    $("#uploadFile").val("");
+
+                    if (getLoggedInUserId == senderId) {
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+
+                        if (data.profile != null && data.profile != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + data.profile;
+                        }
+                        var FilePath = "";
+                        var FileUrl = "";
+                        if (data.filePath != null && data.filePath.trim() != "") {
+                            FileUrl = '@ProjectVariables.BaseUrlForImages' + data.filePath;
+                            if (data.filePath.includes(".png") || data.filePath.includes(".jpeg") ||
+                                data.filePath.includes(".jpg") || data.filePath.includes(".svg") ||
+                                data.filePath.includes(".webp")) {
+                                FilePath = '<a href=' + FileUrl + ' target="_blank"> <img src=' + FileUrl + ' class="img-fluid mt-2" style="width:150px; height:150px"></a>';
+                            }
+                            else {
+                                FilePath = '<a class="btn btn-success btn-sm mt-2" target="_blank" href=' + FileUrl + ' attr="download" title="Download">Download File</a>';
+                            }
+                        }
+                        var message = linkify(data.message);
+                        var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image mr-3 mb-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            data.userName +
+                            '</div>' +
+                            '<p>' +
+                            message + "<br/>" + FilePath +
+                            '</p>' +
+                            '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + data.messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                        $("#chatBoxDialogue-" + getRecieverId).append(appendNewMessage);
+                        if (wayOfMessage == 2) {
+                            $("#deliverNow").text("DELIVER  AGAIN");
+                        }
+
+
+                        scrollToBottom();
+                    }
+
+                },
+                error: function (error) {
+                    alert("fail");
+                    alert(error.responseText);
+                },
+                complete: function () {
+                    document.getElementById("projectDeliveryModalBtn").disabled = false;
+                    $("#sendMessageButton").prop("disabled", false);
+                    $("#projectDeliveryModal").modal('hide');
+                }
+            });
+
+        }</script>
+
+    <script>
+        function RequestMeeting() {
+            $("#ZoomMeetingBtn").prop("disabled", true);
+            $.ajax({
+                type: 'POST',
+                "headers": {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "Message/CreateZoomMeeting?OrderId=" + getOrderId + "&SenderId=" + getLoggedInUserId + "&ReceiverId=" + getRecieverId,
+                data: {},
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == true) {
+                        $("#ZoomMeetingBtn").prop("disabled", false);
+                        window.open(response.startUrl, '_blank');
+
+                        //var ProfileImage = "../frontAssets/images/user/s1.png";
+                        //if (response.profile != null && response.profile != "") {
+                        //    ProfileImage = "@ProjectVariables.BaseUrlForImages" + response.profile;
+                        //}
+
+                        //var appendtype = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:350px">' +
+                        //    '<div class="p-3 border-bottom" bis_skin_checked="1">' +
+                        //    '<h6 class="text-dark"><span class="font-weight-bold"> Zoom Meeting: </span></h6>' +
+                        //    '<p class="mb-0 text-muted mb-3"><span><b>Detail: </b></span> Click the link to Open Zoom Meeting</p>' +
+                        //    '</div>' +
+                        //    '<div class="p-3" bis_skin_checked="1">' +
+                        //    '<div id="extra" bis_skin_checked="1">' +
+                        //    '<a target="_blank" href="' + response.startUrl + '" type="button" class="ml-1 btn btn-success btn-block" >Join Meeting</a>' +
+                        //    '</div>' +
+                        //    '</div>' +
+                        //    '</div>';
+
+                        //var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                        //    '<div class="dropdown-list-image  mr-3  mb-auto mt-auto">' +
+                        //    '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                        //    '</div>' +
+                        //    '<div class="mr-1">' +
+                        //    '<div class="text-truncate h6 mb-3">' +
+                        //    response.userName +
+                        //    '</div>' + appendtype + '</div>' +
+                        //    '<span class="ml-auto mb-auto">' +
+                        //    '<div class="text-right text-muted pt-1 small">' + response.messageTime + '</div>' +
+                        //    '</span>' +
+                        //    '</div>';
+
+                        // $("#chatBoxDialogue-" + getRecieverId).append(appendNewMessage);
+                        scrollToBottom();
+                    }
+
+                },
+                error: function (response) {
+                    alert("Error");
+                },
+                complete: function () {
+
+                    $("#ZoomMeetingBtn").prop("disabled", false);
+
+                }
+            });
+        }
+
+        function orderStatus(value) {
+            $("#reasonType").val(value);
+            $("#extendedDateTimeSection").css("display", "none");
+            $("#projectDelieveryModalBodyForCustomer").css("display", "none");
+            $("#projectDelieveryModalBodyForValet").css("display", "none");
+            if (value == "Deliver") {
+                if (getLoggedInUserRole == "Valet") {
+                    $("#projectDelieveryModalHeader").html('<h5 class="modal-title">Deliver Your Project Now!</h5>');
+                    $("#projectDelieveryModalBodyForValet").css("display", "block");
+                    $("#projectDeliveryModalBtn").text("Upload Work");
+                }
+                else {
+                    $("#projectDelieveryModalHeader").html('<h5 class="modal-title">Accept Your Order</h5>');
+                    $("#projectDelieveryModalBodyForCustomer").css("display", "block");
+                    $("#projectDeliveryModalBtn").text("Accept");
+                }
+                $("#projectDeliveryModal").modal("show");
+            }
+            else if (value == "Extend") {
+                $("#extendedDateTimeSection").css("display", "block");
+                $("#orderStatusModal").modal("show");
+            }
+            else {
+                $("#orderStatusModal").modal("show");
+            }
+        }
+
+        function closeProjectDeliverModal() {
+            $("#projectDeliveryModal").modal("hide");
+        }
+
+        function closeOrderStatus() {
+            resetOrderStatus()
+            $("#orderStatusModal").modal("hide");
+        }
+
+        function resetOrderStatus() {
+            $("#reasonType").val("");
+            $("#extendedDateTime").val(null);
+            $("#reasonExplanation").val("");
+        }
+
+        function postOrderStatus() {
+            $("#postOrderStatusBtn").prop("disabled", true);
+            const senderId = getLoggedInUserId;
+            const receiverId = getRecieverId;
+            var reasonType = $("#reasonType").val();
+            var extendedDateTime = $("#extendedDateTime").val();
+            var reasonExplanation = $("#reasonExplanation").val();
+            $("#alertMessagesForOrderStatus").val("");
+            if (reasonType == "Extend") {
+                if (extendedDateTime == null || extendedDateTime == "") {
+                    $("#alertMessagesForOrderStatus").val("All Fields are Required");
+                    $("#postOrderStatusBtn").prop("disabled", false);
+                    return;
+                }
+            }
+            if (reasonExplanation == null || reasonExplanation == "") {
+                $("#alertMessagesForOrderStatus").val("All Fields are Required");
+                $("#postOrderStatusBtn").prop("disabled", false);
+                return;
+            }
+
+            $.ajax({
+                type: 'PUT',
+                "headers": {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "Message/PostOrderStatus?orderId=" + getOrderId +
+                    "&orderStatus=" + reasonType + "&explanation=" + reasonExplanation + "&dateExtension=" + extendedDateTime +
+                    "&senderId=" + senderId + "&receiverId=" + receiverId,
+                data: {},
+                dataType: "json",
+                success: function (data) {
+                    console.log("Message sent successfully!", data);
+                    closeOrderStatus();
+                    if (getLoggedInUserId == senderId) {
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+                        var messageDescriptionLength = "";
+                        var requestButtons = "";
+
+                        if (data.profile != null && data.profile != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + data.profile;
+                        }
+
+                        getOrderReasonId = data.newOrderReasonId;
+
+                        messageDescriptionLength = data.message;
+                        if (messageDescriptionLength != null && messageDescriptionLength.includes("extend the date")) {
+                            RequestedOrder = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:250px">' +
+                                '<div class="p-3 border-bottom">' +
+                                '<p class="mb-0 text-muted mb-3" id="extendDescriptionMessage-' + getOrderReasonId + '">' + messageDescriptionLength + '</p>' +
+                                '<div class="p-1">' +
+                                requestButtons +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                            messageDescriptionLength = RequestedOrder;
+                        }
+
+                        var appendtype = "";
+                        if (reasonType != "Cancel" && reasonType != "Extend") {
+                            appendtype = '<p>' + reasonExplanation + '</p>';
+                        }
+                        else {
+                            var StatusType = "";
+                            if (reasonType == "Cancel") {
+                                StatusType = "Cancellation";
+                            }
+                            else {
+                                StatusType = "Days Extension ";
+                            }
+
+
+                            appendtype = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:350px">' +
+                                '<div class="p-3 border-bottom" bis_skin_checked="1">' +
+                                '<h6 class="text-dark"><span class="font-weight-bold">' + StatusType + ' Request: </span></h6>' +
+                                '<p class="mb-0 text-muted mb-3"><span><b>Reason: </b></span>' + reasonExplanation + '</p>' +
+                                '</div>' +
+                                '<div class="p-3" bis_skin_checked="1">' +
+                                '<div id="extra" bis_skin_checked="1">' +
+                                '<button id="OrderRequestStatusButton-' + data.newOrderReasonId + '-' + getRecieverId + '" type="button" class="ml-1 btn btn-success btn-block" disabled="">Requested</button>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                        }
+
+                        var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image mr-3 mb-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            data.userName +
+                            '</div>' + appendtype + '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + data.messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                        $("#chatBoxDialogue-" + getRecieverId).append(appendNewMessage);
+
+                        scrollToBottom();
+                    }
+                },
+                error: function (response) {
+                    alert("Error");
+                },
+                complete: function () {
+                    $("#postOrderStatusBtn").prop("disabled", false);
+                }
+            });
+        }
+
+        function AcceptOrRejectOrderReason(reasonType, reasonStatus, OrderReasonId) {
+
+            $("#rejectReasonButton-" + OrderReasonId + "-" + getRecieverId).prop("disabled", true);
+            $("#acceptReasonButton-" + OrderReasonId + "-" + getRecieverId).prop("disabled", true);
+
+            $("#AcceptOrRejectOrderReasonbtn").prop("disabled", true);
+            const senderId = getLoggedInUserId;
+            const receiverId = getRecieverId;
+            $.ajax({
+                type: 'PUT',
+                "headers": {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "Message/AcceptOrRejectOrderReason?orderId=" + getOrderId +
+                    "&orderStatus=" + reasonType + "&reasonStatus=" + reasonStatus + "&senderId=" + senderId + "&receiverId=" + receiverId,
+                data: {},
+                dataType: "json",
+                success: function (response) {
+                    triggerSweetAlert(response.data.messageDescription, "@ProjectVariables.SuccessColor");
+                    $("#rejectReasonButton-" + response.data.orderReasonId + "-" + getRecieverId).hide();
+                    $("#acceptReasonButton-" + response.data.orderReasonId + "-" + getRecieverId).hide();
+                    $("#spanTextReason-" + response.data.orderReasonId + "-" + getRecieverId).hide();
+                    $("#OrderRequestStatusButton-" + response.data.orderReasonId + "-" + getRecieverId).show();
+                    $("#OrderRequestStatusButton-" + response.data.orderReasonId + "-" + getRecieverId).text(response.data.orderReasonStatus);
+                    if (response.data.orderReasonType == "Cancel" && response.data.orderReasonStatus == "Accepted") {
+                        $("#messageTextArea").css("display", "none");
+                        $("#sendMessageButton").css("display", "none");
+                        $("#uploadFile").css("display", "none");
+                        $("#deliverNow").css("display", "none");
+                        $("#ExtendDeadLine").css("display", "none");
+                        $("#cancelOrder").css("display", "none");
+                        scrollToBottom();
+                    }
+                },
+                error: function (response) {
+                    alert("Error");
+                },
+                complete: function () {
+                    $("#AcceptOrRejectOrderReasonbtn").prop("disabled", false);
+                    $("#rejectReasonButton-" + OrderReasonId + "-" + getRecieverId).prop("disabled", false);
+                    $("#acceptReasonButton-" + OrderReasonId + "-" + getRecieverId).prop("disabled", false);
+
+                }
+            });
+        }
+
+
+        function orderReasonStatus(value) {
+            const senderId = getLoggedInUserId;
+            const receiverId = getRecieverId;
+            const orderReasonId = getOrderReasonId;
+            const input = $("#extendDescriptionMessage-" + orderReasonId).text();
+            // Define the regular expression pattern
+            const pattern = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/;
+            // Match the pattern in the input string
+            const match = input.match(pattern);
+            var extendedDates = "";
+            if (match) {
+                const extendedDateStr = match[1];
+                extendedDates = extendedDateStr;
+                const extendedDate = new Date(extendedDateStr);
+                console.log(extendedDate);
+            }
+
+            $.ajax({
+                type: 'PUT',
+                "headers": {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "Message/PostExtendDeadline?orderId=" + getOrderId + "&orderReasonId=" + orderReasonId +
+                    "&orderStatus=" + value + "&datetime=" + extendedDates + "&senderId=" + senderId +
+                    "&receiverId=" + receiverId,
+                data: {},
+                dataType: "json",
+                success: function (data) {
+                    console.log("Message sent successfully!", data);
+
+                    if (getLoggedInUserId == senderId) {
+                        $("#offerRequestBtnA-" + getOrderReasonId).css("display", "none");
+                        $("#offerRequestBtnR-" + getOrderReasonId).css("display", "none");
+
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+
+                        if (data.profile != null && data.profile != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + data.profile;
+                        }
+
+                        var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image mr-3 mb-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            data.userName +
+                            '</div>' +
+                            '<p>' +
+                            data.message +
+                            '</p>' +
+                            '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + data.messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                        $("#chatBoxDialogue-" + getRecieverId).append(appendNewMessage);
+
+                        scrollToBottom();
+                    }
+                },
+                error: function (response) {
+                    alert("Error");
+                },
+            });
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $("#projectDeliveryModalBtn").click(function () {
+                var DelieverbuttonText = $(this).text();
+                if (DelieverbuttonText == "Upload Work") {
+                    var fileInput = $("#upload_work")[0];
+                    var file = fileInput.files[0];
+                    var description = $("#description").val();
+
+                    if (file.size / 1024 / 1024 > 50) {
+                        $("#FileErr").text("Max File Upload Limit is 50 MB ! Please Try Again!");
+                        return;
+                    }
+                    else {
+                        $("#FileErr").text("");
+                        //$("#UploadWork_Form").submit();
+                        sendMessageToServer(2);
+                    }
+                }
+                else {
+                    $("#AcceptOrder_Form").submit();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        function SendorderRevision() {
+            var OrderId = getOrderId;
+            var RevisionExplanation = $("#RevisionExplanation").val();
+            $("#revisionsend_btn").prop("disabled", true);
+            $.ajax({
+                type: 'PUT',
+                url: "@ProjectVariables.BaseUrl" + "Message/PostUpdateOrderStatus?OrderId=" + OrderId + "&RevisionExplanation=" + RevisionExplanation + "&senderId=" + getLoggedInUserId + "&receiverId=" + getRecieverId,
+                "headers": {
+                    'Authorization': Token
+                },
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == true) {
+                        var message = "Order Revision Sended Successfully!";
+                        $("#revision_sended").text(message);
+                        closeOrderRevisionModal();
+                        $("#revisionsend_btn").prop("disabled", false);
+                        // location.reload();
+
+                        var ProfileImage = "../frontAssets/images/user/s1.png";
+                        if (response.profile != null && response.profile != "") {
+                            ProfileImage = "@ProjectVariables.BaseUrlForImages" + response.profile;
+                        }
+
+                        var appendtype = '<div class="box shadow-sm mb-3 rounded bg-white" style="width:350px">' +
+                            '<div class="p-3 border-bottom" bis_skin_checked="1">' +
+                            '<h6 class="text-dark"><span class="font-weight-bold"> Revision Request: </span></h6>' +
+                            '<p class="mb-0 text-muted mb-3"><span><b>Reason: </b></span>' + RevisionExplanation + '</p>' +
+                            '</div>' +
+                            '<div class="p-3" bis_skin_checked="1">' +
+                            '<div id="extra" bis_skin_checked="1">' +
+                            '<button type="button" class="ml-1 btn btn-success btn-block" disabled="">Revision Requested</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+
+                        var appendNewMessage = '<div class="d-flex align-items-center osahan-post-header">' +
+                            '<div class="dropdown-list-image  mr-3  mb-auto mt-auto">' +
+                            '<img class="rounded-circle" src="' + ProfileImage + '" alt="">' +
+                            '</div>' +
+                            '<div class="mr-1">' +
+                            '<div class="text-truncate h6 mb-3">' +
+                            response.userName +
+                            '</div>' + appendtype + '</div>' +
+                            '<span class="ml-auto mb-auto">' +
+                            '<div class="text-right text-muted pt-1 small">' + response.messageTime + '</div>' +
+                            '</span>' +
+                            '</div>';
+
+                        $("#chatBoxDialogue-" + getRecieverId).append(appendNewMessage);
+                        $("#RevisionExplanation").val("");
+                        $("#RevisionButtonDivForSignalR").hide();
+                        $("#AcceptOrderHiddenButton").hide();
+                        scrollToBottom();
+                    }
+                },
+                error: function (error) {
+
+                },
+                complete: function () {
+                    // This function is called after success or error, you can use it if needed
+                }
+            });
+        }
+
+        function closeOrderRevisionModal() {
+            $("#OrderRevisionModal").modal("hide");
+        }
+
+        function AcceptZoomOrder(url) {
+            $("#AcceptZoomOrder").prop("disabled", true);
+            window.open(url, '_blank');
+            $("#AcceptOrder_Form").submit();
+            $("#AcceptZoomOrder").prop("disabled", false);
+        }
+    </script>
+
+}

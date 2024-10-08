@@ -1,0 +1,136 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "SystemPackages";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="font-weight-bold">Hi @ViewBag.UserName,</h1>
+            <h3 class="font-weight-bold">Choose a Package</h3>
+            <p class="lead text-danger">
+                <span class="bold-text">Note</span>: Once 1 Year or 2 Year Package has been bought, the option to buy new package will be disabled until the previous packages have been utilized.</p>
+        </div>
+        <div class="row pt-5 d-flex justify-content-center">
+            <div class="col-md-5">
+                <div class="bg-white rounded shadow-sm p-5">
+                    <div class="d-flex justify-content-center pb-3 display-4">
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                    </div>
+                    <p class="h5 font-weight-bold text-center">One Year Package</p>
+                    <p class="text-muted text-center">6 sessions available anytime within a year</p>
+                    <p class="text-center">$100</p>
+                    <a href="#" class="btn btn-success btn-lg btn-block my-3" id="OneYear_package" onclick="AppendSelectedPackageValue(1)" data-toggle="modal" data-target="#paymentSelectionModal" data-package="one-year">Buy Package</a>
+                </div>
+            </div>
+            <div class="col-md-2 d-flex justify-content-center align-items-center divider">
+                <div class="separator__line"></div>
+                <div class="font-weight-bold m-2">Or</div>
+                <div class="separator__line"></div>
+            </div>
+            <div class="col-md-5">
+                <div class="bg-white rounded shadow-sm p-5">
+                    <div class="d-flex justify-content-center pb-3 display-4">
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                    </div>
+                    <p class="h5 font-weight-bold text-center">Two Year Package</p>
+                    <p class="text-muted text-center">12 sessions available anytime within 2 years</p>
+                    <p class="text-center">$200</p>
+                    <a href="#" class="btn btn-success btn-lg btn-block my-3" id="TwoYear_package" onclick="AppendSelectedPackageValue(2)" data-toggle="modal" data-target="#paymentSelectionModal" data-package="two-year">Buy Package</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Payment Selection Modal -->
+<div class="modal fade" id="paymentSelectionModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="paymentSelectionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="paymentSelectionLabel">Payment Selection</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="packageDetails"></div>
+                <form id="payPal-Form" action="@Url.Action("PostCheckoutForPackage","PayPalClientGateway")" method="post">
+                    <input type="hidden" name="ClientId" value="@ViewBag.Id">
+                    <input type="hidden" name="SelectedPackage" id="selectedPackageInput" value="">
+                    <button type="button" class="btn btn-success btn-md btn-block mb-2" id="payWithPayPalBtn" onclick="processPayment('paypal')">Pay With PayPal</button>
+                </form>
+                <form id="stripe-Form" action="@Url.Action("StripeCheckoutForPackage","User")" method="post">
+                    <input type="hidden" name="ClientId" value="@ViewBag.Id">
+                    <input type="hidden" class="stripePackageInput" name="SelectedPackage" id="selectedPackageInput" value="">
+                    <script src="//checkout.stripe.com/v2/checkout.js" class="stripe-button" style="margin-left:20px;" data-key="pk_test_51LdJU1JGItIO6che36z9ZVzXobOZwgqCGtjhNU1Xh5jj8rYrwrkjwl4ZvvpZvtEwygS5c51cl4abkLAliD9HZe0400fAG3WJm9" data-label="Pay With Stripe" data-description="Buy Package" data-amount=""></script>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script>
+        $(document).ready(function () {
+            var isSession = @(ViewBag.IsSession.ToString().ToLower());
+            var sessionCount = @ViewBag.SessionCount;
+
+            if (isSession) {
+                var successMessage = "Your package is activated. You have " + sessionCount + " remaining session(s).";
+
+                triggerSweetAlert(successMessage, "@ProjectVariables.SuccessColor");
+
+                // $("#OneYear_package").prop("disabled", true);
+                // $("#TwoYear_package").prop("disabled", true);
+                // Add CSS to prevent pointer events on buttons
+                $("#OneYear_package, #TwoYear_package").css("pointer-events", "none");
+            }
+        });
+    </script>
+    <script>
+
+        function processPayment(paymentMethod) {
+            var modal = $('#paymentSelectionModal');
+            var packageType = modal.find('.modal-title').text().trim();
+            var packageValue = "";
+            if (packageType === 'One Year Package') {
+                packageValue = "IYear";
+            } else if (packageType === 'Two Year Package') {
+                packageValue = "2Year";
+            }
+            // Set the value of the hidden input field
+            modal.find('#selectedPackageInput').val(packageValue);
+            // Trigger the form submission
+            modal.find('#payPal-Form').submit();
+        }
+
+        $('#paymentSelectionModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var packageType = button.data('package');
+            var modal = $(this);
+
+            if (packageType === 'one-year') {
+                modal.find('.modal-title').text('One Year Package');
+                modal.find('#packageDetails').html('<p>One Year Package - 6 sessions available anytime within a year<br>Price: $100</p>');
+            } else if (packageType === 'two-year') {
+                modal.find('.modal-title').text('Two Year Package');
+                modal.find('#packageDetails').html('<p>Two Year Package - 12 sessions available anytime within 2 years<br>Price: $200</p>');
+            }
+        });
+
+        $(".stripe-button-el").addClass("btn btn-success btn-md btn-block");
+        function AppendSelectedPackageValue(packageType) {
+            if (packageType === 1) {
+                packageValue = "IYear";
+            } else if (packageType === 2) {
+                packageValue = "2Year";
+            }
+            // Set the value of the hidden input field
+            var selectedPackageInput = document.querySelector(".stripePackageInput");
+            selectedPackageInput.value = packageValue;
+        }
+
+    </script>
+}

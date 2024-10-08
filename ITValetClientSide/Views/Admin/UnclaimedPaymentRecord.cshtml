@@ -1,0 +1,210 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "UnclaimedPaymentRecord";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Customer Name:</strong></label>
+                        <input type="text" maxlength="30" class="form-control" placeholder="Search username here" id="searchUserName" style="background-color:white">
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>IT Valet Name:</strong></label>
+                        <input type="email" maxlength="40" class="form-control" id="searchItValet" style="background-color:white" placeholder="Search IT-Valet Here">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3>Unclaimed Payments Record</h3>
+        </div>
+    </div>
+    <input type="hidden" id="way" value="" />
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Customer</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">IT-Valet</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Recipient Email</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">Returned Amount</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">Transaction Status</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Order Title</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Cancelation Reason</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section CustomJs {
+    <script>
+        $('#manageUnclaimedPayment').addClass('active');
+        loadTable();
+        function loadTable() {
+            var searchUserName = $('#searchUserName').val(); // Change from searchTable to searchUserName
+            var searchItValet = $('#searchItValet').val(); // Change from searchITValet to searchItValet
+
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable({
+                "ajax": {
+                    "url": "@ProjectVariables.BaseUrl" + "Admin/GetPayPalUnclaimedPaymentRecord?UserName=" + searchUserName + "&ItValet=" + searchItValet,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers":
+                    {
+                        'Authorization': Token
+                    },
+                    "data":
+                    {
+
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "customerName", "name": "CustomerName" },
+                        { "data": "itValetName", "name": "ITValetName" },
+                        { "data": "payPalEmailAccount", "name": "PayPalEmailAccount" },
+                        { "data": "unclaimedAmountStatus", "name": "UnclaimedAmountStatus" },
+                        { "data": "transactionStatus", "name": "TransactionStatus" },
+                        { "data": "orderTitle", "name": "OrderTitle" },
+                        { "data": "reason", "name": "Reason" },
+
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function (data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.customerName;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.itValetName;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.payPalEmailAccount;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            "className": '',
+                            "render": function (data, type, full, meta) {
+                                return full.unclaimedAmountStatus;
+                            }
+                        },
+                        {
+                            "targets": 5,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.transactionStatus;
+                            }
+                        },
+                        {
+                            "targets": 6,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                // Assuming full.orderEncId contains the order ID you want to pass in the URL
+                                var orderId = full.orderEncId;
+
+                                // Construct the URL with the orderId
+                                var url = "../User/OrderDetail?orderId=" + orderId;
+
+                                // Create the hyperlink HTML
+                                var linkHtml = '<a href="' + url + '">' + full.orderTitle + '</a>';
+
+                                // Return the HTML
+                                return linkHtml;
+                            }
+                        },
+                        {
+                            "targets": 7,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.reason;
+                            }
+                        }
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+        }
+
+        function searchTable() {
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+
+        function clearSearch() {
+            $('#searchUserName').val("");
+            $('#searchItValet').val("");
+
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+    </script>
+}

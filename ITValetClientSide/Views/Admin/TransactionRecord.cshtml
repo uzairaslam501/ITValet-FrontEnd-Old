@@ -1,0 +1,317 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "TransactionRecord";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Customer Name:</strong></label>
+                        <input type="text" maxlength="30" class="form-control" placeholder="Search username here" id="searchUserName" style="background-color:white">
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>IT Valet Name:</strong></label>
+                        <input type="email" maxlength="40" class="form-control" id="searchItValet" style="background-color:white" placeholder="Search IT-Valet Here">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3>PayPal Transactions Record</h3>
+        </div>
+    </div>
+    <input type="hidden" id="way" value="" />
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Customer</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">IT-Valet</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Recipient Email</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">OrderTitle</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">OrderPrice</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Sent Amount</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Platform fee</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Transaction Status</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Expected Date To Transfer</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Action</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section CustomJs {
+    <script>
+        $('#manageTransactionRecord').addClass('active');
+        loadTable();
+        function loadTable() {
+            var searchUserName = $('#searchUserName').val(); // Change from searchTable to searchUserName
+            var searchItValet = $('#searchItValet').val(); // Change from searchITValet to searchItValet
+
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable({
+                "ajax": {
+                    "url": "@ProjectVariables.BaseUrl" + "Admin/GetPayPalTransactionRecord?UserName=" + searchUserName + "&ItValet=" + searchItValet,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers":
+                    {
+                        'Authorization': Token
+                    },
+                    "data":
+                    {
+
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "customerName", "name": "CustomerName" },
+                        { "data": "itValetName", "name": "IT Valet" },
+                        { "data": "payPalEmailAccount", "name": "PayPalEmailAccount" },
+                        { "data": "orderTitle", "name": "OrderTitle" },
+                        { "data": "orderPrice", "name": "OrderPrice" },
+                        { "data": "sentAmount", "name": "SentAmount" },
+                        { "data": "platformFee", "name": "PlatformFee" },
+                        { "data": "transactionStatus", "name": "TransactionStatus" },
+                        { "data": "expectedDateToTransmitPayment", "name": " ExpectedDateToTransmitPayment" },
+
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function (data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.customerName;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.itValetName;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.payPalEmailAccount;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            "className": "",
+                            "render": function (data, type, full, meta) {
+                                // Assuming full.orderEncId contains the order ID you want to pass in the URL
+                                var orderId = full.orderEncId;
+
+                                // Construct the URL with the orderId
+                                var url = "../User/OrderDetail?orderId=" + orderId;
+
+                                // Create the hyperlink HTML
+                                var linkHtml = '<a href="' + url + '">' + full.orderTitle + '</a>';
+
+                                // Return the HTML
+                                return linkHtml;
+                            }
+                        },
+                        {
+                            "targets": 5,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.orderPrice + "$";
+                            }
+                        },
+                        {
+                            "targets": 6,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.sentAmount + "$";
+                            }
+                        },
+                        {
+                            "targets": 7,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.platformFee + "$";
+                            }
+                        },
+                        {
+                            "targets": 8,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                if (full.transactionStatus == "PENDING" || full.transactionStatus == "SUCCESS") {
+                                    var transactionStatus = '<span class="label label-success">AMOUNT-SENT</span>';
+                                    return transactionStatus;
+                                }
+                                else if (full.transactionStatus == "UNCLAIMED") {
+                                    var transactionStatus = '<span class="label label-danger">UNCLAIMED</span>';
+                                    return transactionStatus;
+                                }
+                                else if (full.transactionStatus == "RETURNED") {
+                                    var transactionStatus = '<span class="label label-info">FUNDS_RECOVERED</span>';
+                                    return transactionStatus;
+                                }
+                                else {
+                                    var transactionStatus = "N/A"
+                                    return transactionStatus;
+                                }
+                               
+                            }
+                        },
+                        {
+                            "targets": 9,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                var dateTimeString = full.expectedDateToTransmitPayment;
+                                var datePart = dateTimeString.split(' ')[0];
+                                return datePart;
+                            }
+                        },
+                        {
+                            "targets": 10,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                var dropdownMenu = '<ul class="dropdown-menu dropdown-menu-right">';
+
+                                if (full.transactionStatus == "PENDING" || full.transactionStatus == "SUCCESS") {
+                                    // Show "Cancel" button for order status 0 and completed payment
+                                    dropdownMenu += '<li class="disabled"><a href="#"><i class="icon-checkmark"></i> Status Cleared</a></li>';
+                                } else if (full.transactionStatus == "UNCLAIMED") {
+                                    // Show "Refund" button for order status 4 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="clearedClaimed(\'' + full.payOutItemId + '\')"><i class="icon-enter"></i>Recover Funds</a></li>';
+                                } else if (full.transactionStatus == "RETURNED") {
+                                    dropdownMenu += '<li class="disabled"><a href="#"><i class="icon-checkmark"></i>AMOUNT RECOVERED</a></li>';
+                                }
+                                dropdownMenu += '</ul>';
+
+                                var dropdownButton = '<ul class="icons-list">' +
+                                    '<li class="dropdown">' +
+                                    '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                    '		<i class="icon-menu"></i>' +
+                                    '	</a>' +
+                                    dropdownMenu +
+                                    '</li>' +
+                                    '</ul>';
+
+                                return dropdownButton;
+                            }
+                        }
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+        }
+
+        function searchTable() {
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+
+        function clearSearch() {
+            $('#searchUserName').val("");
+            $('#searchItValet').val("");
+
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+    </script>
+    <script>
+        function clearedClaimed(payoutItemId) {
+            if (payoutItemId !== "") {
+                // Clear the DataTable first
+                $('#userTable').DataTable().clear();
+                $('#userTable').DataTable().destroy();
+                //Make an Ajax Call For Clear The claims
+                $.ajax({
+                    type: 'POST',
+                    url: "@ProjectVariables.BaseUrl" + "PayPalGateWay/canceledUnclaimedpayment?payOutItemId=" + payoutItemId,
+                    dataType: "json",
+                    headers: {
+                        'Authorization': Token
+                    },
+                    success: function (response) {
+                        console.log("Response:", response);
+                        if (response.status === true) {
+                            triggerSweetAlert("Claimed Recovered", "@ProjectVariables.SuccessColor");
+                            loadTable();
+                        } else {
+                            triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                        }
+                    },
+                    error: function (response) {
+                        triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                    },
+                    complete: function () {
+
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+

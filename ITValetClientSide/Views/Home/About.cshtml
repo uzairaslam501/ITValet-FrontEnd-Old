@@ -1,0 +1,92 @@
+﻿
+@{
+    ViewData["Title"] = "About";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+@section CustomCss{
+    <style>
+        .header-banner{
+            background-image: url("../frontAssets/images/CustomImages/bg/busi01.jpg");
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: #fff;
+        }
+    </style>
+}
+
+<section class="py-5 inner-header header-banner">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h1 class="mt-0 mb-3 text-white">About Us</h1>
+                <div class="breadcrumbs text-center">
+                    <p class="mb-0 text-white"><a class="text-white" href="@Url.Action("Index","Home")">Home</a>  /  <span class="text-success">About Us</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="pl-4 col-lg-5 col-md-5 pr-4">
+                <img class="rounded img-fluid" src="~/frontAssets/images/about.jpg" alt="Card image cap">
+            </div>
+            <div class="col-lg-6 col-md-6 pl-5 pr-5">
+                <h2 class="mb-5">
+                    The leading global marketplace for learning and instruction
+                </h2>
+                <h5 class="mt-2">Our Vision</h5>
+                <p>Our purpose at IT Valet is to empower individuals by offering great online services that improve their lives and allow them to succeed in the digital age. We are dedicated to providing creative solutions that meet customers specific requirements, making their online experiences smooth, convenient, and pleasurable.</p>
+                <h5 class="mt-4">Our Goal</h5>
+                <p>Our mission is to improve people's lives by providing revolutionary online services that enable them to achieve their goals and live fulfilling digital lives. We are committed to delivering solutions that not only address immediate requirements but also inspire personal development, career development, and general well-being.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="section-title text-center mb-1">
+        <h2>What We Provide?</h2>
+        <p>Discover a world of convenience with our services, which provide seamless solutions adapted to your specific need.</p>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-4">
+                <div class="mt-4 mb-4"><i class="text-success mdi mdi-account-box-outline mdi-48px"></i></div>
+                <h5 class="mt-3 mb-3">Transforming Lives</h5>
+                <p>Where we are committed to changing people's lives with our extensive suite of online offerings. We recognize the power of technology and its ability to effect positive change. We seek to empower individuals, businesses, and communities by giving them with the tools they need to prosper in today's digital environment through our innovative solutions.</p>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="mt-4 mb-4"><i class="text-success mdi mdi-check-circle-outline mdi-48px"></i></div>
+                <h5 class="mb-3">Our Customers</h5>
+                <p>Where our first aim is to provide great online services suited to our loyal customers' demands. We are here to enhance your online experience and help you achieve your goals with our comprehensive range of services and commitment to quality.</p>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="mt-4 mb-4"><i class="text-success mdi mdi-account-multiple-outline mdi-48px"></i></div>
+                <h5 class="mt-3 mb-3">Our Marketplace</h5>
+                <p>At Our Marketplace, we realize the need of locating dependable, skilled people to meet your online service requirements. We have you covered whether you're a business owner looking for top-tier freelancers or an individual looking for specialists to help you with various tasks.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-4">
+                <div class="mt-4 mb-4"><i class="text-success mdi mdi-clock mdi-48px"></i></div>
+                <h5 class="mb-3">Our Instructors</h5>
+                <p>Our lecturers are subject matter specialists with years of industry experience and a thorough understanding of the areas they teach. They bring a lot of experience and practical insights to the virtual classroom, ensuring you obtain the most current and relevant material. Our instructors span a wide range of areas, from business and finance to technology and the creative arts, allowing us to meet a variety of learning needs.</p>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="mt-4 mb-4"><i class="text-success mdi mdi-sticker-emoji mdi-48px"></i></div>
+                <h5 class="mt-3 mb-3">Jobs</h5>
+                <p>IT Valet is an online network that connects job seekers with suitable career opportunities. We can help you whether you're a recent graduate looking for your first job, a seasoned professional looking for a career transition, or someone in between employment. Our platform is intended to streamline the job search process, making it easier for you to locate a position that matches your talents, interests, and goals.</p>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="mt-4 mb-4"><i class="text-success mdi mdi-comment-alert-outline mdi-48px"></i></div>
+                <h5 class="mt-3 mb-3">Help</h5>
+                <p>Welcome to IT Valet, your one-stop shop for all of your online service requirements. We have you covered if you need technical assistance, professional advice, or expert direction. Our platform connects you to a large network of competent specialists that are committed to giving excellent guidance and support.</p>
+            </div>
+        </div>
+    </div>
+</section>

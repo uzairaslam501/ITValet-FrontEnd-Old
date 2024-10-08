@@ -1,0 +1,162 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+
+@{
+    ViewData["Title"] = "ManageOrders";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+@section CustomCss{
+    <link href="https://cdn.datatables.net/v/dt/dt-1.13.4/datatables.min.css" rel="stylesheet" />
+    <style>
+        #OrderTables_filter {
+            display: none;
+        }
+
+        table.dataTable thead > tr > th.sorting::before, table.dataTable thead > tr > th.sorting_asc::before, table.dataTable thead > tr > th.sorting_desc::before, table.dataTable thead > tr > th.sorting_asc_disabled::before, table.dataTable thead > tr > th.sorting_desc_disabled::before, table.dataTable thead > tr > td.sorting::before, table.dataTable thead > tr > td.sorting_asc::before, table.dataTable thead > tr > td.sorting_desc::before, table.dataTable thead > tr > td.sorting_asc_disabled::before, table.dataTable thead > tr > td.sorting_desc_disabled::before {
+            display: none !important;
+        }
+
+        table.dataTable thead > tr > th.sorting:after, table.dataTable thead > tr > th.sorting_asc:after, table.dataTable thead > tr > th.sorting_desc:after, table.dataTable thead > tr > th.sorting_asc_disabled:after, table.dataTable thead > tr > th.sorting_desc_disabled:after, table.dataTable thead > tr > td.sorting:after, table.dataTable thead > tr > td.sorting_asc:after, table.dataTable thead > tr > td.sorting_desc:after, table.dataTable thead > tr > td.sorting_asc_disabled:after, table.dataTable thead > tr > td.sorting_desc_disabled:after {
+            display: none !important;
+        }
+    </style>
+}
+
+<div class="main-page second pt-5 pb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="osahan-table bg-white rounded p-4 text-center">
+                    <h2 class="">
+                        Manage Orders
+                    </h2>
+                    <div class="tab-pane" id="all">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped text-center no-footer" id="OrderTables">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-left:5px" class="text-center">Order Summary</th>
+                                        <th class="text-center">Order Date</th>
+                                        <th class="text-center">Due Date</th>
+                                        <th class="text-center">Total Price</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/row_reorder.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/responsive.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_buttons_html5.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_row_reorder.js"></script>
+
+    <script>
+        loadOrderTables();
+        function loadOrderTables() {
+            $('#OrderTables').DataTable().clear();
+            $('#OrderTables').DataTable().destroy();
+            $('#OrderTables').DataTable(
+                {
+                    "ajax":
+                    {
+                        "url": '@ProjectVariables.BaseUrl' + 'User/GetOrdersDatatableByUserId',
+                        headers: {
+                            'Authorization': Token
+                        },
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": {
+                        },
+                    },
+                    'columns':
+                        [
+                            { "data": "orderTitle", "name": "0" },
+                            { "data": "startDateTime", "name": "0" },
+                            { "data": "endDateTime", "name": "0" },
+                            { "data": "orderPrice", "name": "0" },
+                            { "data": "status", "name": "0" },
+                        ],
+                    'columnDefs':
+                        [
+                            {
+                                "targets": 0,
+                                'className': 'col-md-3',
+                                'sortable': false,
+                                "render": function (data, type, full, meta) {
+                                    var messagesRecievedCount = "";
+                                    return '<a href="../User/OrderDetail?orderId=' + full.encId + '"><span class="order-proposal-title">' + full.orderTitle + " " + messagesRecievedCount + '</span></a>';
+                                }
+                            },
+                            {
+                                "targets": 1,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.startDateTime;
+                                }
+                            },
+                            {
+                                "targets": 2,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.endDateTime;
+                                }
+                            },
+                            {
+                                "targets": 3,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return "$" + full.orderPrice;
+                                }
+                            },
+                            {
+                                "targets": 4,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    var orderStatus = "";
+                                    if (full.orderReasonType == 3) {
+                                        orderStatus = '<td><button class="btn btn-sm btn-danger">Cancelled</button></td>';
+                                    }
+                                    else {
+                                        if (full.isDelivered == 0) {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-primary">In Progress</a>';
+                                        }
+                                        else if (full.isDelivered == 1) {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Delivered</a>';
+                                        }
+                                        else {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-success">Completed</a>';
+                                        }
+                                    }
+                                    return orderStatus;
+                                }
+                            },
+                        ],
+                    "serverSide": "true",
+                    "processing": "true",
+                    "searching": "false",
+                    "language":
+                    {
+                        "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                        "search": "<span>Search :</span> _INPUT_",
+                        "searchPlaceholder": "Filter Data",
+                        "lengthMenu": "<span>Show :</span> _MENU_",
+                        "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                    }
+                });
+        }
+    </script>
+}

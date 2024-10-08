@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section CustomCss{
+
+    <style>
+        .HeightofDivs {
+            min-height: 200px;
+            max-height: 200px;
+        }
+    </style>
+
+}
+
+<div class="row text-center m-10">
+    <div class="col-md-12">
+        <h1 class="text-bold text-highlight"><u>Admin Dashboard</u></h1>
+    </div>
+
+    <div class="col-md-4 col-md-offset-2" style="margin-bottom:12px">
+        <div class="text-center text-white HeightofDivs" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Active Customers</h3>
+            <h2 class="text-bold">@ViewBag.Customer</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-md-offset-">
+        <div class="text-center text-white HeightofDivs" style="padding: 25px; background: #196f9c">
+            <h3 class="text-semibold">Total Active IT Valet</h3>
+            <h2 class="text-bold">@ViewBag.Valet</h2>
+        </div>
+    </div>
+
+</div>
+
+<div class="row text-center m-10">
+    <div class="col-md-4 col-md-offset-2" style="margin-bottom:12px">
+        <div class="text-center text-white HeightofDivs" style="padding: 25px; background: #196F9C">
+            <h3 class="text-semibold">Customers Verfication Pending</h3>
+            <h2 class="text-bold">@ViewBag.CustomersVerificationPending</h2>
+        </div>
+    </div>
+    <div class="col-md-4 col-md-offset-">
+        <div class="text-center text-white HeightofDivs" style="padding: 25px; background: #196F9C">
+            <h3 class="text-semibold">Valet Verfication Pending</h3>
+            <h2 class="text-bold">@ViewBag.ValetVerificationPending</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row text-center m-10">
+    <div class="col-md-4 col-md-offset-2" style="margin-bottom:12px">
+        <div class="text-center text-white HeightofDivs" style="padding: 25px; background: #196F9C">
+            <h3 class="text-semibold">Customers Under Review</h3>
+            <h2 class="text-bold">@ViewBag.CustomersUnderReview</h2>
+        </div>
+    </div>
+    <div class="col-md-4 col-md-offset-">
+        <div class="text-center text-white HeightofDivs" style="padding: 25px; background: #196F9C">
+            <h3 class="text-semibold">IT Valet Under Review</h3>
+            <h2 class="text-bold">@ViewBag.ValetUnderReview</h2>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    //Used to handle Sidebar links Activeness
+    $('#adminIndex').addClass('active');
+
+</script>
+

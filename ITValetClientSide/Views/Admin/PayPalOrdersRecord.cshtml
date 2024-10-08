@@ -1,0 +1,376 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "PayPalOrdersRecord";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row m-10">
+    <div class="panel panel-flat text-black">
+        <div class="panel-heading" style="background: #E8ECED; padding:1px !important;">
+            <h2 class="text-center text-black">
+                Search
+            </h2>
+            <div class="heading-elements">
+                <ul class="icons-list">
+                    <li><a data-action="collapse" class="rotate-180"></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body pt-20 pb-20" style="display: none">
+            <div class="row">
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>Customer Name:</strong></label>
+                        <input type="text" maxlength="30" class="form-control" placeholder="Search username here" id="searchUserName" style="background-color:white">
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
+                    <div class="form-group">
+                        <label><strong>IT Valet Name:</strong></label>
+                        <input type="email" maxlength="40" class="form-control" id="searchItValet" style="background-color:white" placeholder="Search IT-Valet Here">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group">
+                        <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <div class="form-group text-right">
+                        <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3>PayPal Orders Detail</h3>
+        </div>
+    </div>
+    <input type="hidden" id="way" value="" />
+
+    <div class="table-responsive">
+        <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+            <thead class="bg-indigo-800">
+                <tr>
+                    <th class="text-bold" hidden>...</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Customer</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">IT-Valet</th>
+                    <th class="text-bold text-center" style="min-width: 140px;">Order Title</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">Order Status</th>
+                    <th class="text-bold text-center" style="min-width: 150px;">Order Price</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Payment Status</th>
+                    <th class="text-bold text-center" style="min-width: 130px;">Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section CustomJs {
+    <script>
+        $('#managePaypalOrderDetail').addClass('active');
+        loadTable();
+        function loadTable() {
+            var searchUserName = $('#searchUserName').val();
+            var searchITValet = $('#searchItValet').val();
+
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable({
+                "ajax": {
+                    "url": "@ProjectVariables.BaseUrl" + "Admin/GetPayPalOrdersRecord?UserName=" + searchUserName + "&ItValet=" + searchITValet,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers":
+                    {
+                        'Authorization': Token
+                    },
+                    "data":
+                    {
+
+                    }
+                },
+                'columns':
+                    [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "customerName", "name": "CustomerName" },
+                        { "data": "itValet", "name": "ITValet" },
+                        { "data": "orderTitle", "name": "OrderTitle" },
+                        { "data": "orderStatus", "name": "OrderStatus" },
+                        { "data": "orderPrice", "name": "OrderPrice" },
+                        { "data": "paymentStatus", "name": "PaymentStatus" },
+                    ],
+                'columnDefs':
+                    [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function (data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.customerName;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                return full.itValet;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.orderTitle;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            "className": '',
+                            "render": function (data, type, full, meta) {
+                                var orderStatus = '';
+                                switch (full.orderStatus) {
+                                    case "0":
+                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-primary" style="padding: 4px 8px; font-size: 12px;">In Progress</a>';
+                                        break;
+                                    case "1":
+                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-info" style="padding: 4px 8px; font-size: 12px;">Delivered</a>';
+                                        break;
+                                    case "2":
+                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-success" style="padding: 4px 8px; font-size: 12px;">Completed</a>';
+                                        break;
+                                    case "3":
+                                        orderStatus = '<button class="btn btn-sm btn-warning">Pending Amount</button>'
+                                        break;
+                                    case "4":
+                                        orderStatus = '<button class="btn btn-sm btn-danger">Cancelled</button>';
+                                        break;
+                                    default:
+                                        orderStatus = "N/A";
+                                        break;
+                                }
+                                return orderStatus;
+                            }
+                        },
+                        {
+                            "targets": 5,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.orderPrice + "$";
+                            }
+                        },
+                        {
+                            "targets": 6,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                if (full.paymentStatus == "completed") {
+                                    var paymentStatus = '<span class="label label-success">COMPLETED</span>';
+                                    return paymentStatus;
+                                }
+                                if (full.paymentStatus == "REFUNDED") {
+                                    var paymentStatus = '<span class="label label-danger">REFUNDED</span>';
+                                    return paymentStatus;
+                                }
+                                if (full.paymentStatus == "USED_SESSION") {
+                                    var paymentStatus = '<span class="label label-info">PAID-BY-PACKAGE</span>';
+                                    return paymentStatus;
+                                }
+                                if (full.paymentStatus == "SESSION_REVERTED") {
+                                    var paymentStatus = '<span class="label label-danger">REFUNDED</span>';
+                                    return paymentStatus;
+                                }
+                                else {
+                                    var paymentStatus = "N/A"
+                                    return paymentStatus;
+                                }
+                            }
+                        },
+                        {
+                            "targets": 7,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+
+                                var dropdownMenu = '<ul class="dropdown-menu dropdown-menu-right">';
+
+                                if (full.orderStatus == "0" && full.paymentStatus == "completed") {
+                                    // Show "Cancel" button for order status 0 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="DeleteOrder(\'' + full.captureId + '\' , \'' + full.id + '\')"><i class="icon-bin"></i> Cancel</a></li>';
+                                } else if (full.orderStatus == "4" && full.paymentStatus == "completed") {
+                                    // Show "Refund" button for order status 4 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="DeleteOrder(\'' + full.captureId + '\', \'' + full.id + '\')"><i class="icon-enter"></i> Refund</a></li>';
+                                } else if (full.orderStatus == "1" && full.paymentStatus == "completed") {
+                                    // Show "Cancel" button for order status 1 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="DeleteOrder(\'' + full.captureId + '\' , \'' + full.id + '\')"><i class="icon-bin"></i> Cancel</a></li>';
+                                }
+                                else if (full.orderStatus == "0" && full.paymentStatus == "USED_SESSION" && full.paidByPackage == true) {
+                                    // Show "Cancel" button for order status 1 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="DeleteOrderAndRevertSession(\'' + full.id + '\')"><i class="icon-bin"></i> Cancel</a></li>';
+                                }
+                                else if (full.orderStatus == "1" && full.paymentStatus == "USED_SESSION" && full.paidByPackage == true) {
+                                    // Show "Cancel" button for order status 1 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="DeleteOrderAndRevertSession(\'' + full.id + '\')"><i class="icon-bin"></i> Cancel</a></li>';
+                                }
+                                else if (full.orderStatus == "2" && full.paymentStatus == "USED_SESSION" && full.paidByPackage == true) {
+                                    // Show "Cancel" button for order status 1 and completed payment
+                                    dropdownMenu += '<li><a href="#" onclick="DeleteOrderAndRevertSession(\'' + full.id + '\')"><i class="icon-bin"></i> Cancel</a></li>';
+                                }
+                                else if (full.orderStatus == "4" && full.paymentStatus == "USED_SESSION" && full.paidByPackage == true) {
+                                    // Show "Cancel" button for order status 1 and completed payment
+                                    dropdownMenu += '<li class="disabled"><a href="#"><i class="icon-checkmark"></i> Order Completed</a></li>';
+                                }
+                                else if (full.orderStatus == "2" && full.paymentStatus == "completed") {
+                                    // Show "Order Completed" as non-clickable for order status 2 and completed payment
+                                    dropdownMenu += '<li class="disabled"><a href="#"><i class="icon-checkmark"></i> Order Completed</a></li>';
+                                } else if (full.orderStatus == "4" && full.paymentStatus == "REFUNDED") {
+                                    // Show "Payment Refunded" as non-clickable for order status 4 and refunded payment
+                                    dropdownMenu += '<li class="disabled"><a href="#"><i class="icon-cross"></i> Payment Refunded</a></li>';
+                                }
+                                else if (full.orderStatus == "4" && full.paymentStatus == "SESSION_REVERTED") {
+                                    // Show "Payment Refunded" as non-clickable for order status 4 and refunded payment
+                                    dropdownMenu += '<li class="disabled"><a href="#"><i class="icon-cross"></i> SESSION_REVERTED</a></li>';
+                                }
+
+
+                                dropdownMenu += '</ul>';
+
+                                var dropdownButton = '<ul class="icons-list">' +
+                                    '<li class="dropdown">' +
+                                    '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                    '		<i class="icon-menu"></i>' +
+                                    '	</a>' +
+                                    dropdownMenu +
+                                    '</li>' +
+                                    '</ul>';
+
+                                return dropdownButton;
+                            }
+                        }
+                    ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+        }
+
+
+        function searchTable() {
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+
+        function clearSearch() {
+            $('#searchUserName').val("");
+            $('#searchItValet').val("");
+            $('#searchStatus').val("").change();
+
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+
+    </script>
+    <script>
+
+        function DeleteOrder(capId , orderid) {
+            openConfirmationModal('Warning!', 'Are you sure you want to cancel this order?', 'Delete', function () {
+                cancelANDrefundOrder(capId, orderid);
+            });
+        }
+
+        function cancelANDrefundOrder(captureId, orderId) {
+            if (captureId !== "" && orderId !== "") {
+                // Clear the DataTable first
+                $('#userTable').DataTable().clear();
+                $('#userTable').DataTable().destroy();
+                //Make an Ajax Call For Cancel Order and Refund Payment
+                $.ajax({
+                    type: 'POST',
+                    url: "@ProjectVariables.BaseUrl" + "PayPalGateWay/paypalRefund?captureId=" + captureId + "&orderId=" + orderId,
+                    dataType: "json",
+                    headers: {
+                        'Authorization': Token
+                    },
+                    success: function (response) {
+                        console.log("Response:", response);
+                        if (response.status === true) {
+                            triggerSweetAlert("Cancellation Request Processed", "@ProjectVariables.SuccessColor");
+                            loadTable();
+                        } else {
+                            triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                        }
+                    },
+                    error: function (response) {
+                        triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                    },
+                    complete: function () {
+
+                    }
+                });
+            }
+        }
+
+        function DeleteOrderAndRevertSession(orderId){
+            openConfirmationModal('Warning!', 'Are you sure you want to cancel this order?', 'Delete', function () {
+                cancelOrderAndRevertSessions(orderId);
+            });
+        }
+
+        function cancelOrderAndRevertSessions(orderId) {
+            if (orderId != "") {
+                // Clear the DataTable first
+                $('#userTable').DataTable().clear();
+                $('#userTable').DataTable().destroy();
+
+                $.ajax({
+                    type: 'POST',
+                    url: "@ProjectVariables.BaseUrl" + "PayPalGateWay/CancelOrderAndRevertSession?OrderId=" + orderId,
+                    dataType: "json",
+                    headers: {
+                        'Authorization': Token
+                    },
+                    success: function (response) {
+                        console.log("Response:", response);
+                        if (response.status === true) {
+                            triggerSweetAlert("Cancellation Request Processed", "@ProjectVariables.SuccessColor");
+                            loadTable();
+                        } else {
+                            triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                        }
+                    },
+                    error: function (response) {
+                        triggerSweetAlert("Something went Wrong", "@ProjectVariables.DangerColor");
+                    },
+                    complete: function () {
+
+                    }
+                });
+            }
+        }
+    </script>
+}

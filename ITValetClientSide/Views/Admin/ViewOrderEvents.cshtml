@@ -1,0 +1,279 @@
+﻿@using ITValetFrontEnd.Models
+@using ITValetFrontEnd.HelperClasses;
+
+@{
+    ViewData["Title"] = "ViewOrderEvents";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+ }
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <form id="searchForm">
+                <div class="row">
+                    <div class="col-md-2">
+                        <h5>Select User:</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <select name="userId" class="form-control" required="" id="usersId">
+                                <option value="">Choose One</option>
+                                @foreach (var user in ViewBag.ActiveUsers as List<ActiveUsersNameDto>)
+                                {
+                                    <option value="@user.UserId">@user.UserName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-success" id="searchButton">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-4 d-flex justify-content-center align-items-center">
+            <div class="form-check form-switch">
+                <input class="form-check-input order-toggle" type="checkbox" role="switch" id="orderSwitch">
+                <span class="badge bg-primary">Order In-Progress</span>
+            </div>
+        </div>
+        <div class="col-4 d-flex justify-content-center align-items-center">
+            <div class="form-check form-switch">
+                <input class="form-check-input cancelled-toggle" type="checkbox" role="switch" id="cancelledSwitch">
+                <span class="badge bg-danger">Cancelled Order</span>
+            </div>
+        </div>
+        <div class="col-4 d-flex justify-content-center align-items-center">
+            <div class="form-check form-switch">
+                <input class="form-check-input completed-toggle" type="checkbox" role="switch" id="completedSwitch">
+                <span class="badge bg-success">Completed Order</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel p-20 m-10">
+    <div class="row">
+        <div class="col-12">
+            <h3 class="font-weight-bold text-dark text-center">Order Details</h3>
+            <!--Loader-->
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status" id="calander-loader" style="display: none;">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            <div id="calendar">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script>
+        $('#manageOrderRecord').addClass('active');
+        // Flag to track whether a user is selected
+        var userSelected = false;
+
+        document.getElementById("searchButton").addEventListener("click", function () {
+            var selectedUserId = document.getElementById("usersId").value;
+            if (selectedUserId) {
+                userSelected = true; // Set the flag to true when a user is selected
+                selectToggleButtonsByDefault();
+                destroyAndFetchEvents(selectedUserId);
+            } else {
+                triggerSweetAlert("Please select a user first", "@ProjectVariables.DangerColor");
+            }
+        });
+
+        function selectToggleButtonsByDefault() {
+            // Select the toggle buttons by default
+            document.getElementById("orderSwitch").checked = true;
+            document.getElementById("cancelledSwitch").checked = true;
+            document.getElementById("completedSwitch").checked = true;
+        }
+
+        function destroyAndFetchEvents(UserId) {
+            var calendarEl = document.getElementById('calendar');
+            calendarEl.innerHTML = "";
+            // Fetch new events and generate the calendar
+            fetchEventsAndGenerateCalendar(UserId);
+        }
+
+        // Event listeners for the toggle buttons
+        document.getElementById("orderSwitch").addEventListener("change", function () {
+            updateCalendar();
+        });
+
+        document.getElementById("cancelledSwitch").addEventListener("change", function () {
+            updateCalendar();
+        });
+
+        document.getElementById("completedSwitch").addEventListener("change", function () {
+            updateCalendar();
+        });
+
+        function updateCalendar() {
+            if (userSelected) {
+                var selectedUserId = document.getElementById("usersId").value;
+                var inProgress = document.getElementById("orderSwitch").checked;
+                var cancelled = document.getElementById("cancelledSwitch").checked;
+                var completed = document.getElementById("completedSwitch").checked;
+
+                var calendarEl = document.getElementById('calendar');
+                calendarEl.innerHTML = "";
+                // Fetch new events based on the toggle button statuses and generate the calendar
+                fetchEventsAndGenerateCalendarForOrderStatus(selectedUserId, inProgress, cancelled, completed);
+            } else {
+                triggerSweetAlert("Please select a user first", "@ProjectVariables.DangerColor");
+                // Reset the toggle buttons to their previous state (optional)
+                selectToggleButtonsByDefault();
+            }
+        }
+    </script>
+
+    <script>
+        function fetchEventsAndGenerateCalendarForOrderStatus(UserId, inProgress, cancelled, completed) {
+            // Show the loader while fetching events
+            $('#calander-loader').show();
+            var events = [];
+
+            $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "Admin/GetOrderEventsRecordByOrderStatus?UserId=" + UserId +
+                    "&InProgress=" + inProgress + "&cancelled=" + cancelled + "&completed=" + completed,
+                headers: {
+                    'Authorization': Token
+                },
+                cache: false,
+                success: function (response) {
+                    if (response.status && response.data) {
+                        events = response.data.map(function (eventData) {
+                            return {
+                                id: eventData.orderEncId,
+                                title: eventData.orderTitle,
+                                start: moment(eventData.startDateTime).format(),
+                                end: eventData.endDateTime ? moment(eventData.endDateTime).format() : null,
+                                url: eventData.orderDetailUrl,
+                                color: '#2ecc71'
+                            };
+                        });
+
+                        // Generate the calendar with fetched events
+                        generateCalendar(events);
+                        $('#calander-loader').hide();
+                    } else {
+                        var calendarEl = document.getElementById('calendar');
+                        calendarEl.innerHTML = "";
+                        triggerSweetAlert(response.message, "@ProjectVariables.DangerColor");
+                        $('#calander-loader').hide();
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred while loading events.");
+                    $('#calander-loader').hide();
+                }
+            });
+        }
+
+
+        function fetchEventsAndGenerateCalendar(UserId) {
+            // Show the loader while fetching events
+            $('#calander-loader').show();
+            var events = [];
+
+            $.ajax({
+                type: 'GET',
+                url: projectBaseUrl + "Admin/GetOrderEventsByUserId?Id=" + UserId,
+                headers: {
+                    'Authorization': Token
+                },
+                cache: false,
+                success: function (response) {
+                    if (response.status && response.data) {
+                        events = response.data.map(function (eventData) {
+                            return {
+                                id: eventData.orderEncId,
+                                title: eventData.orderTitle,
+                                start: moment(eventData.startDateTime).format(),
+                                end: eventData.endDateTime ? moment(eventData.endDateTime).format() : null,
+                                url: eventData.orderDetailUrl,
+                                color: '#2ecc71'
+                            };
+                        });
+
+                        // Generate the calendar with fetched events
+                        generateCalendar(events);
+                        $('#calander-loader').hide();
+                    } else {
+                        var calendarEl = document.getElementById('calendar');
+                        calendarEl.innerHTML = "";
+                        triggerSweetAlert(response.message, "@ProjectVariables.DangerColor");
+                        $('#calander-loader').hide();
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred while loading events.");
+                    $('#calander-loader').hide();
+                }
+            });
+        }
+
+        function generateCalendar(events) {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                initialView: 'dayGridMonth',
+                navLinks: true,
+                selectable: true,
+                events: events,
+                eventMaxStack: 3,
+                eventColor: '#2ecc71',
+                dateClick: function (info) {
+                    // Navigate to the clicked day with all time slots shown
+                    calendar.gotoDate(info.date);
+                    calendar.changeView('timeGridDay');
+                },
+                eventMouseEnter: function (mouseEnterInfo) {
+                    // Customize the behavior when hovering over an event
+                    var event = mouseEnterInfo.event;
+                    var el = mouseEnterInfo.el;
+
+                    // Create a popover or tooltip to display event details
+                    $(el).popover({
+                        title: event.title,
+                        content: 'Start Date: ' + event.start.toLocaleString() +
+                            '<br>End Date: ' + (event.end ? event.end.toLocaleString() : 'N/A'),
+                        placement: 'auto',
+                        trigger: 'hover',
+                        html: true,
+                    });
+                    $(el).popover('show');
+                },
+                eventMouseLeave: function () {
+                    // Hide the popover or tooltip when leaving the event
+                    $('.popover').popover('dispose');
+                },
+                eventClick: function (event) {
+                    if (event.url) {
+                        window.location.href = event.url;
+                    }
+                }
+            });
+            calendar.render();
+        }
+    </script>
+}
+
+

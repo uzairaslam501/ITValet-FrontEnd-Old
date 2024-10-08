@@ -1,0 +1,406 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+
+@{
+    ViewData["Title"] = "PackageDetails";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+@section CustomCss{
+    <link href="https://cdn.datatables.net/v/dt/dt-1.13.4/datatables.min.css" rel="stylesheet" />
+    <style>
+        #OrderTables_filter {
+            display: none;
+        }
+
+        table.dataTable thead > tr > th.sorting::before, table.dataTable thead > tr > th.sorting_asc::before, table.dataTable thead > tr > th.sorting_desc::before, table.dataTable thead > tr > th.sorting_asc_disabled::before, table.dataTable thead > tr > th.sorting_desc_disabled::before, table.dataTable thead > tr > td.sorting::before, table.dataTable thead > tr > td.sorting_asc::before, table.dataTable thead > tr > td.sorting_desc::before, table.dataTable thead > tr > td.sorting_asc_disabled::before, table.dataTable thead > tr > td.sorting_desc_disabled::before {
+            display: none !important;
+        }
+
+        table.dataTable thead > tr > th.sorting:after, table.dataTable thead > tr > th.sorting_asc:after, table.dataTable thead > tr > th.sorting_desc:after, table.dataTable thead > tr > th.sorting_asc_disabled:after, table.dataTable thead > tr > th.sorting_desc_disabled:after, table.dataTable thead > tr > td.sorting:after, table.dataTable thead > tr > td.sorting_asc:after, table.dataTable thead > tr > td.sorting_desc:after, table.dataTable thead > tr > td.sorting_asc_disabled:after, table.dataTable thead > tr > td.sorting_desc_disabled:after {
+            display: none !important;
+        }
+    </style>
+
+    <style>
+        #Orders_Table_filter {
+            display: none;
+        }
+
+        table.dataTable thead > tr > th.sorting::before, table.dataTable thead > tr > th.sorting_asc::before, table.dataTable thead > tr > th.sorting_desc::before, table.dataTable thead > tr > th.sorting_asc_disabled::before, table.dataTable thead > tr > th.sorting_desc_disabled::before, table.dataTable thead > tr > td.sorting::before, table.dataTable thead > tr > td.sorting_asc::before, table.dataTable thead > tr > td.sorting_desc::before, table.dataTable thead > tr > td.sorting_asc_disabled::before, table.dataTable thead > tr > td.sorting_desc_disabled::before {
+            display: none !important;
+        }
+
+        table.dataTable thead > tr > th.sorting:after, table.dataTable thead > tr > th.sorting_asc:after, table.dataTable thead > tr > th.sorting_desc:after, table.dataTable thead > tr > th.sorting_asc_disabled:after, table.dataTable thead > tr > th.sorting_desc_disabled:after, table.dataTable thead > tr > td.sorting:after, table.dataTable thead > tr > td.sorting_asc:after, table.dataTable thead > tr > td.sorting_desc:after, table.dataTable thead > tr > td.sorting_asc_disabled:after, table.dataTable thead > tr > td.sorting_desc_disabled:after {
+            display: none !important;
+        }
+    </style>
+
+    <style>
+        .custom-width {
+            max-width: 800px;
+            width: 100%;
+        }
+    </style>
+}
+
+<!-- Modal Package Consumption Orders -->
+
+<div class="modal fade" id="createOrderModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog custom-width" role="document">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <!-- Add a button with a close icon -->
+
+                <h4 class="">
+                    Packages Consumption Orders
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="main-page second pt-5 pb-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="osahan-table bg-white rounded p-4 text-center">
+                                @*<h2 class="">
+                                Packages Consumption Orders
+                                </h2>*@
+                                <div class="tab-pane" id="all">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped text-center no-footer" id="Orders_Table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="padding-left:5px" class="text-center">Order Summary</th>
+                                                    <th class="text-center">Order Date</th>
+                                                    <th class="text-center">Due Date</th>
+                                                    <th class="text-center">Total Price</th>
+                                                    <th class="text-center">Status</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="main-page second pt-5 pb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="osahan-table bg-white rounded p-4 text-center">
+                    <h2 class="">
+                        Package Details
+                    </h2>
+                    <div class="tab-pane" id="all">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped text-center no-footer" id="OrderTables">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Customer Name</th>
+                                        <th class="text-center">Package Start Date</th>
+                                        <th class="text-center">Package End Date</th>
+                                        <th class="text-center">Package Type</th>
+                                        <th class="text-center">Total Sessions</th>
+                                        <th class="text-center">Remaining Sessions</th>
+                                        <th class="text-center">Package Status</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJs{
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/row_reorder.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/responsive.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_buttons_html5.js"></script>
+    <script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_row_reorder.js"></script>
+
+    <script>
+        debugger;
+        var LoggedInUserId = '@ViewBag.loggendInUserId';
+        loadPackagesTables();
+        function loadPackagesTables() {
+            $('#OrderTables').DataTable().clear();
+            $('#OrderTables').DataTable().destroy();
+            $('#OrderTables').DataTable(
+                {
+                    "ajax":
+                    {
+                        "url": '@ProjectVariables.BaseUrl' + 'Customer/GetUserPackageDatatable?UserId=' + LoggedInUserId,
+                        headers: {
+                            'Authorization': Token
+                        },
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": {
+                        },
+                    },
+                    'columns':
+                        [
+                            { "data": "customer", "name": "0" },
+                            { "data": "startDateTime", "name": "0" },
+                            { "data": "endDateTime", "name": "0" },
+                            { "data": "packageType", "name": "0" },
+                            { "data": "totalSessions", "name": "0" },
+                            { "data": "remainingSessions", "name": "0" },
+                            { "data": "status", "name": "0" },
+                            { "data": "Action", "name": "0" },
+
+                        ],
+                    'columnDefs':
+                        [
+                            {
+                                "targets": 0,
+                                'className': 'col-md-2',
+                                'sortable': false,
+                                "render": function (data, type, full, meta) {
+
+                                    console.log(full);
+                                    return full.customer;
+
+                                }
+                            },
+                            {
+                                "targets": 1,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    var startDate = new Date(full.startDateTime);
+                                    // custom Datetime format 
+                                    var day = startDate.getDate().toString().padStart(2, '0');
+                                    var month = (startDate.getMonth() + 1).toString().padStart(2, '0'); // Adding 1 to the month because months are 0-based.
+                                    var year = startDate.getFullYear();
+                                    var hours = startDate.getHours().toString().padStart(2, '0');
+                                    var minutes = startDate.getMinutes().toString().padStart(2, '0');
+
+                                    var startdateTime = day + "-" + month + "-" + year + " " + hours + ":" + minutes;
+                                    return startdateTime;
+
+
+                                }
+                            },
+                            {
+                                "targets": 2,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    var endDate = new Date(full.endDateTime);
+                                    // custom Datetime format
+                                    var day = endDate.getDate().toString().padStart(2, '0');
+                                    var month = (endDate.getMonth() + 1).toString().padStart(2, '0'); // Adding 1 to the month because months are 0-based.
+                                    var year = endDate.getFullYear();
+                                    var hours = endDate.getHours().toString().padStart(2, '0');
+                                    var minutes = endDate.getMinutes().toString().padStart(2, '0');
+
+                                    var endDateTime = day + "-" + month + "-" + year + " " + hours + ":" + minutes;
+                                    return endDateTime;
+
+
+                                }
+                            },
+                            {
+                                "targets": 3,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    var packageType = "";
+                                    if (full.packageType == 1) {
+                                        packageType = "1 Year";
+                                    }
+                                    else {
+                                        packageType = "2 Year"
+                                    }
+                                    return packageType;
+                                }
+                            },
+                            {
+                                "targets": 4,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.totalSessions;
+                                }
+                            },
+                            {
+                                "targets": 5,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.remainingSessions;
+                                }
+                            },
+                            {
+                                "targets": 6,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    var packageStatus = "";
+                                    if (full.remainingSessions > 0) {
+                                        packageStatus = "Activate";
+                                    }
+                                    else {
+                                        packageStatus = "Expired";
+
+                                    }
+                                    return packageStatus;
+                                }
+                            },
+                            {
+                                "targets": 7,
+                                'sortable': false,
+                                'className': 'col-md-1',
+                                "render": function (data, type, full, meta) {
+                                    var dropdown = "";
+                                    dropdown = '<ul class="icons-list text-center" > ' +
+                                        '<li class="dropdown" > ' +
+                                        '<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bars"></i></a >' +
+                                        '<ul class="dropdown-menu dropdown-menu-right p-1" > ' +
+                                        '<li class="p-1">' +
+                                        '<button title="View" class="btn btn-primary mr-1 btn-md text-white" data - toggle="modal" data - target="#createOrderModal" onclick = "loadOrderTables(' + full.id + ')" >' +
+                                        'View Consumption'
+                                    '< /button> ' +
+                                        '</li>' +
+                                        '</ul>' +
+                                        '</li>' +
+                                        '</ul>';
+                                    return dropdown;
+                                }
+                            },
+                        ],
+                    "serverSide": "true",
+                    "processing": "true",
+                    "searching": "false",
+                    "language":
+                    {
+                        "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                        "search": "<span>Search :</span> _INPUT_",
+                        "searchPlaceholder": "Filter Data",
+                        "lengthMenu": "<span>Show :</span> _MENU_",
+                        "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                    }
+                });
+        }
+    </script>
+
+
+    <script>
+        //loadOrderTables();
+        function loadOrderTables(packageId) {
+
+            $('#createOrderModal').modal('show');
+            $('#Orders_Table').DataTable().clear();
+            $('#Orders_Table').DataTable().destroy();
+            $('#Orders_Table').DataTable(
+                {
+                    "ajax":
+                    {
+                        "url": '@ProjectVariables.BaseUrl' + 'Customer/GetOrdersDatatableByPackageId?packageId=' + packageId,
+                        headers: {
+                            'Authorization': Token
+                        },
+                        "type": "POST",
+                        "datatype": "json",
+                        "data": {
+                        },
+                    },
+                    'columns':
+                        [
+                            { "data": "orderTitle", "name": "0" },
+                            { "data": "startDateTime", "name": "0" },
+                            { "data": "endDateTime", "name": "0" },
+                            { "data": "orderPrice", "name": "0" },
+                            { "data": "status", "name": "0" },
+                        ],
+                    'columnDefs':
+                        [
+                            {
+                                "targets": 0,
+                                'className': 'col-md-3',
+                                'sortable': false,
+                                "render": function (data, type, full, meta) {
+                                    var messagesRecievedCount = "";
+                                    return '<a href="../User/OrderDetail?orderId=' + full.encId + '"><span class="order-proposal-title">' + full.orderTitle + " " + messagesRecievedCount + '</span></a>';
+                                }
+                            },
+                            {
+                                "targets": 1,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.startDateTime;
+                                }
+                            },
+                            {
+                                "targets": 2,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return full.endDateTime;
+                                }
+                            },
+                            {
+                                "targets": 3,
+                                'sortable': false,
+                                'className': 'col-md-2',
+                                "render": function (data, type, full, meta) {
+                                    return "$" + full.orderPrice;
+                                }
+                            },
+                            {
+                                "targets": 4,
+                                'sortable': false,
+                                'className': 'col-md-3',
+                                "render": function (data, type, full, meta) {
+                                    var orderStatus = "";
+                                    if (full.orderReasonType == 3) {
+                                        orderStatus = '<td><button class="btn btn-sm btn-danger">Cancelled</button></td>';
+                                    }
+                                    else {
+                                        if (full.isDelivered == 0) {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-primary">In Progress</a>';
+                                        }
+                                        else if (full.isDelivered == 1) {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Delivered</a>';
+                                        }
+                                        else {
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-success">Completed</a>';
+                                        }
+                                    }
+                                    return orderStatus;
+                                }
+                            },
+                        ],
+                    "serverSide": "true",
+                    "processing": "true",
+                    "searching": "false",
+                    "language":
+                    {
+                        "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                        "search": "<span>Search :</span> _INPUT_",
+                        "searchPlaceholder": "Filter Data",
+                        "lengthMenu": "<span>Show :</span> _MENU_",
+                        "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                    }
+                });
+        }
+    </script>
+}

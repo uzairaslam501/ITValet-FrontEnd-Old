@@ -1,0 +1,562 @@
+﻿
+@{
+    ViewData["Title"] = "RequestService";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+<div class="bg-white" id="realoadForResize">
+    <div class="py-5 container">
+        <div class="row">
+            <div class="col-lg-6 my-auto videonone text-center">
+                <lottie-player class="video-tablet text-center" src="https://assets4.lottiefiles.com/packages/lf20_zw0djhar.json" background="transparent" speed="1" style="width: 100%; height: 500px;" loop autoplay></lottie-player>
+            </div>
+            <div class="col-lg-6 mx-auto">
+                <div class="osahan-login py-4">
+                    <div class="text-center mb-4">
+                        <a href="@Url.Action("Welcome","Home")"><img src="~/frontAssets/images/customImages/butlerlogo.png" alt="" style="width: 139.22px; height: 38px;"></a>
+                        <h5 class="font-weight-bold mt-3">Service Required</h5>
+                    </div>
+
+                    <form id="requestServiceForm" action="@Url.Action("PostRequestService","User")" method="post">
+                        <input type="hidden" name="RequestedServiceUserId" value="@ViewBag.RequestedServiceUserId" />
+                        <div class="form-group" style="display:none">
+                            <label class="mb-1">Service Title <span class="text-danger">*</span></label>
+                            <input type="text" name="ServiceTitle" id="requestServiceTitle" class="form-control" placeholder="Enter Your Service Title Here">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="mb-1 bold-text">When do you want help from your IT Valet<span class="text-danger">*</span></label>
+                            <div class="row ml-0">
+                                <div class="col-6 custom-control custom-radio ">
+                                    <input type="radio" class="custom-control-input" onclick="displayRequestTypeSection(this.value)" value="LiveNow" id="liveNow_Checkbox">
+                                    <label class="custom-control-label" for="liveNow_Checkbox">Now</label>
+                                </div>
+
+                                <div class="col-6 custom-control custom-radio ">
+                                    <input type="radio" class="custom-control-input" checked onclick="displayRequestTypeSection(this.value)" value="Schedule" id="schedule_Checkbox">
+                                    <label class="custom-control-label" for="schedule_Checkbox">Schedule Later</label>
+                                </div>
+                            </div>
+                            <input type="hidden" id="requestType" value="" name="RequestServiceType" />
+                        </div>
+
+                        <div id="prefferedTimeSelectionSection" style="display:block">
+                            <div class="form-group">
+                                <label class="mb-1 bold-text">Preferred Service Time<span class="text-danger">*</span></label>
+                                <div class="position-relative">
+                                    <select id="selectedPrefferedTime" class="custom-select form-group" multiple>
+                                        <option value="8,9,10,11,12">Morning (8AM-12PM) </option>
+                                        <option value="12,13,14,15,16,17">Afternoon (12PM-5PM) </option>
+                                        <option value="17,18,19,20,21,22">Evening (5PM-10PM)</option>
+                                        <option value="22,23,00,01,02,03,04,05,06,07">Night (10PM-7AM)</option>
+                                    </select>
+                                </div>
+                                <span id="selectedPrefferedTimeAlertMessages" class="text-danger  "></span>
+                                <input type="hidden" id="selectedPrefferedServiceTime" value="" name="PrefferedServiceTime" />
+                            </div>
+
+
+                            <div class="form-row">
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="mb-1 bold-text">From Date Time<span class="text-danger">*</span></label>
+                                        <input type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" id="orderStartDate" onchange="selectDateTimeRegardingPrefferedTime(1)" name="FromDateTime" class="form-control" required>
+                                        <strong id="frm_lbl" style="color:red"></strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="mb-1 bold-text">To Date Time<span class="text-danger">*</span></label>
+                                        <input type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" id="orderEndDate" onchange="selectDateTimeRegardingPrefferedTime(2)" name="ToDateTime" class="form-control" required>
+                                    </div>
+                                </div>
+                                <span id="prefferedTimeDatesAlertMessages" class="text-danger"></span>
+                            </div>
+                        </div>
+                    
+                        <div class="form-group my-3" id="requestServiceCategoriesOfProblemsSection">
+                            <label class="mb-2 h6">Categories of Problem <span class="text-danger">*</span></label>
+
+                            <div class="row ml-0">
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Software" id="SoftwareRepair" />
+                                    <label class="custom-control-label " for="SoftwareRepair">Software</label>
+                                </div>
+                                <div class="col-4 "></div>
+                                <div class="col-4 "></div>
+                            </div>
+
+                            <div class="row ml-0">
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Computer Setup" id="ComputerSetup">
+                                    <label class="custom-control-label " for="ComputerSetup">Computer OS</label>
+                                </div>
+
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Smartphone And TabletSetup" id="SmartphoneAndTabletSetup">
+                                    <label class="custom-control-label " for="SmartphoneAndTabletSetup">Smartphone And Tablet Setup</label>
+                                </div>
+
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Printer Scanner Copiers" id="PrinterScannerCopiers">
+                                    <label class="custom-control-label " for="PrinterScannerCopiers">Printer / Scanner / Copiers</label>
+                                </div>
+                            </div>
+
+                            <div class="row ml-0">
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Smartwear watch" id="Smartwearwatch">
+                                    <label class="custom-control-label " for="Smartwearwatch">Smartwear-watch</label>
+                                </div>
+
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Server" id="Server">
+                                    <label class="custom-control-label " for="Server">Server</label>
+                                </div>
+
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Email" id="Email">
+                                    <label class="custom-control-label " for="Email">Email</label>
+                                </div>
+                            </div>
+
+                            <div class="row ml-0">
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Internet" id="Internet">
+                                    <label class="custom-control-label " for="Internet">Internet</label>
+                                </div>
+
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Website" id="Website">
+                                    <label class="custom-control-label " for="Website">Website</label>
+                                </div>
+
+                                <div class="col-4 custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input categoriesOfProblemsCheckBox" onclick="SubcategoriesDropDown(this.value)" value="Device troubleshooting" id="Devicetroubleshooting">
+                                    <label class="custom-control-label " for="Devicetroubleshooting">Device troubleshooting</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="CategoriesOfProblems" id="selectedCategoriesOfProblems" />
+                        </div>
+
+                        <div class="form-group" id="subCategoryOfProblemsSection">
+                            <label class="mb-1 bold-text">What best describes your problem <span class="text-danger">*</span></label>
+                            <select name="" id="subCategoryOfProblems" class="custom-select" multiple required>
+                                <option value="" disabled>please select skills</option>
+                            </select>
+                            <input type="hidden" name="RequestServiceSkills" id="selectedRequestServiceSkills" value="" />
+                        </div>
+
+                        <div class="form-group" id="issuesInCategoriesSelectedSection">
+                            <label class="mb-1 bold-text">Issue<span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="issuesInCategoriesSelected" id="issuesInCategoriesSelected" class="custom-select" required>
+                                    <option value="" disabled>Please select an option</option>
+                                    <option value="Slow/Delayed">Slow / Delayed</option>
+                                    <option value="Voicemail">Voicemail</option>
+                                    <option value="Update Software">Update Software</option>
+                                    <option value="Install Software">Install Software</option>
+                                    <option value="Password/Login">Password/Login</option>
+                                    <option value="Email">Email</option>
+                                    <option value="WiFi connection">WiFi connection</option>
+                                    <option value="Bluetooth Connection">Bluetooth Connection</option>
+                                    <option value="Specific App Problem">Specific App Problem</option>
+                                    <option value="Specific Software Problem">Specific Software Problem</option>
+                                    <option value="Virus/Malware">Virus / Malware</option>
+                                    <option value="Backup Issues">Backup Issues</option>
+                                    <option value="File Restore">File Restore</option>
+                                    <option value="Format">Format</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="requestServiceLanguageSection">
+                            <label class="mb-1 bold-text">Preferred Language </label>
+                            <div class="position-relative">
+                                <select name="" id="prefferedLanguage" class="custom-select" multiple>
+                                    <option value="English">English</option>
+                                    <option value="French">French</option>
+                                    <option value="Deutsch">Deutsch</option>
+                                    <option value="Portuguêse">Portuguêse</option>
+                                    <option value="Mandarin">Mandarin</option>
+                                    <option value="Cantonese">Yue(Cantonese)</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="Filipino">Tagalog(Filipino)</option>
+                                    <option value="Russian">Russian</option>
+                                    <option value="Chinese">Chinese</option>
+                                    <option value="Korean">Korean</option>
+                                    <option value="Persian">Persian</option>
+                                    <option value="Italian">Italian</option>
+                                    <option value="Vietnamese">Vietnamese</option>
+                                    <option value="Dutch">Dutch</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="ServiceLanguage" id="selectedServiceLanguage" />
+                        </div>
+
+                        <div class="form-group" id="requestServiceDescriptionSection">
+                            <label class="mb-1 bold-text">Is there anything else we should know about?</label>
+                            <div class="position-relative">
+                                <textarea type="text" rows="5" name="ServiceDescription" id="requestServiceDescription" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <span class="text-danger" id="formSubmitAlertMessages"></span>
+                        <button onclick="submitRequest()" id="submitRequestBtn" class="btn btn-success btn-block text-uppercase" type="button">Submit Service</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section CustomJs{
+    <script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <script>
+        displayRequestTypeSection("Schedule");
+
+        function displayRequestTypeSection(value){
+            resetRequestValues();
+            var sheduledCheckBox = document.getElementById("schedule_Checkbox");
+            var liveNowCheckBox = document.getElementById("liveNow_Checkbox");
+            if(value == "LiveNow"){
+                sheduledCheckBox.checked = false;
+                var LivenowIsChecked = $('#liveNow_Checkbox').is(':checked');
+                if (LivenowIsChecked) {
+                    $("#requestType").val("");
+                    $("#requestType").val(value);
+                }
+                $("#prefferedTimeSelectionSection").css("display", "none");
+            }
+            else if (value == "Schedule") {
+                liveNowCheckBox.checked = false;
+                var ScheduleIsChecked = $('#schedule_Checkbox').is(':checked');
+                if (ScheduleIsChecked) {
+                    $("#requestType").val("");
+                    $("#requestType").val(value);
+                }
+                $("#selectedPrefferedTime").prop('required', true);
+                $('#orderStartDate').prop('required', true);
+                $('#orderEndDate').prop('required', true);
+                $("#prefferedTimeSelectionSection").css("display", "block");
+            }
+        }
+
+        function resetRequestValues(){
+            $("#requestType").val("");
+            $("#selectedPrefferedTime option:selected").removeAttr('selected');
+            $("#orderStartDate").val(null);
+            $("#orderEndDate").val(null);
+
+            $("#selectedPrefferedTime").removeAttr('required');
+            $('#orderStartDate').removeAttr('required');
+            $('#orderEndDate').removeAttr('required');
+        }
+
+        function selectDateTimeRegardingPrefferedTime(value) {
+
+            var edate = $("#orderEndDate").val();
+            var sdate = $("#orderStartDate").val();
+            if (edate != "" && edate < sdate && value == 1) {
+                alert("Start date must be smaller than end date");
+                $("#orderStartDate").val("");
+                return;
+            }
+            else if (edate < sdate && value == 2) {
+                alert("Start date must be smaller than end date");
+                $("#orderEndDate").val("");
+                return;
+            }
+
+            $("#prefferedTimeDatesAlertMessages").text("");
+
+            // Determine which input field we're working with
+            var inputFieldId = value === 1 ? "orderStartDate" : "orderEndDate";
+            var inputFieldValue = document.getElementById(inputFieldId).value;
+
+            var getPrefferedSelectedTime = $("#selectedPrefferedTime").val();
+            var hours = new Date(inputFieldValue).getHours();
+            var minutes = new Date(inputFieldValue).getMinutes();
+            var setFlagForCheckingTheValue = 1;
+
+            console.log(getPrefferedSelectedTime);
+            console.log(hours);
+
+            if (getPrefferedSelectedTime.length === 0) {
+                $("#prefferedTimeDatesAlertMessages").text("Please choose your preferred service time first!").fadeOut(6000);
+                document.getElementById(inputFieldId).value = "";
+                return;
+            }
+
+            for (var i = 0; i < getPrefferedSelectedTime.length; i++) {
+                if (!getPrefferedSelectedTime[i].includes(hours)) {
+                    console.log("Preffered Time Doesn't Match");
+                    setFlagForCheckingTheValue = 1;
+                }
+                else {
+                    if(minutes > 0){
+                        hours = hours + 1;
+                        if (!getPrefferedSelectedTime[i].includes(hours)){
+                            console.log("Preffered Time Doesn't Match");
+                            setFlagForCheckingTheValue = 1;
+                        } else {
+                            console.log("Preffered Time Does Match");
+                            setFlagForCheckingTheValue = 0;
+                            break;
+                        }
+                    }
+                    else{
+                    console.log("Preffered Time Does Match");
+                    setFlagForCheckingTheValue = 0;
+                    break;}
+                }
+            }
+
+            if (setFlagForCheckingTheValue) {
+                showErrorMessage("Choose a time that corresponds to your preferred service hour.", inputFieldId);
+            }
+        }
+
+        function showErrorMessage(message, inputFieldId) {
+            $("#prefferedTimeDatesAlertMessages").text(message).fadeOut(6000);
+            document.getElementById(inputFieldId).value = "";
+        }
+
+        function SubcategoriesDropDown(Oldvalue) {
+            var checkboxes = document.getElementsByClassName("categoriesOfProblemsCheckBox");
+            var allUnchecked = true;
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    allUnchecked = false;
+                    break;
+                }
+            }
+
+            var checkedCheckboxes = [];
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    checkedCheckboxes.push(checkboxes[i].value);
+                }
+            }
+            if (allUnchecked == true) {
+                $("#categoriesOfProblem").val("");
+            }
+            else {
+                $("#selectedCategoriesOfProblems").val("");
+                $("#selectedCategoriesOfProblems").val(checkedCheckboxes);
+            }
+
+            $("#subCategoryOfProblems").empty();
+            checkedCheckboxes.forEach(function (value) {
+                if (value == "") {
+                    $("#subCategoryOfProblems").empty().append("<option value=''>Please Select a Category First</option>");
+                }
+
+                if (value == "Software") {
+                    var Software = `<option value="Microsoft Office Suite">Microsoft Office Suite</option>
+                    <option value="G-Doc">G-Doc</option>
+                    <option value="Notepad">Notepad</option>
+                    <option value="Google Sheets">Google Sheets</option>
+                    <option value="Google Chrome">Browsers - Google Chrome</option>
+                    <option value="Safari">Safari</option>
+                    <option value="Firefox">Firefox</option>
+                    <option value="Adobe Photoshop">Graphics - Adobe Photoshop</option>
+                    <option value="CorelDraw">CorelDraw</option>
+                    <option value="AutoCAD">AutoCAD</option>
+                    <option value="Paintshop">Paintshop</option>
+                    <option value="Skype">Communication - Skype</option>
+                    <option value="Hangouts">Hangouts</option>
+                    <option value="Google Meet">Google Meet</option>
+                    <option value="Zoom">Zoom</option>
+                    <option value="Whatsapp">Whatsapp</option>
+                    <option value="Teams">Teams</option>
+                    <option value="Google Classroom">Google Classroom</option>
+                    <option value="MX Player">Multimedia - MX Player</option>
+                    <option value="VLC Media Player">VLC Media Player</option>
+                    <option value="Spotify">Spotify</option>
+                    <option value="Pandora Technologies">Pandora Technologies</option>
+                    <option value="Asana">Project Management - Asana</option>
+                    <option value="Zoho">Zoho</option>
+                    <option value="Slack">Slack</option>
+                    <option value="Forecast">Forecast</option>
+                    <option value="Trello">Trello</option>
+                    <option value="Airtable">Airtable</option>
+                    <option value="Database - Oracle">Database - Oracle</option>
+                    <option value="Digital Cameras">Digital Cameras</option>
+                    <option value="IPad">IPad</option>
+                    <option value="Samsung">Samsung</option>
+                    <option value="LG">LG</option>
+                    <option value="TV">TV</option>
+                    <option value="Bell">Bell</option>
+                    <option value="Rogers">Rogers</option>`;
+
+                    $("#subCategoryOfProblems").prop('required', true);
+                    $("#subCategoryOfProblems").append(Software);
+                    $("#subCategoryOfProblemsSection").show();
+                }
+
+                if (value == "Computer Setup") {
+                    var Itsupport = `<option value="Windows">Windows</option>
+                    <option value="Mac">Mac</option>
+                    <option value="Chromebook">Chromebook</option>`;
+
+                    $("#subCategoryOfProblems").prop('required', true);
+                    $("#subCategoryOfProblems").append(Itsupport);
+                    $("#subCategoryOfProblemsSection").show();
+                }
+                if (value == "Smartphone And TabletSetup") {
+                    var Homeservice = `<option value="Apple">Apple</option>
+                    <option value="Android">Android</option>`;
+
+                    $("#subCategoryOfProblems").prop('required', true);
+                    $("#subCategoryOfProblems").append(Homeservice);
+                    $("#subCategoryOfProblemsSection").show();
+                }
+                if (value == "Printer Scanner Copiers") {
+                    var Cleaning = `<option value="Printer">Printer</option>
+                    <option value="Scanner">Scanner</option>
+                    <option value="Copiers">Copiers</option>`;
+
+                    $("#subCategoryOfProblems").prop('required', true);
+                    $("#subCategoryOfProblems").append(Cleaning);
+                    $("#subCategoryOfProblemsSection").show();
+                }
+                if (value == "Smartwear watch") {
+                    var Cleaning = `<option value="Smartwearwatch">Smartwear - watch</option>`;
+                    $("#subCategoryOfProblems").append(Cleaning);
+                    $("#subCategoryOfProblemsSection").show();
+                    $("#subCategoryOfProblems").prop('required', true);
+                }
+                if (value == "Server") {
+                    var server = `<option value="Server">Server</option>`;
+                    $("#subCategoryOfProblems").append(server);
+                    $("#subCategoryOfProblemsSection").show();
+                    $("#subCategoryOfProblems").prop('required', true);
+                }
+                if (value == "Email") {
+                    var Email = `<option value="Email">Email</option>`;
+                    $("#subCategoryOfProblems").append(Email);
+                    $("#subCategoryOfProblemsSection").show();
+                    $("#subCategoryOfProblems").prop('required', true);
+                }
+                if (value == "Internet") {
+                    var Internet = `<option value="Internet">Internet</option>`;
+                    $("#subCategoryOfProblems").append(Internet);
+                    $("#subCategoryOfProblemsSection").show();
+                    $("#subCategoryOfProblems").prop('required', true);
+                }
+                if (value == "Website") {
+                    var Website = `<option value="Website">Website</option>`;
+
+                    $("#subCategoryOfProblems").append(Website);
+                    $("#subCategoryOfProblemsSection").show();
+                    $("#subCategoryOfProblems").prop('required', true);
+                }
+                if (value == "Device troubleshooting") {
+                    var Device = `<option value="Devicetroubleshooting">Device troubleshooting</option>`;
+                    $("#subCategoryOfProblems").append(Device);
+                    $("#subCategoryOfProblemsSection").show();
+                    $("#subCategoryOfProblems").prop('required', true);
+                }
+                else if (value == "Others") {
+                    var other = `<option value="Others">Others</option>`;
+                    $("#subCategoryOfProblems").append(other);
+                    var subvalue = $("#subCategoryOfProblems").val(value);
+                    console.log(subvalue);
+                    $("#subCategoryOfProblemsSection").hide();
+                    $("#subCategoryOfProblems").removeAttr('required');
+                }
+            });
+        }
+
+        $('#selectedPrefferedTime').change(function () {
+            var getOption = $(this).val();
+            var selectedPrefferedServiceTime = "";
+            $("#selectedPrefferedServiceTime").val("");
+            for(var item = 0; item<getOption.length; item++){
+                if (getOption[item] == "8,9,10,11,12"){
+                    selectedPrefferedServiceTime = 1;
+                }
+                if (getOption[item] == "12,13,14,15,16,17") {
+                    selectedPrefferedServiceTime = selectedPrefferedServiceTime + ","+2;
+                }
+                if (getOption[item] == "17,18,19,20,21,22") {
+                    selectedPrefferedServiceTime = selectedPrefferedServiceTime + ","+3;
+                }
+                if (getOption[item] == "22,23,00,01,02,03,04,05,06,07") {
+                    selectedPrefferedServiceTime = selectedPrefferedServiceTime + ","+4;
+                }
+            }
+            $("#selectedPrefferedServiceTime").val(selectedPrefferedServiceTime);
+        });
+
+        $('#subCategoryOfProblems').change(function () {
+            var getOption = $(this).val();
+            $("#selectedRequestServiceSkills").val("");
+            $("#selectedRequestServiceSkills").val(getOption);
+        });
+
+        $('#prefferedLanguage').change(function () {
+            var getOption = $(this).val();
+            $("#selectedServiceLanguage").val("");
+            $("#selectedServiceLanguage").val(getOption);
+        });
+
+        function submitRequest(){
+            $("#submitRequestBtn").prop("disabled", true);
+            var requestServiceTitle = $("#requestServiceTitle").val();
+            var categoriesOfProblem = $("#selectedCategoriesOfProblems").val();
+            var subCategoryOfProblems = $("#subCategoryOfProblems").val();
+            var issuesInCategoriesSelected = $("#issuesInCategoriesSelected").val();
+
+            var ScheduleIsChecked = $('#schedule_Checkbox').is(':checked');
+            var selectedPrefferedTime = $("#selectedPrefferedTime").val();;
+            var orderStartDate = $("#orderStartDate").val();
+            var orderEndDate = $("#orderEndDate").val();
+
+            //if (requestServiceTitle == null || requestServiceTitle == "" || requestServiceTitle == undefined){
+            //    $("#formSubmitAlertMessages").text("All Fields are Required");
+            //    $("#submitRequestBtn").prop("disabled", false);
+            //    return;
+            //}
+            if (categoriesOfProblem == null || categoriesOfProblem == "" || categoriesOfProblem == undefined) {
+                $("#formSubmitAlertMessages").text("All Fields are Required");
+                $("#submitRequestBtn").prop("disabled", false);
+                return;
+            }
+            if (subCategoryOfProblems == null || subCategoryOfProblems == "" || subCategoryOfProblems == undefined) {
+                $("#formSubmitAlertMessages").text("All Fields are Required");
+                $("#submitRequestBtn").prop("disabled", false);
+                return;
+            }
+            if (issuesInCategoriesSelected == null || issuesInCategoriesSelected == "" || issuesInCategoriesSelected == undefined) {
+                $("#formSubmitAlertMessages").text("All Fields are Required");
+                $("#submitRequestBtn").prop("disabled", false);
+                return;
+            }
+
+            if(ScheduleIsChecked){
+                if (selectedPrefferedTime == null || selectedPrefferedTime == "" || selectedPrefferedTime == undefined){
+                    $("#formSubmitAlertMessages").text("All Fields are Required");
+                    $("#submitRequestBtn").prop("disabled", false);
+                    return ;
+                }
+                if (orderStartDate == null || orderStartDate == "" || orderStartDate == undefined) {
+                    $("#formSubmitAlertMessages").text("Start Date is Required");
+                    $("#submitRequestBtn").prop("disabled", false);
+                    return;
+                }
+                if (orderEndDate == null || orderEndDate == "" || orderEndDate == undefined) {
+                    $("#formSubmitAlertMessages").text("End Date is Required");
+                    $("#submitRequestBtn").prop("disabled", false);
+                    return;
+                }
+                if(orderStartDate >= orderEndDate){
+                    $("#formSubmitAlertMessages").text("Start Date Time Must Be Lesser Than End Date Time");
+                    $("#submitRequestBtn").prop("disabled", false);
+                    return;
+                }
+            }
+            $("#requestServiceForm").submit();
+        }
+    </script>
+}

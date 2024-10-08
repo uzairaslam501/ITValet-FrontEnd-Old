@@ -1,0 +1,391 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@using System.Security.Claims;
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>IT-Valet</title>
+
+	<!-- Global stylesheets -->
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+	<link href="~/adminAssets/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+	<link href="~/adminAssets/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+	<link href="~/adminAssets/assets/css/core.css" rel="stylesheet" type="text/css">
+	<link href="~/adminAssets/assets/css/components.css" rel="stylesheet" type="text/css">
+	<link href="~/adminAssets/assets/css/colors.css" rel="stylesheet" type="text/css">
+	<link rel="icon" type="image/png" href="~/Images/favicon.ico">
+	<!-- /global stylesheets -->
+	<!-- Core JS files -->
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/loaders/pace.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/core/libraries/jquery.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/core/libraries/bootstrap.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/loaders/blockui.min.js"></script>
+	<!-- /core JS files -->
+
+	<!-- Theme JS files -->
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/forms/styling/switchery.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/forms/styling/uniform.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/ui/moment/moment.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/pickers/daterangepicker.js"></script>
+
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+	
+
+	<script type="text/javascript" src="~/adminAssets/assets/js/core/app.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/pages/dashboard.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/ui/ripple.min.js"></script>
+
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/row_reorder.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/responsive.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+	<script type="text/javascript" src="~/adminAssets/assets/js/pages/datatables_extension_buttons_html5.js"></script>
+	<link href="../sweetalert/wnoty.css" rel="stylesheet" />
+
+
+	@RenderSection("CustomCss", false)
+</head>
+
+<body>
+
+
+	<img id="loadImg" src='~/FrontAssets/vendor/slick-master/slick/ajax-loader.gif' width='150' style="position:fixed;margin-left:45%; margin-top:20%; z-index:111; display:none" />
+	<!--Modal-->
+	<!--Modal-->
+	<div class="modal fade" id="confirmModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header text-center" id="confirmModalHeader">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h3 class="modal-title" id="confirmModalHeading">Warning</h3>
+				</div>
+				<div class="modal-body p-5">
+					<h6 class="text-semibold" id="confirmModalText" style="font-size:17px"></h6>
+				</div>
+				<div class="modal-footer border-top-1 border-top-grey-300 pt-10">
+					<form method="post" id="confirmModalForm">
+						<button class="btn btn-link" data-dismiss="modal">Cancel</button>
+						<button class="btn btn-danger" type="submit" id="confirmModalAction">Proceed</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Main navbar -->
+	<div class="navbar navbar-inverse bg-indigo">
+		<div class="navbar-header">
+			@*<a class="navbar-brand" href="index.html"><img src="assets/images/logo_light.png" alt=""></a>*@
+
+			<ul class="nav navbar-nav visible-xs-block">
+				<li><a data-toggle="collapse" data-target="#navbar-mobile"><i class="icon-tree5"></i></a></li>
+				<li><a class="sidebar-mobile-main-toggle"><i class="icon-paragraph-justify3"></i></a></li>
+			</ul>
+		</div>
+
+		<div class="navbar-collapse collapse" id="navbar-mobile">
+			<div class="navbar-right">
+				<ul class="nav navbar-nav">				
+                     <li class="dropdown dropdown-user">
+                        <a href="@Url.Action("Logout", "Auth")" class="dropdown-toggle">
+                          <i class="icon-switch2" style="margin-right:5px;"></i><span>Logout</span>
+                        </a>    
+                     </li>	        			
+				</ul>
+			</div>
+		</div>
+	</div>
+	<!-- /main navbar -->
+
+
+	<!-- Page container -->
+	<div class="page-container">
+
+		<!-- Page content -->
+		<div class="page-content">
+
+			<!-- Main sidebar -->
+			<div class="sidebar sidebar-main sidebar-default">
+				<div class="sidebar-content">
+					<!-- User menu -->
+					<div class="sidebar-user-material">
+						<div class="category-content">
+							<div class="sidebar-user-material-content">
+								<a href="#">
+									@{
+										var getProfileImage = @User.Claims.First(x => x.Type == "ProfileImage").Value;
+										if (getProfileImage != null && getProfileImage != "")
+										{
+													<img class="img-fluid" src="@getProfileImage">
+										}
+										else
+										{
+												  	<img src="~/adminAssets/assets/images/placeholder.jpg" class="img-circle img-responsive" alt="">
+										}
+									}
+									
+								</a>
+								<h6>@User.Claims.First(x => x.Type == "UserName").Value</h6>
+								<span class="text-size-small">
+									@User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+								</span>
+							</div>
+														
+							<div class="sidebar-user-material-menu">
+								<a href="#user-nav" data-toggle="collapse"><span>My Account</span> <i class="caret"></i></a>
+							</div>
+						</div>
+						
+						<div class="navigation-wrapper collapse" id="user-nav">
+							<ul class="navigation">
+								<li><a href="@Url.Action("UpdateProfile", "Auth")"><i class="icon-user-plus"></i> <span>Update Profile</span></a></li>
+								<li><a href="@Url.Action("UpdatePassword", "Auth")"><i class="icon-lock"></i> <span>Update Password</span></a></li>
+								<li><a href="@Url.Action("Logout", "Auth")"><i class="icon-switch2"></i> <span>Logout</span></a></li>
+							</ul>
+						</div>
+
+
+					</div>
+					<!-- /user menu -->
+					<!-- Main navigation -->
+					<div class="sidebar-category sidebar-category-visible">
+						<div class="category-content no-padding">
+							<ul id="SideScroller" class="navigation navigation-main navigation-accordion">
+								<!-- Main -->
+								<li class="navigation-header"><span>Main</span> <i class="icon-menu" title="Main pages"></i></li>
+								<li><a href="@Url.Action("Index","Home")"><i class="icon-home"></i> <span>Home</span></a></li>
+								<li class="active"><a href="@Url.Action("Index","Admin")"><i class="icon-home4"></i> <span>Dashboard</span></a></li>
+								<li>
+									<a href="#"><i class="icon-users"></i> <span>Manage Customers</span></a>
+									<ul>
+										<li id="manageAddCustomer"><a href="@Url.Action("AddNewUser", "Admin", new{ valetOrCustomer = 3})"><i class="icon-plus-circle2"></i> <span>Add New Customer</span></a></li>
+										<li id="manageViewCustomer"><a href="@Url.Action("ViewUser", "Admin", new{ valetOrCustomer = 3})"><i class="icon-eye"></i> <span>View Customers</span></a></li>
+										<li id="manageCustomerUnderReview"><a href="@Url.Action("UserUnderReviews", "Admin", new{ valetOrCustomer = 3})"><i class="icon-checkmark3"></i> <span>Customers Under Review</span></a></li>
+									</ul>
+								</li>
+								<li>
+									<a href="#"><i class="icon-users"></i> <span>Manage IT Valets</span></a>
+									<ul>
+										<li id="manageAddValet"><a href="@Url.Action("AddNewUser", "Admin", new{ valetOrCustomer = 4})"><i class="icon-plus-circle2"></i> <span>Add New IT Valet</span></a></li>
+										<li id="manageViewValet"><a href="@Url.Action("ViewUser", "Admin", new{ valetOrCustomer = 4})"><i class="icon-eye"></i> <span>View IT Valets</span></a></li>
+										<li id="manageValetUnderReview"><a href="@Url.Action("UserUnderReviews", "Admin", new{ valetOrCustomer = 4})"><i class="icon-checkmark3"></i> <span>IT Valet Under Review</span></a></li>
+									</ul>
+								</li>
+								<li>
+									<a href="#"><i class="icon-database"></i> <span>Order Record Management</span></a>
+									<ul>
+										<li id="manageOrderRecord"><a href="@Url.Action("ViewOrderEvents", "Admin")"><i class="icon-calendar"></i> <span>Order Tracking</span></a></li>
+									</ul>
+								</li>
+								<li>
+									<a href="#"><i class="icon-paypal"></i> <span>PayPal GateWay</span></a>
+									<ul>
+										<li id="managePaypalOrderDetail"><a href="@Url.Action("PayPalOrdersRecord", "Admin")"><i class="icon-list"></i> <span>Orders Detail</span></a></li>
+										<li id="manageTransactionRecord"><a href="@Url.Action("PayPalTransactionRecord", "Admin")"><i class="icon-credit-card2"></i> <span>Transaction Record</span></a></li>
+										<li id="manageUnclaimedPayment"><a href="@Url.Action("PayPalUnclaimedPaymentRecord","Admin")"><i class="icon-minus-circle2"></i> <span>Unclaimed Payments</span></a></li>
+									</ul>
+								</li>
+								<li>
+									<a href="#"><i class="icon-credit-card2"></i> <span>Stripe Gateway</span></a>
+									<ul>
+										<!-- Sub-items for Stripe Gateway -->
+										<li id="manageStripeOrderDetail"><a href="@Url.Action("StripeOrdersRecord", "Admin")"><i class="icon-list"></i> <span>Orders Detail</span></a></li>
+									</ul>
+								</li>
+								<li id="manageViewFeedbacks">
+									<a href="@Url.Action("FeedbackRecord", "Admin")"><i class="icon-comments"></i> <span>View Feedbacks</span></a>
+								</li>
+								<li id="manageViewPackages">
+									<a href="@Url.Action("ViewSubscriptions", "Admin")"><i class="icon-file-text2"></i> <span>View Packages</span></a>
+								</li>
+
+							</ul>
+						</div>
+					</div>
+					<!-- /main navigation -->
+
+
+				</div>
+			</div>
+			<!-- /main sidebar -->
+
+
+			<!-- Main content -->
+			<div class="content-wrapper">
+			   @RenderBody()
+			</div>
+			<!-- /main content -->
+
+		</div>
+		<!-- /page content -->
+
+	</div>
+
+	<script src="~/sweetalert/wnoty.js"></script>
+	<script>
+		var projectBaseUrl = "@ProjectVariables.BaseUrl";
+		var Token = '@User.Claims.First(x => x.Type == "Token").Value';
+		var validEmail = 1;
+		var validUserName = 1;
+
+		function triggerSweetAlert(message, color) {
+			$.wnoty({
+				type: color.includes("E54826") ? 'error' : 'success',
+				message: message,
+				autohideDelay: 5000
+			});
+		}
+
+		function checkNullOrEmpty(val) {
+			if (val === null || val === undefined || val.trim() === "") {
+				return false;
+			}
+			return true;
+		}
+
+		function validateEmail(email) {
+			$('#subBtn').attr("disabled", true);
+			email = email.trim();
+			if (email.includes('"')) {
+				email = email.replace('"', '');
+			}
+
+			var Emailpattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+			if (Emailpattern.test(email)) {
+				$('#emailErrMsg').text("");
+			}
+			else {
+				validEmail = 0;
+				$('#emailErrMsg').text("Please enter a valid email address!");
+				$('#subBtn').attr("disabled", true);
+				return;
+			}
+			if (email != "") {
+				$.ajax({
+					type: 'GET',
+					url: projectBaseUrl + "GeneralPurpose/validateEmail",
+					dataType: "json",
+					data:
+					{
+						Email: email,
+						UserId: -1
+					},
+					success: function (response) {
+						if (response) {
+							$('#emailErrMsg').text("");
+							if (validUserName == 1) {
+								$('#subBtn').attr('disabled', false);
+							}
+							validEmail = 1;
+						}
+						else {
+							validEmail = 0;
+							$('#emailErrMsg').text("");
+
+							$('#emailErrMsg').text("Email already exist");
+							$('#emailAddress').val("");
+							$('#subBtn').attr('disabled', true);
+						}
+					},
+					error: function () {
+						$('#emailErrMsg').text("");
+						$('#subBtn').attr('disabled', false);
+						alert("Ajax failed");
+					}
+				});
+			}
+
+		}
+		function validateUsername(username) {
+			if (username != "") {
+				$.ajax(
+					{
+						type: 'GET',
+						url: projectBaseUrl + "GeneralPurpose/validateUsername",
+						dataType: "json",
+						data:
+						{
+							username: username,
+							UserId: -1
+						},
+						success: function (response) {
+							if (response) {
+								$('#nameErrMsg').text("");
+								if (validEmail == 1) {
+									$('#subBtn').attr('disabled', false);
+								}
+								validUserName = 1;
+							}
+							else {
+								validUserName = 0;
+								$('#nameErrMsg').text("");
+								$('#nameErrMsg').text("Username already exist");
+								$('#username').val("");
+								$('#subBtn').attr('disabled', true);
+							}
+						},
+						error: function () {
+							$('#nameErrMsg').text("");
+							$('#subBtn').attr('disabled', false);
+							alert("Ajax failed");
+						}
+					});
+			}
+
+		}
+
+		function openConfirmationModal(heading, text, actionText, actionCallback) {
+			$('#confirmModalHeading').text(heading);
+			$('#confirmModalHeader').addClass('bg-danger');
+			$('#confirmModalText').text(text);
+			$('#confirmModalAction').text(actionText);
+
+			$('#confirmModalForm').off('submit').on('submit', function (e) {
+				e.preventDefault();
+				if (actionCallback && typeof actionCallback === 'function') {
+					actionCallback();
+				}
+				$('#confirmModal').modal('hide');
+			});
+
+			$('#confirmModal').modal('show');
+		}
+
+
+	</script>
+	<script>
+		function ShowPasswords(id) {
+			if (id == 1) {
+			var passwordField = document.getElementById('password');
+			var toggleButton = document.getElementById('SignupShowPassword');
+			}
+			if (id == 2) {
+				passwordField = document.getElementById('ConfirmPassword')
+				toggleButton = document.getElementById('LoginShowPassword');
+			}
+
+
+			if (passwordField.type === 'password') {
+				passwordField.type = 'text';
+				toggleButton.textContent = 'Hide';
+			} else {
+				passwordField.type = 'password';
+				toggleButton.textContent = 'Show';
+			}
+		}
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.0.3/index.global.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.2/js/bootstrap.min.js"></script>
+	<!-- /page container -->
+	@RenderSection("CustomJs", false)
+
+</body>
+</html>

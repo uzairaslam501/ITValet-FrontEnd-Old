@@ -1,0 +1,160 @@
+﻿@using ITValetFrontEnd.HelperClasses
+@{
+    if (ViewBag.ValetOrCustomer == 3)
+    {
+        ViewBag.Title = "Add Customer";
+    }
+    else if (ViewBag.ValetOrCustomer == 4)
+    {
+        ViewBag.Title = "Add IT Valet";
+    }
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="p-20">
+    <div class="row">
+        <form action="@Url.Action("PostNewUser", "Admin")" id="myForm" method="post">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+                            @if (ViewBag.ValetOrCustomer == 3)
+                            {
+                                <h2 class="panel-title text-center text-bold">Add New Customer</h2>
+                            }
+                            else if (ViewBag.ValetOrCustomer == 4)
+                            {
+                                <h2 class="panel-title text-center text-bold">Add New IT Valet</h2>
+                            }
+                        </div>
+
+                        <div class="panel-body">
+                            <legend class="text-bold text-uppercase"><span class="text-danger">*</span> Fields are mandatory to fill</legend>
+
+                            <div class="form-group">
+                                <label class="text-bold">First Name <span class="text-danger">*</span></label>
+                                <input type="text" maxlength="40" class="form-control" required name="FirstName" placeholder="Enter First Name Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" maxlength="40" class="form-control" required name="LastName" placeholder="Enter Last Name Here">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">User Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Input_username" required name="UserName" maxlength="25" onkeyup="validateUsername(this.value)" placeholder="Enter User Name">
+                                <span name="UserName" id="nameErrMsg" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Country<span class="text-danger">*</span></label>
+                                <input type="text" maxlength="40" class="form-control" name="Country" placeholder="Enter Country" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">City<span class="text-danger">*</span></label>
+                                <input type="text" maxlength="60" class="form-control" name="City" placeholder="Enter City Name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Postal Code/Zip Code<span class="text-danger">*</span></label>
+                                <input type="text" maxlength="10" name="ZipCode" id="zipCodeInput" class="form-control" placeholder="Please Enter Your postal Code" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="Email" id="Inputuser_email" class="form-control" onkeyup="validateEmail(this.value)" placeholder="Add Email Here" required>
+                                <span class="text-danger" id="emailErrMsg"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold"> Timezone <span class="text-danger">*</span> </label>
+                                <div class="position-relative">
+                                    <select class="form-control" id="gmt" name="Timezone" required>
+                                       @* <option value="">Select Your Timezone</option>
+                                        <option value="-3:30">St Johns (GMT -3:30)</option>
+                                        <option value="-4:00">Halifax (GMT -4:00)</option>
+                                        <option value="-5:00">Toronto (GMT -5:00)</option>
+                                        <option value="-6:00">Winnipeg (GMT -6:00)</option>
+                                        <option value="-7:00">Edmonton (GMT -7:00)</option>
+                                        <option value="-8:00">Vancouver (GMT -8:00)</option>*@
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold ">Password: <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" autocomplete="new-password" placeholder="Your Password" required name="Password" id="password">
+                                    <span class="input-group-btn" style="padding-left:0px;">
+                                        <button class="btn btn-default" onclick="ShowPasswords(1)" type="button" style="display:block" id="SignupShowPassword">Show</button>
+                                        <button class="btn btn-default" onclick="ShowPasswords(1)" type="button" style="display:none" id="SignupHidePassword">Hide</button>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="Role" value="@ViewBag.ValetOrCustomer" />
+
+                            <div class="text-center">
+                                <button type="submit" id="subBtn" class="btn btn-primary">Add<i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section CustomJs
+    {
+    <script>
+        var Message = "@ViewBag.Message";
+        var Color = "@ViewBag.Color";
+        var token = Token;
+        var baseUrl = projectBaseUrl;
+        if (Message != "") {
+            triggerSweetAlert(Message, Color);
+        }
+        GetGmtTimRegion();
+        function GetGmtTimRegion() {
+            $("#gmt").empty().append();
+            $.ajax({
+                type: "GET",
+                headers: {
+                    'AccessToken': token
+                },
+                url: '@ProjectVariables.BaseUrl' + 'Admin/GetTimeZones',
+                data: {},
+                cache: false,
+                success: function (response) {
+                    var appendOptions = '';
+                    $.each(response, function (key, value) {
+                        appendOptions += '<option value=' + key + '>' + value + '</option>';
+                    })
+                    $("#gmt").append(appendOptions);
+                },
+                error: function () {
+
+                },
+                complete: function () {
+
+                }
+            });
+        }
+
+    </script>
+    @if (ViewBag.ValetOrCustomer == 3)
+    {
+        <script>
+            $('#manageAddCustomer').addClass('active');
+        </script>
+    }
+    else if (ViewBag.ValetOrCustomer == 4)
+    {
+        <script>
+            $('#manageAddValet').addClass('active');
+        </script>
+    }
+}

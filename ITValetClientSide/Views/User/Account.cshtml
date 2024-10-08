@@ -1,0 +1,1850 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+
+@{
+    ViewData["Title"] = "Account";
+    Layout = "~/Views/Shared/_UserSideLayout.cshtml";
+}
+
+@section CustomCss{
+    <style>
+        #previewImg{
+            width:250px;
+            height:250px;
+        }
+        .select2-container{
+            width:100% !important;
+        }
+    </style>
+}
+
+<!--Create Connect Account Modal-->
+<div class="modal fade" id="ConnectModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 style="margin-left:95px;font-weight:bold;" class="modal-title text-primary" id="exampleModalLabel">Create New Connect Account</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="input-group-prepend">
+                            <i class="fa fa-cc-stripe pr-1" style="font-size:34px;color:#001C40;"></i>
+                            <input type="email" class="form-control form-block" id="StripeEmail" placeholder="Enter your email" />
+                        </div>
+                        <small class="ml-1 text-dark">we would not share this email with anyone.</small>
+
+                    </div>
+                    <span class="text-danger" id="ErrModal"></span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnstripe" onclick="CreateConnectAccount($('#StripeEmail').val())" class="btn btn-success">Submit</button>
+                </div>
+
+            </div>
+        </div>
+ </div>
+ <!--End Connect Account Modal-->
+<!--Add External Account Modal-->
+<div class="modal fade" id="BankModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 style="margin-left:95px;font-weight:bold;" class="modal-title text-primary" id="exampleModalLabel">Add Bank to Your Stripe</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="input-group-prepend">
+                        <i class="fa fa-cc-stripe pr-1" style="font-size:34px;color:#001C40;"></i>
+                    </div>
+                    <input type="text" class="mt-2 form-control form-block" id="BankAccountHolder" placeholder="Enter Account Holder Name" />
+                    <input type="text" class="mt-2 form-control form-block" id="BankAccountNumber" placeholder="Enter Account Number" />
+                    <input type="text" class="mt-2 form-control form-block" id="RoutingNumber" placeholder="Enter Routing Number" />
+                </div>
+                <span class="text-danger" id="ErrBank"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnstripe" onclick="addExternalBankAccountToStripe($('#BankAccountHolder').val(),$('#BankAccountNumber').val(),$('#RoutingNumber').val())" class="btn btn-success">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End External Account Modal-->
+@if(ViewBag.UserRecord != null)
+{
+    <div class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Main Content -->
+                <aside class="col col-xl-4 order-xl-1 col-lg-12 order-lg-1 col-12">
+                    <div class="box mb-3 shadow-sm rounded bg-white profile-box text-center">
+                        <div class="py-4 px-3">
+                            @if (ViewBag.UserRecord.ProfilePicture != null)
+                            {
+                                <img src="@ViewBag.UserRecord.ProfilePicture" id="previewImg" class="rounded-circle" alt="Responsive image">
+                            }
+                            else
+                            {
+                                <img src="~/frontassets/images/user/s4.png" id="previewImg" class="rounded-circle" alt="Responsive image">
+                            }
+                            <h5 class="font-weight-bold text-dark mb-1">@ViewBag.UserRecord.FirstName @ViewBag.UserRecord.LastName</h5>
+                        </div>
+                        <form action="@Url.Action("UploadProfileImage", "User")" id="uploadProfileImageForm" method="post" enctype="multipart/form-data">
+                            <div class="pb-3" id="imageLoadSection">  
+                                <label data-toggle="tooltip" data-placement="top" data-original-title="Upload New Picture" class="btn btn-info m-0" for="fileAttachmentBtn">
+                                    <i class="mdi mdi-image"></i> Upload Photo
+                                    <input id="fileAttachmentBtn" name="ImagePath" onchange="loadImageFile(event)" accept="image/*" type="file" class="d-none"/>
+                                </label>
+                            </div>
+                            <div class="pb-3" style="display:none" id="uploadImageBtnSection">
+                                <button class="btn btn-primary" onclick="uploadImage()" id="saveImage">Update Image</button>
+                                @if (ViewBag.UserRecord.ProfilePicture != null)
+                                {
+                                    <a class="btn btn-primary text-white" onclick="resetPreviewImg('@ViewBag.UserRecord.ProfilePicture')" id="imgReset">Reset</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-primary text-white" onclick="resetPreviewImg('')" id="imgReset">Reset</a>
+                                }
+                            </div>
+                        </form>
+                        <div class="custom-control custom-switch my-2">
+                            @if (ViewBag.UserRecord.Status == "1")
+                            {
+                                <input type="checkbox" onclick="myStatus()" class="custom-control-input" id="customSwitches" autofocus="" checked="checked">
+                                <label id="userActivityStatusLabel" class="custom-control-label" for="customSwitches">Online</label>
+                                <input type="hidden" id="userActivityStatus" name="Status" value="0">
+                            }
+                            else
+                            {
+                                <input type="checkbox" onclick="myStatus()" class="custom-control-input" id="customSwitches" autofocus="">
+                                <label id="userActivityStatusLabel" class="custom-control-label" for="customSwitches">Offline</label>
+                                <input type="hidden" id="userActivityStatus" name="Status" value="0">
+                            }
+                        </div>
+                        <div class="custom-control custom-switch my-2">
+                            @if (ViewBag.UserRecord.Availability != "1")
+                            {
+                                <input type="checkbox" onclick="myAvailability()" id="switch2" class="custom-control-input">
+                                <label id="userAvailabilityStatusLabel" class="custom-control-label" for="switch2">Unavailable</label>
+                                <input type="hidden" id="userAvailabilityStatus" name="Availability" value="0">
+                            }
+                            else
+                            {
+                                <input type="checkbox" onclick="myAvailability()" id="switch2" class="custom-control-input" checked="checked">
+                                <label id="userAvailabilityStatusLabel" class="custom-control-label" for="switch2">Available</label>
+                                <input type="hidden" id="userAvailabilityStatus" name="Availability" value="1">
+                            }
+                        </div>
+                        <div class="overflow-hidden border-top">
+                            <a class="font-weight-bold p-3 d-block" href="@Url.Action("Logout","User")"> Log Out </a>
+                        </div>
+                    </div>
+
+                    @if(ViewBag.UserRecord.Role == "Valet" || ViewBag.UserRecord.Role == "Customer")
+                    {
+                      <div class="box shadow-sm rounded bg-white mb-3">
+                        <div class="box-title border-bottom p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                @if (ViewBag.UserRecord.Role == "Valet")
+                                {
+                                    <h5 class="font-weight-bold text-dark">Scheduled IT Valet Appointments</h5>
+                                }
+                                else
+                                {
+                                    <h5 class="font-weight-bold text-dark text-center">Scheduled Customer Appointments</h5>
+                                }
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="align-items-center osahan-post-header p-3 border-bottom people-list">
+                                <form method="post" action="@Url.Action("ScheduledTask", "Home")">
+                                    <button type="submit" class="btn btn-success btn-block">View Scheduling</button>
+                                </form>
+                            </div>
+                        </div>
+                      </div>
+                    }
+                   
+
+                    @if(ViewBag.UserRecord.Role == "Valet"){
+                        <div class="box shadow-sm  rounded bg-white mb-3">
+                            <div class="box-title border-bottom p-3">
+                                <h6 class="m-0">Skills &amp; Endorsements</h6>
+                            </div>
+                            <div class="box-body">
+                                <div class="p-3 border-bottom align-item-left" id="mySelectedTagSkill">
+
+                                </div>
+
+                                <div class="align-items-center osahan-post-header p-3 border-bottom people-list" id="selectSkillsDropDownSection">
+                                    <label>Add/Update your Skills</label>
+                                    <select id="skillcategories" class="form-control" data-placeholder="Select your Skills" name="SkillName" multiple>
+                                        <option value="Windows">Windows</option>
+                                        <option value="Chromebook">Chromebook</option>
+                                        <option value="Mac">Mac</option>
+                                        <option value="Apple">Apple</option>
+                                        <option value="Android">Android</option>
+                                        <option value="Printer">Printer</option>
+                                        <option value="Scanner">Scanner </option>
+                                        <option value="Copiers">Copiers</option>
+                                        <option value="Smartwearwatch">Smartwear - watch</option>
+                                        <option value="Server">Server</option>
+                                        <option value="Email">Email</option>
+                                        <option value="Internet">Internet</option>
+                                        <option value="Website">Website</option>
+                                        <option value="Devicetroubleshooting">Device troubleshooting</option>
+                                        <option value="Microsoft Office Suite">Microsoft Office Suite</option>
+                                        <option value="G-Doc">G-Doc</option>
+                                        <option value="Notepad">Notepad</option>
+                                        <option value="Google Sheets">Google Sheets</option>
+                                        <option value="Google Chrome">Browsers - Google Chrome</option>
+                                        <option value="Safari">Safari</option>
+                                        <option value="Firefox">Firefox</option>
+                                        <option value="Adobe Photoshop">Graphics - Adobe Photoshop</option>
+                                        <option value="AutoCAD">AutoCAD</option>
+                                        <option value="CorelDraw">CorelDraw</option>
+                                        <option value="Paintshop">Paintshop</option>
+                                        <option value="Skype">Communication - Skype</option>
+                                        <option value="Hangouts">Hangouts</option>
+                                        <option value="Google Meet">Google Meet</option>
+                                        <option value="Zoom">Zoom</option>
+                                        <option value="Whatsapp">Whatsapp</option>
+                                        <option value="Teams">Teams</option>
+                                        <option value="Google Classroom">Google Classroom</option>
+                                        <option value="MX Player">Multimedia - MX Player</option>
+                                        <option value="VLC Media Player">VLC Media Player</option>
+                                        <option value="Spotify">Spotify</option>
+                                        <option value="Pandora Technologies">Pandora Technologies</option>
+                                        <option value="Asana">Project Management - Asana</option>
+                                        <option value="Zoho">Zoho</option>
+                                        <option value="Slack">Slack</option>
+                                        <option value="Forecast">Forecast</option>
+                                        <option value="Trello">Trello</option>
+                                        <option value="Airtable">Airtable</option>
+                                        <option value="Database - Oracle">Database - Oracle</option>
+                                        <option value="Digital Cameras">Digital Cameras</option>
+                                        <option value="IPad">IPad</option>
+                                        <option value="Samsung">Samsung</option>
+                                        <option value="LG">LG</option>
+                                        <option value="TV">TV</option>
+                                        <option value="Bell">Bell</option>
+                                        <option value="Rogers">Rogers</option>
+                                    </select>
+                                    <span class="text-danger" id="updatedSkillsAlertMessage"></span>
+                                    <div class="text-right mt-3">
+                                        <button class="btn btn-outline-gold pl-4 pr-4 btn-sm" id="updateSkillsBtn" onclick="updateSkills()">Update Skills</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Stripe Accounts-->
+                        <div class="box shadow-sm  rounded bg-white mb-3">
+                            <div class="box-title border-bottom p-3">
+                                <h6 class="m-0">Stripe Account Connect</h6>
+                            </div>
+                            <div class="box-body">
+                                <div class="align-items-center osahan-post-header p-3 border-bottom people-list">
+                                    @if (@ViewBag.UserRecord.StripeId != null && @ViewBag.UserRecord.StripeId != "")
+                                    {
+                                        <div class="input-group mb-2 col-md-12 p-0">
+                                            <div class="input-group-prepend">
+                                                <i class="fa fa-cc-stripe pr-1" style="font-size:34px;color:#001C40;"></i>
+                                            </div>
+                                            <input name="StripeId" id="StripeAccId" value="@ViewBag.UserRecord.StripeId" placeholder="Stripe Id" class="form-control" readonly>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="input-group mb-2 col-md-12 p-0">
+                                            <div class="input-group-prepend">
+                                                <i class="fa fa-cc-stripe pr-1" style="font-size:34px;color:#001C40;"></i>
+                                            </div>
+                                            <input name="StripeId" id="StripeAccId" onkeyup="ValidateStripeAccount(this.value)" placeholder="Stripe Id" class="form-control" readonly>
+                                        </div>
+                                    }
+
+                                    @if (@ViewBag.UserRecord.StripeId != null && ViewBag.UserRecord.StripeId != "" && ViewBag.UserRecord.IsVerify_StripeAccount != 1)
+                                    {
+                                        <span class="text-success"><a onclick="verifyStripeAccount()" style="cursor:pointer">Verify Your Stripe Account</a></span>
+                                    }
+
+                                    @if (@ViewBag.UserRecord.IsVerify_StripeAccount == 1 && @ViewBag.UserRecord.IsBankAccountAdded != 1)
+                                    {
+                                        <p class="text-success">Verified !</p>
+                                        <!--Incase of future-->
+                                        <p><a href="#" data-toggle="modal" data-target="#BankModal">Add Bank Details</a></p>
+                                    }
+                                    @if (ViewBag.UserRecord.IsVerify_StripeAccount == 1 && ViewBag.UserRecord.IsBankAccountAdded == 1)
+                                    {
+                                        <p class="text-success">Verified And Bank Account Added</p>
+                                    }
+                                    @if (@ViewBag.UserRecord.StripeId != null && @ViewBag.UserRecord.StripeId != "")
+                                    {
+                                        <p class="mt-3"> <a class="text-danger" style="cursor:pointer" onclick="deleteStripeAccount()">Delete Existing Account !</a></p>
+                                    }
+                                    else
+                                    {
+                                        <p>Don't have a Connect Account? </p>
+                                        <span><a href="#" data-toggle="modal" data-target="#ConnectModal">Create New Account</a></span>
+                                    }
+                                    <p class="text-danger" id="stripeErr"></p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- PayPal Account Attachment -->
+                        <div class="box shadow-sm rounded bg-white mb-3">
+                            <div class="box-title border-bottom p-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h6 class="m-0">Attach your PayPal account here</h6>
+                                    <i class="fa fa-cc-paypal" style="font-size: 40px; color: #0070BA;"></i>
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <div class="align-items-center osahan-post-header p-3 border-bottom people-list">
+                                    @if (ViewBag.PayPalEmail == null)
+                                    {
+                                        <div class="text-center p-3">
+                                            <button id="attachPayPalBtn" class="btn btn-success btn-block" onclick="showAttachPayPalSection()">Attach</button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="input-group mb-2 col-md-12 p-0">
+                                            <div class="input-group-prepend">
+                                                <i class="fa fa-cc-paypal pr-1" style="font-size:34px;color:#001C40;"></i>
+                                            </div>
+                                            <input type="hidden" name="ValetId" id="ValetIdForPayPal" value="@ViewBag.UserRecord.Id">
+                                            <input name="paypalAccount" id="paypalAccount" value="@ViewBag.PayPalEmail" placeholder="PayPal Account" class="form-control" readonly>
+                                        </div>
+                                        <p class="mt-3">
+                                            <a id="deletepaypalAccount" class="text-danger" onclick="deletePayPalAccount()" href="#">Remove Existing Account !</a>
+                                        </p>
+                                    }    
+                                </div>
+                            </div>
+                            <div id="attachPayPalSection" style="display: none;">
+                                <form id="paypalForm" method="POST" action="@Url.Action("AddPayPalAccountInformation","PayPalClientGateway")">
+                                    <div class="p-3">
+                                        <div class="input-group mb-2">
+                                            @if (ViewBag.UserRecord != null)
+                                            {
+                                                <input type="hidden" name="ValetId" value="@ViewBag.UserRecord.Id">
+                                            }
+                                            <input type="email" id="paypalEmail" name="PayPalEmail" class="form-control" placeholder="Enter your PayPal email" aria-label="PayPal email" aria-describedby="paypalLabel">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <button type="button" class="btn btn-outline-success btn-block" onclick="hideAttachPayPalSection()">Cancel</button>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <button type="submit" class="btn btn-success btn-block">Add</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!--end Stripe Connect Account-->
+
+                        <div class="box shadow-sm rounded bg-white mb-3">
+                            <div class="box-title border-bottom p-3">
+                                <div class="row">
+                                    <div class="col-md-6 col-6 d-flex justify-content-start">
+                                        <h6 class="m-0">Education</h6>
+                                    </div>
+                                    <div class="col-md-6 col-6 d-flex justify-content-end">
+                                        <p class="m-0"><a onclick="addNewEducationBtn(1)" style="cursor:pointer; color:#138496;">Add New</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 border-bottom">
+                                <div class="box-body">
+                                    <div class="py-3" style="display: none;" id="addEducationSection">
+                                        <input type="hidden" id="educationId">
+                                        <div class="mb-2">
+                                            <div class="position-relative icon-form-control mb-2 w-100">
+                                                <i class="mdi mdi-hospital-building position-absolute text-muted"></i>
+                                                <input placeholder="College/University Name" onkeydown="limitText(this,50);" id="educationInstituteName" type="text" class="form-control" required="required">
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="position-relative icon-form-control mb-2 w-100">
+                                                <i class="mdi mdi-school position-absolute text-muted"></i>
+                                                <input placeholder="Degree Name" type="text" onkeydown="limitText(this,50);" id="educationDegreeName" class="form-control" required="required">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-6 col-6 col-md-6 mb-2">
+                                                <label id="FROM" class="form-label">Start Date</label>
+                                                <div class="form-group">
+                                                    <input type="date" class="form-control" id="educationStartDate">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-6 col-md-6 mb-2">
+                                                <label id="TO" class="form-label">End Date</label>
+                                                <div class="form-group">
+                                                    <input type="date" class="form-control" id="educationEndDate">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="text-danger" id="educationErrorAlertMessagesSection"></span>
+                                        <div class="row">
+                                            <div class="col-sm-6 col-6 col-md-6">
+                                                <button type="button" onclick="hideEducationSection()" class="btn btn-outline-success w-100">Cancel</button>
+                                            </div>
+                                            <div class="col-sm-6 col-6 col-md-6">
+                                                <button type="button" onclick="addUpdateEducationBtn()" id="addUpdateEducationBtnLabel" class="btn btn-success w-100">Add</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="mr-2 py-3" id="myEducationDisplaySection">
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box shadow-sm rounded bg-white mb-3">
+                            <div class="box-title border-bottom p-3">
+                                <div class="row">
+                                    <div class="col-md-6 col-6 d-flex justify-content-start">
+                                        <h6 class="m-0">Services Offered</h6>
+                                    </div>
+                                    <div class="col-md-6 col-6 d-flex justify-content-end">
+                                        <p class="m-0"><a onclick="addNewExperience(1)" style="cursor:pointer; color:#138496;">Add New</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 border-bottom">
+                                <div class="box-body">
+                                    <div class="py-3" style="display: none;" id="addExperienceSection">
+                                        <input type="hidden" id="experienceId">
+                                        <div class="input-group mb-2">
+                                            <textarea type="text" rows="4" id="userExperience" class="form-control" 
+                                            placeholder="Enter Your services offered" 
+                                            aria-label="Enter Your services" 
+                                            aria-describedby="companyLabel"></textarea>
+                                        </div>
+
+                                        <span class="text-danger" id="experienceErrorAlertMessagesSection"></span>
+                                        <div class="row">
+                                            <div class="col-sm-6 col-6 col-md-6">
+                                                <button type="button" onclick="hideExperienceSection()" class="btn btn-outline-success w-100">Cancel</button>
+                                            </div>
+                                            <div class="col-sm-6 col-6 col-md-6">
+                                                <button type="button" onclick="addUpdateExperienceBtn()" id="addUpdateExperienceBtnLabel" class="btn btn-success w-100">Add</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="mr-2 py-3" id="myExperienceDisplaySection"></div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    }
+                </aside>
+                <main class="col col-xl-8 order-xl-2 col-lg-12 order-lg-2 col-md-12 col-sm-12 col-12">
+                    <form action="@Url.Action("PostUpdateProfile","User")" method="post" enctype="multipart/form-data" id="updateAccountForm">
+                        <div class="shadow-sm rounded bg-white mb-3">
+                            <div class="box-title border-bottom p-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="mb-3">Welcome <b>@ViewBag.UserRecord.UserName!</b></h4>
+                                    </div>
+                                    <div class="col-md-6">
+                                        @if (ViewBag.UserRecord.Role == "Valet")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-primary float-right" onclick="checkAvailability()">Check Availability</button>
+                                        }
+                                    </div>
+                                    <div class="col-md-12">
+                                        <h6 class="m-0">Edit Basic Info:</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-body p-3">
+                                <div class="row">
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="nameLabel" class="form-label"> First Name <span class="text-danger">*</span> </label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="userRecordFirstName" name="FirstName" value="@ViewBag.UserRecord.FirstName">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="nameLabel" class="form-label"> Last Name <span class="text-danger">*</span> </label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="userRecordLastName" name="LastName" value="@ViewBag.UserRecord.LastName">
+                                            </div>
+                                        </div>
+                                    </div>
+          
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="usernameLabel" class="form-label"> Username <span class="text-danger">*</span></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="userRecordUserName" name="UserName" value="@ViewBag.UserRecord.UserName" 
+                                                disabled="">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="EmailLlbl" class="form-label"> Email 
+                                                <span class="text-danger">*<b id="Invalid_Email" class="ml-2"></b></span>
+                                            </label>
+                                            <div class="form-group">
+                                                <input type="email" disabled id="User_Email" name="Email" class="form-control" value="@ViewBag.UserRecord.Email" placeholder="Enter your Email" >
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="EmailLlbl" class="form-label"> About
+                                            </label>
+                                            <div class="form-group">
+                                                <textarea rows="4" class="form-control" id="userRecordDescription" name="Description" required placeholder="write someting about yourself">@ViewBag.UserRecord.Description</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="ContactLbl" class="form-label">
+                                                Contact
+                                            </label>
+
+                                            <div class="form-group">
+                                                <input type="number" maxlength="18" id="contct" name="Contact" class="form-control" value="@ViewBag.UserRecord.Contact" placeholder="Enter your Contact" aria-label="Enter your Contact" data-msg="Please enter your Contact." data-error-class="u-has-error" data-success-class="u-has-success">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3 mb-sm-6">
+                                        <label class="form-label">
+                                            Birth date
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="js-form-message">
+                                            <div class="form-group">
+                                                @if (ViewBag.UserRecord.BirthDate != null)
+                                                {
+                                                    <input type="date" class="form-control"
+                                                           @* value="@Convert.ToDateTime(ViewBag.UserRecord.BirthDate).ToString("yyyy-MM-dd")" *@
+                                                           name="BirthDate" required="" id="birth_date">
+                                                }
+                                                else
+                                                {
+                                                    <input type="date" class="form-control"
+                                                           value=""
+                                                           name="BirthDate" id="birth_date" required>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3 mb-sm-6">
+                                        <div class="js-form-message">
+                                            <div class="form-group">
+                                                <label class="form-label">Gender</label>
+                                                <span class="text-danger">*</span>
+                                                <select class="form-control custom-select"
+                                                required=""
+                                                id="Gender"
+                                                name="Gender" 
+                                                data-msg="Please select your gender." 
+                                                data-error-class="u-has-error" 
+                                                data-success-class="u-has-success">
+                                                    <option value="" selected="">-- Select Gender --</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="StateLabel" class="form-label">
+                                                State
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="form-group">
+                                                <input type="text" required="" name="State" id="userRecordState" class="form-control" value="@ViewBag.UserRecord.State" placeholder="Enter your State">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="CityLabel" class="form-label">
+                                                City
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="form-group">
+                                                <input type="text" required="" name="City" id="userRecordCity" class="form-control" value="@ViewBag.UserRecord.City" placeholder="Enter your City" >
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="ZipCodelabel" class="form-label">
+                                                Postal Code/Zip Code
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="form-group">
+                                                <input type="text" required="" name="ZipCode" id="zip" 
+                                                    title="This field can contain only alpha numeric characters." 
+                                                    class="form-control" value="@ViewBag.UserRecord.ZipCode" 
+                                                    placeholder="Enter your Zip Code">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="js-form-message">
+                                            <label id="countrylbl" class="form-label">
+                                                Country
+                                            </label>
+                                            <span class="text-danger">*</span>
+                                            <div class="form-group">
+                                                <select name="Country" class="form-control countrypicker" data-live-search="true" data-default="Canada" data-flag="true">
+                                                    <option data-country-code="AF" data-tokens="AF Afghanistan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/af.png);background-repeat:no-repeat;" value="Afghanistan">Afghanistan</option>
+                                                    <option data-country-code="AX" data-tokens="AX Åland Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ax.png);background-repeat:no-repeat;" value="Åland Islands">Åland Islands</option>
+                                                    <option data-country-code="AL" data-tokens="AL Albania" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/al.png);background-repeat:no-repeat;" value="Albania">Albania</option>
+                                                    <option data-country-code="DZ" data-tokens="DZ Algeria" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/DZ.png);background-repeat:no-repeat;" value="Algeria">Algeria</option>
+                                                    <option data-country-code="AS" data-tokens="AS American Samoa" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AS.png);background-repeat:no-repeat;" value="American Samoa">American Samoa</option>
+                                                    <option data-country-code="AD" data-tokens="AD Andorra" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AD.png);background-repeat:no-repeat;" value="Andorra">Andorra</option>
+                                                    <option data-country-code="AO" data-tokens="AO Angola" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AO.png);background-repeat:no-repeat;" value="Angola">Angola</option>
+                                                    <option data-country-code="AI" data-tokens="AI Anguilla" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AI.png);background-repeat:no-repeat;" value="Anguilla">Anguilla</option>
+                                                    <option data-country-code="AQ" data-tokens="AQ Antarctica" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AQ.png);background-repeat:no-repeat;" value="Antarctica">Antarctica</option>
+                                                    <option data-country-code="AG" data-tokens="AG Antigua and Barbuda" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AG.png);background-repeat:no-repeat;" value="Antigua and Barbuda">Antigua and Barbuda</option>
+                                                    <option data-country-code="AR" data-tokens="AR Argentina" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AR.png);background-repeat:no-repeat;" value="Argentina">Argentina</option>
+                                                    <option data-country-code="AM" data-tokens="AM Armenia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AM.png);background-repeat:no-repeat;" value="Armenia">Armenia</option>
+                                                    <option data-country-code="AW" data-tokens="AW Aruba" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AW.png);background-repeat:no-repeat;" value="Aruba">Aruba</option>
+                                                    <option data-country-code="AU" data-tokens="AU Australia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AU.png);background-repeat:no-repeat;" value="Australia">Australia</option>
+                                                    <option data-country-code="AT" data-tokens="AT Austria" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AT.png);background-repeat:no-repeat;" value="Austria">Austria</option>
+                                                    <option data-country-code="AZ" data-tokens="AZ Azerbaijan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AZ.png);background-repeat:no-repeat;" value="Azerbaijan">Azerbaijan</option>
+                                                    <option data-country-code="BS" data-tokens="BS Bahamas" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BS.png);background-repeat:no-repeat;" value="Bahamas">Bahamas</option>
+                                                    <option data-country-code="BH" data-tokens="BH Bahrain" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BH.png);background-repeat:no-repeat;" value="Bahrain">Bahrain</option>
+                                                    <option data-country-code="BD" data-tokens="BD Bangladesh" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BD.png);background-repeat:no-repeat;" value="Bangladesh">Bangladesh</option>
+                                                    <option data-country-code="BB" data-tokens="BB Barbados" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BB.png);background-repeat:no-repeat;" value="Barbados">Barbados</option>
+                                                    <option data-country-code="BY" data-tokens="BY Belarus" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BY.png);background-repeat:no-repeat;" value="Belarus">Belarus</option>
+                                                    <option data-country-code="BE" data-tokens="BE Belgium" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BE.png);background-repeat:no-repeat;" value="Belgium">Belgium</option>
+                                                    <option data-country-code="BZ" data-tokens="BZ Belize" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BZ.png);background-repeat:no-repeat;" value="Belize">Belize</option>
+                                                    <option data-country-code="BJ" data-tokens="BJ Benin" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BJ.png);background-repeat:no-repeat;" value="Benin">Benin</option>
+                                                    <option data-country-code="BM" data-tokens="BM Bermuda" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BM.png);background-repeat:no-repeat;" value="Bermuda">Bermuda</option>
+                                                    <option data-country-code="BT" data-tokens="BT Bhutan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BT.png);background-repeat:no-repeat;" value="Bhutan">Bhutan</option>
+                                                    <option data-country-code="BO" data-tokens="BO Bolivia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BO.png);background-repeat:no-repeat;" value="Bolivia">Bolivia</option>
+                                                    <option data-country-code="BA" data-tokens="BA Bosnia and Herzegovina" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BA.png);background-repeat:no-repeat;" value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                                                    <option data-country-code="BW" data-tokens="BW Botswana" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BW.png);background-repeat:no-repeat;" value="Botswana">Botswana</option>
+                                                    <option data-country-code="BV" data-tokens="BV Bouvet Island" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BV.png);background-repeat:no-repeat;" value="Bouvet Island">Bouvet Island</option>
+                                                    <option data-country-code="BR" data-tokens="BR Brazil" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BR.png);background-repeat:no-repeat;" value="Brazil">Brazil</option>
+                                                    <option data-country-code="IO" data-tokens="IO British Indian Ocean Territory" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IO.png);background-repeat:no-repeat;" value="British Indian Ocean Territory">British Indian Ocean Territory</option>
+                                                    <option data-country-code="BN" data-tokens="BN Brunei Darussalam" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BN.png);background-repeat:no-repeat;" value="Brunei Darussalam">Brunei Darussalam</option>
+                                                    <option data-country-code="BG" data-tokens="BG Bulgaria" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BG.png);background-repeat:no-repeat;" value="Bulgaria">Bulgaria</option>
+                                                    <option data-country-code="BF" data-tokens="BF Burkina Faso" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BF.png);background-repeat:no-repeat;" value="Burkina Faso">Burkina Faso</option>
+                                                    <option data-country-code="BI" data-tokens="BI Burundi" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/BI.png);background-repeat:no-repeat;" value="Burundi">Burundi</option>
+                                                    <option data-country-code="KH" data-tokens="KH Cambodia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KH.png);background-repeat:no-repeat;" value="Cambodia">Cambodia</option>
+                                                    <option data-country-code="CM" data-tokens="CM Cameroon" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CM.png);background-repeat:no-repeat;" value="Cameroon">Cameroon</option>
+                                                    <option data-country-code="CA" data-tokens="CA Canada" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CA.png);background-repeat:no-repeat;" value="Canada">Canada</option>
+                                                    <option data-country-code="CV" data-tokens="CV Cape Verde" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CV.png);background-repeat:no-repeat;" value="Cape Verde">Cape Verde</option>
+                                                    <option data-country-code="KY" data-tokens="KY Cayman Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KY.png);background-repeat:no-repeat;" value="Cayman Islands">Cayman Islands</option>
+                                                    <option data-country-code="CF" data-tokens="CF Central African Republic" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CF.png);background-repeat:no-repeat;" value="Central African Republic">Central African Republic</option>
+                                                    <option data-country-code="TD" data-tokens="TD Chad" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TD.png);background-repeat:no-repeat;" value="Chad">Chad</option>
+                                                    <option data-country-code="CL" data-tokens="CL Chile" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CL.png);background-repeat:no-repeat;" value="Chile">Chile</option>
+                                                    <option data-country-code="CN" data-tokens="CN China" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CN.png);background-repeat:no-repeat;" value="China">China</option>
+                                                    <option data-country-code="CX" data-tokens="CX Christmas Island" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CX.png);background-repeat:no-repeat;" value="Christmas Island">Christmas Island</option>
+                                                    <option data-country-code="CC" data-tokens="CC Cocos (Keeling) Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CC.png);background-repeat:no-repeat;" value="Cocos (Keeling) Islands">Cocos (Keeling) Islands</option>
+                                                    <option data-country-code="CO" data-tokens="CO Colombia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CO.png);background-repeat:no-repeat;" value="Colombia">Colombia</option>
+                                                    <option data-country-code="KM" data-tokens="KM Comoros" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KM.png);background-repeat:no-repeat;" value="Comoros">Comoros</option>
+                                                    <option data-country-code="CG" data-tokens="CG Congo" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CG.png);background-repeat:no-repeat;" value="Congo">Congo</option>
+                                                    <option data-country-code="CD" data-tokens="CD Congo, The Democratic Republic of the" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CD.png);background-repeat:no-repeat;" value="Congo, The Democratic Republic of the">Congo, The Democratic Republic of the</option>
+                                                    <option data-country-code="CK" data-tokens="CK Cook Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CK.png);background-repeat:no-repeat;" value="Cook Islands">Cook Islands</option>
+                                                    <option data-country-code="CR" data-tokens="CR Costa Rica" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CR.png);background-repeat:no-repeat;" value="Costa Rica">Costa Rica</option>
+                                                    <option data-country-code="CI" data-tokens="CI Cote D&quot;Ivoire" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CI.png);background-repeat:no-repeat;" value="Cote D&quot;Ivoire">Cote D"Ivoire</option>
+                                                    <option data-country-code="HR" data-tokens="HR Croatia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/HR.png);background-repeat:no-repeat;" value="Croatia">Croatia</option>
+                                                    <option data-country-code="CU" data-tokens="CU Cuba" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CU.png);background-repeat:no-repeat;" value="Cuba">Cuba</option>
+                                                    <option data-country-code="CY" data-tokens="CY Cyprus" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CY.png);background-repeat:no-repeat;" value="Cyprus">Cyprus</option>
+                                                    <option data-country-code="CZ" data-tokens="CZ Czech Republic" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CZ.png);background-repeat:no-repeat;" value="Czech Republic">Czech Republic</option>
+                                                    <option data-country-code="DK" data-tokens="DK Denmark" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/DK.png);background-repeat:no-repeat;" value="Denmark">Denmark</option>
+                                                    <option data-country-code="DJ" data-tokens="DJ Djibouti" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/DJ.png);background-repeat:no-repeat;" value="Djibouti">Djibouti</option>
+                                                    <option data-country-code="DM" data-tokens="DM Dominica" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/DM.png);background-repeat:no-repeat;" value="Dominica">Dominica</option>
+                                                    <option data-country-code="DO" data-tokens="DO Dominican Republic" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/DO.png);background-repeat:no-repeat;" value="Dominican Republic">Dominican Republic</option>
+                                                    <option data-country-code="EC" data-tokens="EC Ecuador" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/EC.png);background-repeat:no-repeat;" value="Ecuador">Ecuador</option>
+                                                    <option data-country-code="EG" data-tokens="EG Egypt" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/EG.png);background-repeat:no-repeat;" value="Egypt">Egypt</option>
+                                                    <option data-country-code="SV" data-tokens="SV El Salvador" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SV.png);background-repeat:no-repeat;" value="El Salvador">El Salvador</option>
+                                                    <option data-country-code="GQ" data-tokens="GQ Equatorial Guinea" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GQ.png);background-repeat:no-repeat;" value="Equatorial Guinea">Equatorial Guinea</option>
+                                                    <option data-country-code="ER" data-tokens="ER Eritrea" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ER.png);background-repeat:no-repeat;" value="Eritrea">Eritrea</option>
+                                                    <option data-country-code="EE" data-tokens="EE Estonia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/EE.png);background-repeat:no-repeat;" value="Estonia">Estonia</option>
+                                                    <option data-country-code="ET" data-tokens="ET Ethiopia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ET.png);background-repeat:no-repeat;" value="Ethiopia">Ethiopia</option>
+                                                    <option data-country-code="FK" data-tokens="FK Falkland Islands (Malvinas)" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/FK.png);background-repeat:no-repeat;" value="Falkland Islands (Malvinas)">Falkland Islands (Malvinas)</option>
+                                                    <option data-country-code="FO" data-tokens="FO Faroe Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/FO.png);background-repeat:no-repeat;" value="Faroe Islands">Faroe Islands</option>
+                                                    <option data-country-code="FJ" data-tokens="FJ Fiji" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/FJ.png);background-repeat:no-repeat;" value="Fiji">Fiji</option>
+                                                    <option data-country-code="FI" data-tokens="FI Finland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/FI.png);background-repeat:no-repeat;" value="Finland">Finland</option>
+                                                    <option data-country-code="FR" data-tokens="FR France" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/FR.png);background-repeat:no-repeat;" value="France">France</option>
+                                                    <option data-country-code="GF" data-tokens="GF French Guiana" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GF.png);background-repeat:no-repeat;" value="French Guiana">French Guiana</option>
+                                                    <option data-country-code="PF" data-tokens="PF French Polynesia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PF.png);background-repeat:no-repeat;" value="French Polynesia">French Polynesia</option>
+                                                    <option data-country-code="TF" data-tokens="TF French Southern Territories" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TF.png);background-repeat:no-repeat;" value="French Southern Territories">French Southern Territories</option>
+                                                    <option data-country-code="GA" data-tokens="GA Gabon" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GA.png);background-repeat:no-repeat;" value="Gabon">Gabon</option>
+                                                    <option data-country-code="GM" data-tokens="GM Gambia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GM.png);background-repeat:no-repeat;" value="Gambia">Gambia</option>
+                                                    <option data-country-code="GE" data-tokens="GE Georgia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GE.png);background-repeat:no-repeat;" value="Georgia">Georgia</option>
+                                                    <option data-country-code="DE" data-tokens="DE Germany" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/DE.png);background-repeat:no-repeat;" value="Germany">Germany</option>
+                                                    <option data-country-code="GH" data-tokens="GH Ghana" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GH.png);background-repeat:no-repeat;" value="Ghana">Ghana</option>
+                                                    <option data-country-code="GI" data-tokens="GI Gibraltar" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GI.png);background-repeat:no-repeat;" value="Gibraltar">Gibraltar</option>
+                                                    <option data-country-code="GR" data-tokens="GR Greece" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GR.png);background-repeat:no-repeat;" value="Greece">Greece</option>
+                                                    <option data-country-code="GL" data-tokens="GL Greenland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GL.png);background-repeat:no-repeat;" value="Greenland">Greenland</option>
+                                                    <option data-country-code="GD" data-tokens="GD Grenada" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GD.png);background-repeat:no-repeat;" value="Grenada">Grenada</option>
+                                                    <option data-country-code="GP" data-tokens="GP Guadeloupe" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GP.png);background-repeat:no-repeat;" value="Guadeloupe">Guadeloupe</option>
+                                                    <option data-country-code="GU" data-tokens="GU Guam" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GU.png);background-repeat:no-repeat;" value="Guam">Guam</option>
+                                                    <option data-country-code="GT" data-tokens="GT Guatemala" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GT.png);background-repeat:no-repeat;" value="Guatemala">Guatemala</option>
+                                                    <option data-country-code="GG" data-tokens="GG Guernsey" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GG.png);background-repeat:no-repeat;" value="Guernsey">Guernsey</option>
+                                                    <option data-country-code="GN" data-tokens="GN Guinea" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GN.png);background-repeat:no-repeat;" value="Guinea">Guinea</option>
+                                                    <option data-country-code="GW" data-tokens="GW Guinea-Bissau" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GW.png);background-repeat:no-repeat;" value="Guinea-Bissau">Guinea-Bissau</option>
+                                                    <option data-country-code="GY" data-tokens="GY Guyana" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GY.png);background-repeat:no-repeat;" value="Guyana">Guyana</option>
+                                                    <option data-country-code="HT" data-tokens="HT Haiti" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/HT.png);background-repeat:no-repeat;" value="Haiti">Haiti</option>
+                                                    <option data-country-code="HM" data-tokens="HM Heard Island and Mcdonald Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/HM.png);background-repeat:no-repeat;" value="Heard Island and Mcdonald Islands">Heard Island and Mcdonald Islands</option>
+                                                    <option data-country-code="VA" data-tokens="VA Holy See (Vatican City State)" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VA.png);background-repeat:no-repeat;" value="Holy See (Vatican City State)">Holy See (Vatican City State)</option>
+                                                    <option data-country-code="HN" data-tokens="HN Honduras" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/HN.png);background-repeat:no-repeat;" value="Honduras">Honduras</option>
+                                                    <option data-country-code="HK" data-tokens="HK Hong Kong" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/HK.png);background-repeat:no-repeat;" value="Hong Kong">Hong Kong</option>
+                                                    <option data-country-code="HU" data-tokens="HU Hungary" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/HU.png);background-repeat:no-repeat;" value="Hungary">Hungary</option>
+                                                    <option data-country-code="IS" data-tokens="IS Iceland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IS.png);background-repeat:no-repeat;" value="Iceland">Iceland</option>
+                                                    <option data-country-code="IN" data-tokens="IN India" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IN.png);background-repeat:no-repeat;" value="India">India</option>
+                                                    <option data-country-code="ID" data-tokens="ID Indonesia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ID.png);background-repeat:no-repeat;" value="Indonesia">Indonesia</option>
+                                                    <option data-country-code="IR" data-tokens="IR Iran, Islamic Republic Of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IR.png);background-repeat:no-repeat;" value="Iran, Islamic Republic Of">Iran, Islamic Republic Of</option>
+                                                    <option data-country-code="IQ" data-tokens="IQ Iraq" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IQ.png);background-repeat:no-repeat;" value="Iraq">Iraq</option>
+                                                    <option data-country-code="IE" data-tokens="IE Ireland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IE.png);background-repeat:no-repeat;" value="Ireland">Ireland</option>
+                                                    <option data-country-code="IM" data-tokens="IM Isle of Man" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IM.png);background-repeat:no-repeat;" value="Isle of Man">Isle of Man</option>
+                                                    <option data-country-code="IL" data-tokens="IL Israel" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IL.png);background-repeat:no-repeat;" value="Israel">Israel</option>
+                                                    <option data-country-code="IT" data-tokens="IT Italy" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/IT.png);background-repeat:no-repeat;" value="Italy">Italy</option>
+                                                    <option data-country-code="JM" data-tokens="JM Jamaica" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/JM.png);background-repeat:no-repeat;" value="Jamaica">Jamaica</option>
+                                                    <option data-country-code="JP" data-tokens="JP Japan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/JP.png);background-repeat:no-repeat;" value="Japan">Japan</option>
+                                                    <option data-country-code="JE" data-tokens="JE Jersey" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/JE.png);background-repeat:no-repeat;" value="Jersey">Jersey</option>
+                                                    <option data-country-code="JO" data-tokens="JO Jordan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/JO.png);background-repeat:no-repeat;" value="Jordan">Jordan</option>
+                                                    <option data-country-code="KZ" data-tokens="KZ Kazakhstan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KZ.png);background-repeat:no-repeat;" value="Kazakhstan">Kazakhstan</option>
+                                                    <option data-country-code="KE" data-tokens="KE Kenya" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KE.png);background-repeat:no-repeat;" value="Kenya">Kenya</option>
+                                                    <option data-country-code="KI" data-tokens="KI Kiribati" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KI.png);background-repeat:no-repeat;" value="Kiribati">Kiribati</option>
+                                                    <option data-country-code="KP" data-tokens="KP Korea, Democratic People&quot;S Republic of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KP.png);background-repeat:no-repeat;" value="Korea, Democratic People&quot;S Republic of">Korea, Democratic People"S Republic of</option>
+                                                    <option data-country-code="KR" data-tokens="KR Korea, Republic of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KR.png);background-repeat:no-repeat;" value="Korea, Republic of">Korea, Republic of</option>
+                                                    <option data-country-code="KW" data-tokens="KW Kuwait" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KW.png);background-repeat:no-repeat;" value="Kuwait">Kuwait</option>
+                                                    <option data-country-code="KG" data-tokens="KG Kyrgyzstan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KG.png);background-repeat:no-repeat;" value="Kyrgyzstan">Kyrgyzstan</option>
+                                                    <option data-country-code="LA" data-tokens="LA Lao People&quot;S Democratic Republic" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LA.png);background-repeat:no-repeat;" value="Lao People&quot;S Democratic Republic">Lao People"S Democratic Republic</option>
+                                                    <option data-country-code="LV" data-tokens="LV Latvia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LV.png);background-repeat:no-repeat;" value="Latvia">Latvia</option>
+                                                    <option data-country-code="LB" data-tokens="LB Lebanon" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LB.png);background-repeat:no-repeat;" value="Lebanon">Lebanon</option>
+                                                    <option data-country-code="LS" data-tokens="LS Lesotho" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LS.png);background-repeat:no-repeat;" value="Lesotho">Lesotho</option>
+                                                    <option data-country-code="LR" data-tokens="LR Liberia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LR.png);background-repeat:no-repeat;" value="Liberia">Liberia</option>
+                                                    <option data-country-code="LY" data-tokens="LY Libyan Arab Jamahiriya" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LY.png);background-repeat:no-repeat;" value="Libyan Arab Jamahiriya">Libyan Arab Jamahiriya</option>
+                                                    <option data-country-code="LI" data-tokens="LI Liechtenstein" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LI.png);background-repeat:no-repeat;" value="Liechtenstein">Liechtenstein</option>
+                                                    <option data-country-code="LT" data-tokens="LT Lithuania" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LT.png);background-repeat:no-repeat;" value="Lithuania">Lithuania</option>
+                                                    <option data-country-code="LU" data-tokens="LU Luxembourg" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LU.png);background-repeat:no-repeat;" value="Luxembourg">Luxembourg</option>
+                                                    <option data-country-code="MO" data-tokens="MO Macao" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MO.png);background-repeat:no-repeat;" value="Macao">Macao</option>
+                                                    <option data-country-code="MK" data-tokens="MK Macedonia, The Former Yugoslav Republic of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MK.png);background-repeat:no-repeat;" value="Macedonia, The Former Yugoslav Republic of">Macedonia, The Former Yugoslav Republic of</option>
+                                                    <option data-country-code="MG" data-tokens="MG Madagascar" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MG.png);background-repeat:no-repeat;" value="Madagascar">Madagascar</option>
+                                                    <option data-country-code="MW" data-tokens="MW Malawi" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MW.png);background-repeat:no-repeat;" value="Malawi">Malawi</option>
+                                                    <option data-country-code="MY" data-tokens="MY Malaysia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MY.png);background-repeat:no-repeat;" value="Malaysia">Malaysia</option>
+                                                    <option data-country-code="MV" data-tokens="MV Maldives" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MV.png);background-repeat:no-repeat;" value="Maldives">Maldives</option>
+                                                    <option data-country-code="ML" data-tokens="ML Mali" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ML.png);background-repeat:no-repeat;" value="Mali">Mali</option>
+                                                    <option data-country-code="MT" data-tokens="MT Malta" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MT.png);background-repeat:no-repeat;" value="Malta">Malta</option>
+                                                    <option data-country-code="MH" data-tokens="MH Marshall Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MH.png);background-repeat:no-repeat;" value="Marshall Islands">Marshall Islands</option>
+                                                    <option data-country-code="MQ" data-tokens="MQ Martinique" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MQ.png);background-repeat:no-repeat;" value="Martinique">Martinique</option>
+                                                    <option data-country-code="MR" data-tokens="MR Mauritania" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MR.png);background-repeat:no-repeat;" value="Mauritania">Mauritania</option>
+                                                    <option data-country-code="MU" data-tokens="MU Mauritius" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MU.png);background-repeat:no-repeat;" value="Mauritius">Mauritius</option>
+                                                    <option data-country-code="YT" data-tokens="YT Mayotte" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/YT.png);background-repeat:no-repeat;" value="Mayotte">Mayotte</option>
+                                                    <option data-country-code="MX" data-tokens="MX Mexico" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MX.png);background-repeat:no-repeat;" value="Mexico">Mexico</option>
+                                                    <option data-country-code="FM" data-tokens="FM Micronesia, Federated States of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/FM.png);background-repeat:no-repeat;" value="Micronesia, Federated States of">Micronesia, Federated States of</option>
+                                                    <option data-country-code="MD" data-tokens="MD Moldova, Republic of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MD.png);background-repeat:no-repeat;" value="Moldova, Republic of">Moldova, Republic of</option>
+                                                    <option data-country-code="MC" data-tokens="MC Monaco" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MC.png);background-repeat:no-repeat;" value="Monaco">Monaco</option>
+                                                    <option data-country-code="MN" data-tokens="MN Mongolia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MN.png);background-repeat:no-repeat;" value="Mongolia">Mongolia</option>
+                                                    <option data-country-code="MS" data-tokens="MS Montserrat" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MS.png);background-repeat:no-repeat;" value="Montserrat">Montserrat</option>
+                                                    <option data-country-code="MA" data-tokens="MA Morocco" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MA.png);background-repeat:no-repeat;" value="Morocco">Morocco</option>
+                                                    <option data-country-code="MZ" data-tokens="MZ Mozambique" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MZ.png);background-repeat:no-repeat;" value="Mozambique">Mozambique</option>
+                                                    <option data-country-code="MM" data-tokens="MM Myanmar" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MM.png);background-repeat:no-repeat;" value="Myanmar">Myanmar</option>
+                                                    <option data-country-code="NA" data-tokens="NA Namibia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NA.png);background-repeat:no-repeat;" value="Namibia">Namibia</option>
+                                                    <option data-country-code="NR" data-tokens="NR Nauru" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NR.png);background-repeat:no-repeat;" value="Nauru">Nauru</option>
+                                                    <option data-country-code="NP" data-tokens="NP Nepal" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NP.png);background-repeat:no-repeat;" value="Nepal">Nepal</option>
+                                                    <option data-country-code="NL" data-tokens="NL Netherlands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NL.png);background-repeat:no-repeat;" value="Netherlands">Netherlands</option>
+                                                    <option data-country-code="AN" data-tokens="AN Netherlands Antilles" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AN.png);background-repeat:no-repeat;" value="Netherlands Antilles">Netherlands Antilles</option>
+                                                    <option data-country-code="NC" data-tokens="NC New Caledonia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NC.png);background-repeat:no-repeat;" value="New Caledonia">New Caledonia</option>
+                                                    <option data-country-code="NZ" data-tokens="NZ New Zealand" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NZ.png);background-repeat:no-repeat;" value="New Zealand">New Zealand</option>
+                                                    <option data-country-code="NI" data-tokens="NI Nicaragua" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NI.png);background-repeat:no-repeat;" value="Nicaragua">Nicaragua</option>
+                                                    <option data-country-code="NE" data-tokens="NE Niger" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NE.png);background-repeat:no-repeat;" value="Niger">Niger</option>
+                                                    <option data-country-code="NG" data-tokens="NG Nigeria" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NG.png);background-repeat:no-repeat;" value="Nigeria">Nigeria</option>
+                                                    <option data-country-code="NU" data-tokens="NU Niue" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NU.png);background-repeat:no-repeat;" value="Niue">Niue</option>
+                                                    <option data-country-code="NF" data-tokens="NF Norfolk Island" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NF.png);background-repeat:no-repeat;" value="Norfolk Island">Norfolk Island</option>
+                                                    <option data-country-code="MP" data-tokens="MP Northern Mariana Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/MP.png);background-repeat:no-repeat;" value="Northern Mariana Islands">Northern Mariana Islands</option>
+                                                    <option data-country-code="NO" data-tokens="NO Norway" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/NO.png);background-repeat:no-repeat;" value="Norway">Norway</option>
+                                                    <option data-country-code="OM" data-tokens="OM Oman" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/OM.png);background-repeat:no-repeat;" value="Oman">Oman</option>
+                                                    <option data-country-code="PK" data-tokens="PK Pakistan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PK.png);background-repeat:no-repeat;" value="Pakistan">Pakistan</option>
+                                                    <option data-country-code="PW" data-tokens="PW Palau" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PW.png);background-repeat:no-repeat;" value="Palau">Palau</option>
+                                                    <option data-country-code="PS" data-tokens="PS Palestinian Territory, Occupied" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PS.png);background-repeat:no-repeat;" value="Palestinian Territory, Occupied">Palestinian Territory, Occupied</option>
+                                                    <option data-country-code="PA" data-tokens="PA Panama" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PA.png);background-repeat:no-repeat;" value="Panama">Panama</option>
+                                                    <option data-country-code="PG" data-tokens="PG Papua New Guinea" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PG.png);background-repeat:no-repeat;" value="Papua New Guinea">Papua New Guinea</option>
+                                                    <option data-country-code="PY" data-tokens="PY Paraguay" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PY.png);background-repeat:no-repeat;" value="Paraguay">Paraguay</option>
+                                                    <option data-country-code="PE" data-tokens="PE Peru" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PE.png);background-repeat:no-repeat;" value="Peru">Peru</option>
+                                                    <option data-country-code="PH" data-tokens="PH Philippines" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PH.png);background-repeat:no-repeat;" value="Philippines">Philippines</option>
+                                                    <option data-country-code="PN" data-tokens="PN Pitcairn" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PN.png);background-repeat:no-repeat;" value="Pitcairn">Pitcairn</option>
+                                                    <option data-country-code="PL" data-tokens="PL Poland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PL.png);background-repeat:no-repeat;" value="Poland">Poland</option>
+                                                    <option data-country-code="PT" data-tokens="PT Portugal" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PT.png);background-repeat:no-repeat;" value="Portugal">Portugal</option>
+                                                    <option data-country-code="PR" data-tokens="PR Puerto Rico" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PR.png);background-repeat:no-repeat;" value="Puerto Rico">Puerto Rico</option>
+                                                    <option data-country-code="QA" data-tokens="QA Qatar" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/QA.png);background-repeat:no-repeat;" value="Qatar">Qatar</option>
+                                                    <option data-country-code="RE" data-tokens="RE Reunion" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/RE.png);background-repeat:no-repeat;" value="Reunion">Reunion</option>
+                                                    <option data-country-code="RO" data-tokens="RO Romania" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/RO.png);background-repeat:no-repeat;" value="Romania">Romania</option>
+                                                    <option data-country-code="RU" data-tokens="RU Russian Federation" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/RU.png);background-repeat:no-repeat;" value="Russian Federation">Russian Federation</option>
+                                                    <option data-country-code="RW" data-tokens="RW RWANDA" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/RW.png);background-repeat:no-repeat;" value="RWANDA">RWANDA</option>
+                                                    <option data-country-code="SH" data-tokens="SH Saint Helena" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SH.png);background-repeat:no-repeat;" value="Saint Helena">Saint Helena</option>
+                                                    <option data-country-code="KN" data-tokens="KN Saint Kitts and Nevis" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/KN.png);background-repeat:no-repeat;" value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
+                                                    <option data-country-code="LC" data-tokens="LC Saint Lucia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LC.png);background-repeat:no-repeat;" value="Saint Lucia">Saint Lucia</option>
+                                                    <option data-country-code="PM" data-tokens="PM Saint Pierre and Miquelon" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/PM.png);background-repeat:no-repeat;" value="Saint Pierre and Miquelon">Saint Pierre and Miquelon</option>
+                                                    <option data-country-code="VC" data-tokens="VC Saint Vincent and the Grenadines" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VC.png);background-repeat:no-repeat;" value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option>
+                                                    <option data-country-code="WS" data-tokens="WS Samoa" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/WS.png);background-repeat:no-repeat;" value="Samoa">Samoa</option>
+                                                    <option data-country-code="SM" data-tokens="SM San Marino" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SM.png);background-repeat:no-repeat;" value="San Marino">San Marino</option>
+                                                    <option data-country-code="ST" data-tokens="ST Sao Tome and Principe" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ST.png);background-repeat:no-repeat;" value="Sao Tome and Principe">Sao Tome and Principe</option>
+                                                    <option data-country-code="SA" data-tokens="SA Saudi Arabia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SA.png);background-repeat:no-repeat;" value="Saudi Arabia">Saudi Arabia</option>
+                                                    <option data-country-code="SN" data-tokens="SN Senegal" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SN.png);background-repeat:no-repeat;" value="Senegal">Senegal</option>
+                                                    <option data-country-code="RS" data-tokens="RS Serbia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/RS.png);background-repeat:no-repeat;" value="Serbia">Serbia</option>
+                                                    <option data-country-code="ME" data-tokens="ME Montenegro" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ME.png);background-repeat:no-repeat;" value="Montenegro">Montenegro</option>
+                                                    <option data-country-code="SC" data-tokens="SC Seychelles" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SC.png);background-repeat:no-repeat;" value="Seychelles">Seychelles</option>
+                                                    <option data-country-code="SL" data-tokens="SL Sierra Leone" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SL.png);background-repeat:no-repeat;" value="Sierra Leone">Sierra Leone</option>
+                                                    <option data-country-code="SG" data-tokens="SG Singapore" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SG.png);background-repeat:no-repeat;" value="Singapore">Singapore</option>
+                                                    <option data-country-code="SK" data-tokens="SK Slovakia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SK.png);background-repeat:no-repeat;" value="Slovakia">Slovakia</option>
+                                                    <option data-country-code="SI" data-tokens="SI Slovenia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SI.png);background-repeat:no-repeat;" value="Slovenia">Slovenia</option>
+                                                    <option data-country-code="SB" data-tokens="SB Solomon Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SB.png);background-repeat:no-repeat;" value="Solomon Islands">Solomon Islands</option>
+                                                    <option data-country-code="SO" data-tokens="SO Somalia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SO.png);background-repeat:no-repeat;" value="Somalia">Somalia</option>
+                                                    <option data-country-code="ZA" data-tokens="ZA South Africa" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ZA.png);background-repeat:no-repeat;" value="South Africa">South Africa</option>
+                                                    <option data-country-code="GS" data-tokens="GS South Georgia and the South Sandwich Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GS.png);background-repeat:no-repeat;" value="South Georgia and the South Sandwich Islands">South Georgia and the South Sandwich Islands</option>
+                                                    <option data-country-code="ES" data-tokens="ES Spain" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ES.png);background-repeat:no-repeat;" value="Spain">Spain</option>
+                                                    <option data-country-code="LK" data-tokens="LK Sri Lanka" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/LK.png);background-repeat:no-repeat;" value="Sri Lanka">Sri Lanka</option>
+                                                    <option data-country-code="SD" data-tokens="SD Sudan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SD.png);background-repeat:no-repeat;" value="Sudan">Sudan</option>
+                                                    <option data-country-code="SR" data-tokens="SR Suriname" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SR.png);background-repeat:no-repeat;" value="Suriname">Suriname</option>
+                                                    <option data-country-code="SJ" data-tokens="SJ Svalbard and Jan Mayen" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SJ.png);background-repeat:no-repeat;" value="Svalbard and Jan Mayen">Svalbard and Jan Mayen</option>
+                                                    <option data-country-code="SZ" data-tokens="SZ Swaziland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SZ.png);background-repeat:no-repeat;" value="Swaziland">Swaziland</option>
+                                                    <option data-country-code="SE" data-tokens="SE Sweden" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SE.png);background-repeat:no-repeat;" value="Sweden">Sweden</option>
+                                                    <option data-country-code="CH" data-tokens="CH Switzerland" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/CH.png);background-repeat:no-repeat;" value="Switzerland">Switzerland</option>
+                                                    <option data-country-code="SY" data-tokens="SY Syrian Arab Republic" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/SY.png);background-repeat:no-repeat;" value="Syrian Arab Republic">Syrian Arab Republic</option>
+                                                    <option data-country-code="TW" data-tokens="TW Taiwan, Province of China" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TW.png);background-repeat:no-repeat;" value="Taiwan, Province of China">Taiwan, Province of China</option>
+                                                    <option data-country-code="TJ" data-tokens="TJ Tajikistan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TJ.png);background-repeat:no-repeat;" value="Tajikistan">Tajikistan</option>
+                                                    <option data-country-code="TZ" data-tokens="TZ Tanzania, United Republic of" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TZ.png);background-repeat:no-repeat;" value="Tanzania, United Republic of">Tanzania, United Republic of</option>
+                                                    <option data-country-code="TH" data-tokens="TH Thailand" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TH.png);background-repeat:no-repeat;" value="Thailand">Thailand</option>
+                                                    <option data-country-code="TL" data-tokens="TL Timor-Leste" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TL.png);background-repeat:no-repeat;" value="Timor-Leste">Timor-Leste</option>
+                                                    <option data-country-code="TG" data-tokens="TG Togo" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TG.png);background-repeat:no-repeat;" value="Togo">Togo</option>
+                                                    <option data-country-code="TK" data-tokens="TK Tokelau" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TK.png);background-repeat:no-repeat;" value="Tokelau">Tokelau</option>
+                                                    <option data-country-code="TO" data-tokens="TO Tonga" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TO.png);background-repeat:no-repeat;" value="Tonga">Tonga</option>
+                                                    <option data-country-code="TT" data-tokens="TT Trinidad and Tobago" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TT.png);background-repeat:no-repeat;" value="Trinidad and Tobago">Trinidad and Tobago</option>
+                                                    <option data-country-code="TN" data-tokens="TN Tunisia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TN.png);background-repeat:no-repeat;" value="Tunisia">Tunisia</option>
+                                                    <option data-country-code="TR" data-tokens="TR Turkey" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TR.png);background-repeat:no-repeat;" value="Turkey">Turkey</option>
+                                                    <option data-country-code="TM" data-tokens="TM Turkmenistan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TM.png);background-repeat:no-repeat;" value="Turkmenistan">Turkmenistan</option>
+                                                    <option data-country-code="TC" data-tokens="TC Turks and Caicos Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TC.png);background-repeat:no-repeat;" value="Turks and Caicos Islands">Turks and Caicos Islands</option>
+                                                    <option data-country-code="TV" data-tokens="TV Tuvalu" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/TV.png);background-repeat:no-repeat;" value="Tuvalu">Tuvalu</option>
+                                                    <option data-country-code="UG" data-tokens="UG Uganda" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/UG.png);background-repeat:no-repeat;" value="Uganda">Uganda</option>
+                                                    <option data-country-code="UA" data-tokens="UA Ukraine" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/UA.png);background-repeat:no-repeat;" value="Ukraine">Ukraine</option>
+                                                    <option data-country-code="AE" data-tokens="AE United Arab Emirates" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/AE.png);background-repeat:no-repeat;" value="United Arab Emirates">United Arab Emirates</option>
+                                                    <option data-country-code="GB" data-tokens="GB United Kingdom" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/GB.png);background-repeat:no-repeat;" value="United Kingdom">United Kingdom</option>
+                                                    <option data-country-code="US" data-tokens="US United States" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/US.png);background-repeat:no-repeat;" value="United States">United States</option>
+                                                    <option data-country-code="UM" data-tokens="UM United States Minor Outlying Islands" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/UM.png);background-repeat:no-repeat;" value="United States Minor Outlying Islands">United States Minor Outlying Islands</option>
+                                                    <option data-country-code="UY" data-tokens="UY Uruguay" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/UY.png);background-repeat:no-repeat;" value="Uruguay">Uruguay</option>
+                                                    <option data-country-code="UZ" data-tokens="UZ Uzbekistan" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/UZ.png);background-repeat:no-repeat;" value="Uzbekistan">Uzbekistan</option>
+                                                    <option data-country-code="VU" data-tokens="VU Vanuatu" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VU.png);background-repeat:no-repeat;" value="Vanuatu">Vanuatu</option>
+                                                    <option data-country-code="VE" data-tokens="VE Venezuela" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VE.png);background-repeat:no-repeat;" value="Venezuela">Venezuela</option>
+                                                    <option data-country-code="VN" data-tokens="VN Viet Nam" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VN.png);background-repeat:no-repeat;" value="Viet Nam">Viet Nam</option>
+                                                    <option data-country-code="VG" data-tokens="VG Virgin Islands, British" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VG.png);background-repeat:no-repeat;" value="Virgin Islands, British">Virgin Islands, British</option>
+                                                    <option data-country-code="VI" data-tokens="VI Virgin Islands, U.S." style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/VI.png);background-repeat:no-repeat;" value="Virgin Islands, U.S.">Virgin Islands, U.S.</option>
+                                                    <option data-country-code="WF" data-tokens="WF Wallis and Futuna" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/WF.png);background-repeat:no-repeat;" value="Wallis and Futuna">Wallis and Futuna</option>
+                                                    <option data-country-code="EH" data-tokens="EH Western Sahara" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/EH.png);background-repeat:no-repeat;" value="Western Sahara">Western Sahara</option>
+                                                    <option data-country-code="YE" data-tokens="YE Yemen" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/YE.png);background-repeat:no-repeat;" value="Yemen">Yemen</option>
+                                                    <option data-country-code="ZM" data-tokens="ZM Zambia" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ZM.png);background-repeat:no-repeat;" value="Zambia">Zambia</option>
+                                                    <option data-country-code="ZW" data-tokens="ZW Zimbabwe" style="padding-left:25px; background-position: 4px 7px; background-image:url(../FrontAssets/css/flags/ZW.png);background-repeat:no-repeat;" value="Zimbabwe">Zimbabwe</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="js-form-message">
+                                            <label class="form-label"> Preferred language </label>
+                                            <div class="form-group">
+                                                <select class="" id="userlanguages" placeholder="Select upto 8 tags" multiple>
+                                                    <option value="English">English</option>
+                                                    <option value="French">French</option>
+                                                    <option value="Deutsch">Deutsch</option>
+                                                    <option value="Portuguêse">Portuguêse</option>
+                                                    <option value="Mandarin">Mandarin</option>
+                                                    <option value="Cantonese">Yue(Cantonese)</option>
+                                                    <option value="Spanish">Spanish</option>
+                                                    <option value="Filipino">Tagalog(Filipino)</option>
+                                                    <option value="Russian">Russian</option>
+                                                    <option value="Chinese">Chinese</option>
+                                                    <option value="Korean">Korean</option>
+                                                    <option value="Persian">Persian</option>
+                                                    <option value="Italian">Italian</option>
+                                                    <option value="Vietnamese">Vietnamese</option>
+                                                    <option value="Dutch">Dutch</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="Language" id="getSelectedLanguages">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-12 mb-2">
+                                        <div class="js-form-message">
+                                            <label class="form-label">
+                                                Timezone
+                                            </label>
+                                            <span class="text-danger">*</span>
+                                            <div class="form-group">
+                                                <select class="custom-select" id="updRegionTimeZones" name="TimeZone" required="">
+                                                   @* <option value="">Select Your Timezone</option>
+                                                    <option value="-2:30">St Johns (GMT -2:30)</option>
+                                                    <option value="-3:00">Halifax (GMT -3:00)</option>
+                                                    <option value="-4:00">Toronto (GMT -4:00)</option>
+                                                    <option value="-5:00">Winnipeg (GMT -5:00)</option>
+                                                    <option value="-6:00">Edmonton (GMT -6:00)</option>
+                                                    <option value="-7:00">Vancouver (GMT -7:00)</option>*@
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+@*
+                                @if (ViewBag.UserRecord.Role == "Valet")
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-12 mb-2" id="setAvailabilityRow" style="display:block">
+                                            <div class="js-form-message">
+                                                <label class="form-label"> Set Availability <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="form-group">
+                                                    <select class="custom-select" id="setAvailability" name="AvailabilityType" onchange="showDaysOrWeek(this.value)">
+                                                        <option value="">Select Option</option>
+                                                        <option value="Daily">Daily Availability</option>
+                                                        <option value="Weekly">Weekly Availability</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-12 mb-2" id="daySelectionRow" style="display: none;">
+                                            <div class="js-form-message">
+                                                <label class="form-label">Select Day(s)</label>
+                                                <span class="text-danger">*</span>
+                                                <div class="form-group">
+                                                    <select class="custom-select" id="selectedDays" multiple>
+
+                                                    </select>
+                                                </div>
+                                                <input type="hidden" name="SelectedDays" id="selectedDaysInputType">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-12 mb-2" id="timeSelectionRow" style="display: none;">
+                                            <div class="js-form-message">
+                                                <label class="" id="timeSelectionAvailabilityLabel">Available Times <span class="text-danger">*</span></label>
+                                                <div class="form-group">
+                                                    <label class="mr-3"><input type="checkbox" name="availableTimes" value="1"> Morning (7am-12pm)</label>
+                                                    <label class="mr-3"><input type="checkbox" name="availableTimes" value="2"> Afternoon (12pm-5pm)</label>
+                                                    <label class="mr-3"><input type="checkbox" name="availableTimes" value="3"> Evening (5pm-10pm)</label>
+                                                    <label><input type="checkbox" name="availableTimes" value="4"> Night (12am-7am)</label>
+                                                </div>
+                                                <input type="hidden" name="AvailableTimeSlots" id="availableTimesInputType">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if(ViewBag.UserRecord.AvailabilitySlots != null)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-12 mb-2">
+                                                <div class="js-form-message" id="timeSelectionRowFromSlots" style="display:block">
+                                                    <label class="">Your Available Slots<span class="text-danger">*</span></label>
+                                                    <div class="form-group">
+                                                        @{
+                                                            string[] siy = ViewBag.UserRecord.AvailabilitySlots.Split(",");
+                                                            List<string> selectedSlots = siy.ToList();
+                                                            if (siy[0] == "1")
+                                                            {
+                                                                <label class="mr-3"><input disabled type="checkbox" checked> Morning (7am-12pm)</label>
+                                                            }
+                                                            if (siy[1] == "2")
+                                                            {
+                                                                <label class="mr-3"><input disabled type="checkbox" checked> Afternoon (12pm-5pm)</label>
+                                                            }
+                                                            if (siy[2] == "3")
+                                                            {
+                                                                <label class="mr-3"><input disabled type="checkbox" checked> Evening (5pm-10pm)</label>
+                                                            }
+                                                            if (siy[3] == "4")
+                                                            {
+                                                                <label><input disabled type="checkbox" checked> Night (12am-7am)</label>
+                                                            }
+                                                        }
+                                                    
+                                                    </div>
+                                                </div>
+
+                                                <div class="text-right">
+                                                    <a class="btn btn-warning" id="updateYourAvailabilityBtn" onclick="updateYourAvailability()"> Update Your Availabilty</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }*@
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-right">
+                                <button type="button" class="btn btn-success" id="updateProfileSubmitBtn" onclick="updateProfileSubmit()"> Update Profile</button>
+                            </div>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div>
+    </div>
+}
+
+@section CustomJs{
+    <script>
+        var getUserIdFromViewBag = '@ViewBag.UserRecord.Id';
+        //var getRemainingDays = '@ViewBag.TodaysDay';
+        var getSelectedSlots = '@ViewBag.UserRecord.AvailabilitySlots';
+        var getStripeId = '@ViewBag.UserRecord.StripeId';
+
+        var selectedLanguages = [];
+        //var daysArray = getRemainingDays.split(",");
+        var timesArray = [];
+        $(document).ready(function () {
+            $("#Gender").val('@ViewBag.UserRecord.Gender').change();
+            $("#updRegionTimeZones").val('@ViewBag.UserRecord.Timezone').change();
+
+             var selectedCountry = '@ViewBag.UserRecord.Country';
+             $(".countrypicker").val(selectedCountry).change();
+
+            var arr1 = ["English", "French", "Deutsch", "Portuguêse", "Mandarin", "Cantonese", "Spanish", "Filipino", "Russian", "Chinese", "Korean", "Persian", "Italian", "Vietnamese", "Dutch"];
+            var arr2 = '@ViewBag.UserRecord.Language';
+            $("#userlanguages").empty().append("");
+            var dropdown = $("#userlanguages");
+            $.each(arr1, function (index, value) {
+                var option = $("<option></option>").attr("value", value).text(value);
+                if (arr2.includes(value)) {
+                    option.attr("selected", "selected");
+                }
+                dropdown.append(option);
+            });
+
+            // if(getSelectedSlots != null && getSelectedSlots != ""){
+            //     var setAvailabilityRowShowhide = document.getElementById("setAvailabilityRow");
+            //     setAvailabilityRowShowhide.style.display  = "none";
+            //     $("#availableTimesInputType").val(getSelectedSlots);
+            // }
+            // else{
+            //     $("#setAvailabilityRow").css("display", "block");
+            // } 
+        });
+
+        $('#userlanguages').change(function () {
+            var getOption = $(this).val();
+            $("#getSelectedLanguages").val("");
+            $("#getSelectedLanguages").val(getOption);
+        });
+    </script>
+
+    <script>
+        function loadImageFile(event){
+            var output = document.getElementById('previewImg');
+            output.src = URL.createObjectURL(event.target.files[0]);
+            output.onload = function () {
+                URL.revokeObjectURL(output.src) // free memory
+            }
+            $("#uploadImageBtnSection").css("display", "block");
+        }
+
+        function resetPreviewImg(src) {
+            var output = document.getElementById('previewImg');
+            if(src != ""){
+                output.src = src;
+            }else{
+            output.src = "../frontassets/images/user/s4.png";
+            }
+            $("#uploadImageBtnSection").css("display", "none");
+            $("#imageLoadSection").css("display", "block");
+        }
+    </script>
+    <script>
+
+        function showAttachPayPalSection() {
+            resetPayPalSectionValues();
+            $("#attachPayPalSection").show();
+        }
+
+        function resetPayPalSectionValues() {
+            $("#paypalEmail").val("");
+        }
+
+        function hideAttachPayPalSection() {
+            $("#attachPayPalSection").hide();
+            resetPayPalSectionValues();
+        }
+    </script>
+
+    <script>
+        function uploadImage() {
+            $("#uploadProfileImageForm").submit();
+            $("#saveImage").attr("disabled", true);
+        }
+
+        $("#alertMsg").fadeOut(6000);
+
+        function myStatus() {
+            var x = document.getElementById("userActivityStatusLabel");
+            if (x.innerHTML === "Online") {
+                $("#userActivityStatus").val(0);
+                x.innerHTML = "Offline";
+            } else {
+                $("#userActivityStatus").val(1);
+                x.innerHTML = "Online";
+
+            }
+            var userActivityStatus = $('#userActivityStatus').val();
+
+            $.ajax({
+                type: 'PUT',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "User/UpdateUserAccountActivityStatus?ActivityStatus=" + userActivityStatus,
+                dataType: "json",
+                data: {
+                },
+                success: function (response) {
+                    if(response.status == true){
+                        triggerSweetAlert(response.message, "success");
+                    }
+                    else{
+                        triggerSweetAlert(response.message, "E54826");
+                    }
+                },
+                error: function (response) {
+                    alert("Status not updated");
+                    if (x.innerHTML === "Online") {
+                        $("#userActivityStatus").val(0);
+                        x.innerHTML = "Offline";
+                    } else {
+                        $("#userActivityStatus").val(1);
+                        x.innerHTML = "Online";
+                    }
+                }
+            });
+
+        }
+
+        function myAvailability() {
+            var x = document.getElementById("userAvailabilityStatusLabel");
+            if (x.innerHTML === "Available") {
+                $("#userAvailabilityStatus").val(0);
+                x.innerHTML = "Unavailable";
+            } else {
+                $("#userAvailabilityStatus").val(1);
+                x.innerHTML = "Available";
+            }
+            var userAvailabilityStatus = $('#userAvailabilityStatus').val();
+            $.ajax({
+                type: 'PUT',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "User/UpdateUserAccountAvailabilityStatus?AvailabilityStatus=" + userAvailabilityStatus,
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == true) {
+                        triggerSweetAlert(response.message, "success");
+                    }
+                    else {
+                        triggerSweetAlert(response.message, "E54826");
+                    }
+                },
+                error: function (response) {
+                    alert("Availability not updated");
+                    if (x.innerHTML === "Available") {
+                        $("#userAvailabilityStatus").val(0);
+                        x.innerHTML = "Unavailable";
+                    } else {
+                        $("#userAvailabilityStatus").val(1);
+                        x.innerHTML = "Available";
+                    }
+                }
+            });
+        }
+    </script>
+
+    <script>
+
+    </script>
+
+
+    @if(ViewBag.UserRecord.Role == "Valet")
+    {
+        <script src="~/frontAssets/customJS/userExperience.js"></script>
+        <script src="~/frontAssets/customJS/userEducation.js"></script>
+        <script src="~/frontAssets/customJS/userSkills.js"></script>
+        <script src="~/frontAssets/customJS/paypalAccount.js"></script>
+        <script src="~/frontAssets/customJS/StripeAccount.js"></script>
+        <script>
+            getUserSkills();
+        </script>
+
+        <script>
+            function showDaysOrWeek(selectedOption) {
+                $("#selectedDays").empty().append("");
+                var dropdown = $("#selectedDays");
+                $("#daySelectionRow").show();
+                $("#timeSelectionRow").show();
+                if (selectedOption === "Daily") {
+                    $.each(daysArray, function (index, value) {
+                        var option = $("<option></option>").attr("value", value).text(value);
+                        dropdown.append(option);
+                    });
+                    $("#selectedDays").prop("disabled", false);
+                    $("#selectedDays").prop("required", true);
+                } else if (selectedOption === "Weekly") {
+                    $.each(daysArray, function (index, value) {
+                        var option = $("<option></option>").attr("value", value).text(value);
+                        option.attr("selected", "selected");
+                        dropdown.append(option);
+                    });
+                    $("#selectedDays").prop("disabled", true);
+                    $("#selectedDays").prop("required", false);
+                } else {
+                    $("#daySelectionRow").hide();
+                    $("#timeSelectionRow").hide();
+                }
+            }
+
+            $('#selectedDays').change(function () {
+                var getOption = $(this).val();
+                $("#selectedDaysInputType").val("");
+                $("#selectedDaysInputType").val(getOption);
+            });
+
+            function saveSelectedTimes() {
+                var selectedTimes = $("input[name='availableTimes']:checked").map(function () {
+                    return $(this).val();
+                }).get().join(",");
+
+                $("#availableTimesInputType").val(selectedTimes);
+            }
+
+            $("input[name='availableTimes']").on('click', saveSelectedTimes);
+        </script>
+
+        <script>
+            function updateYourAvailability() {
+                var setAvailabilityRowShowhide = document.getElementById("setAvailabilityRow");
+                var timeSelectionRowFromSlots = document.getElementById("timeSelectionRowFromSlots");
+                if (setAvailabilityRowShowhide.style.display === 'none') {
+                    timeSelectionRowFromSlots.style.display = "none";
+                    setAvailabilityRowShowhide.style.display = "block";
+                    $("#updateYourAvailabilityBtn").text("");
+                    $("#updateYourAvailabilityBtn").text("Check Your Availability");
+                    $("#availableTimesInputType").val("");
+                }
+                else {
+                    setAvailabilityRowShowhide.style.display = "none";
+                    $("#setAvailability").val("").change();
+                    $("#daySelectionRow").val("").change();
+                    $("#daySelectionRow").css("display", "none");
+                    $("#timeSelectionRow").css("display", "none");
+                    $('input[name="availableTimes"]').prop('checked', false);
+                    timeSelectionRowFromSlots.style.display = "block";
+                    $("#updateYourAvailabilityBtn").text("");
+                    $("#updateYourAvailabilityBtn").text("Update Your Availability");
+                    $("#availableTimesInputType").val(getSelectedSlots);
+                }
+            }
+        </script>
+
+        <script>
+            function DayRequired()
+            {
+                var DaysAreRequired = $("#selectedDays").prop("required");
+                if (DaysAreRequired) {
+                    var dayvalueisnull = $("#selectedDays").val();
+                    if (dayvalueisnull == "") {
+                        alert("Select Days Field is required");
+                        return;
+                    }
+                }
+
+                var getSelectedDaysForWeekly = $("#selectedDays").val();
+                $("#selectedDaysInputType").val(getSelectedDaysForWeekly);
+
+                $("#updateProfileSubmitBtn").prop("disabled", true);
+                $("#updateAccountForm").submit();
+            }
+        </script>
+
+        <script>
+            function CreateConnectAccount(email) {
+                debugger;
+                if (email == "" && email == null) {
+                    $("#ErrModal").text("Please enter an email");
+                    return;
+                }
+                else {
+                    $("#ErrModal").text("");
+                }
+                $.ajax({
+                    type: 'POST',
+                    headers: {
+                        'Authorization': Token
+                    },
+                    url: projectBaseUrl + 'User/CreateAccount?email=' + email + "&LoggedInUserId=" + getUserIdFromViewBag,
+                    dataType: "json",
+                    success: function (response) {
+                        debugger;
+
+                        window.open(response[0], "_blank");
+
+                        $("#StripeAccId").val(response[1]);
+
+                        //$("#stripeErr").text("\nAccount Generated !"); // Commented For Later Use
+
+                        //$("#ConnectModal").modal("hide");
+
+                        location.reload();
+                    },
+                    error: function (response) {
+                        alert("Error");
+                    },
+                });
+            }
+        </script>
+        <script>
+            function updateProfileSubmit() {
+                $("#updateProfileSubmitBtn").prop("disabled", true);
+                var userRecordFirstName = $("#userRecordFirstName").val();
+                var userRecordLastName = $("#userRecordLastName").val();
+                var userRecordDescription = $("#userRecordDescription").val();
+                var contct = $("#contct").val();
+                var birth_date = $("#birth_date").val();
+                var zip = $("#zip").val();
+                var userRecordCity = $("#userRecordCity").val();
+                var userRecordState= $("#userRecordState").val();
+                if (zip == "" || userRecordCity == "" || userRecordState == "" || userRecordFirstName == "" || userRecordLastName == "" || userRecordDescription == "" || contct == "" || birth_date == "" ||
+                    zip == null || userRecordCity == null || userRecordState == null || userRecordFirstName == null || userRecordLastName == null || userRecordDescription == null || contct == null || birth_date == null ||
+                    zip == undefined || userRecordCity == undefined || userRecordState == undefined || userRecordFirstName == undefined || userRecordLastName == undefined || userRecordDescription == undefined || contct == undefined || birth_date == undefined
+                ){
+                    alert("All Fields are required");
+                    $("#updateProfileSubmitBtn").prop("disabled", false);
+                    return;
+                }
+                $("#updateAccountForm").submit();
+            }
+        </script>
+    }
+    else
+    {
+        <script>
+            function updateProfileSubmit() {
+                $("#updateProfileSubmitBtn").prop("disabled", true);
+                var userRecordFirstName = $("#userRecordFirstName").val();
+                var userRecordLastName = $("#userRecordLastName").val();
+                var userRecordDescription = $("#userRecordDescription").val();
+                var contct = $("#contct").val();
+                var birth_date = $("#birth_date").val();
+                var zip = $("#zip").val();
+                var userRecordCity = $("#userRecordCity").val();
+                var userRecordState = $("#userRecordState").val();
+                if (zip == "" || userRecordCity == "" || userRecordState == "" || userRecordFirstName == "" || userRecordLastName == "" || userRecordDescription == "" || contct == "" || birth_date == "" ||
+                    zip == null || userRecordCity == null || userRecordState == null || userRecordFirstName == null || userRecordLastName == null || userRecordDescription == null || contct == null || birth_date == null ||
+                    zip == undefined || userRecordCity == undefined || userRecordState == undefined || userRecordFirstName == undefined || userRecordLastName == undefined || userRecordDescription == undefined || contct == undefined || birth_date == undefined
+                ) {
+                    alert("All Fields are required");
+                    $("#updateProfileSubmitBtn").prop("disabled", false);
+                    return;
+                }
+                $("#updateAccountForm").submit();
+            }
+        </script>
+    }
+
+    <script>
+        function deleteFunction() {
+            var getTypeOfDelete = $("#staticBackdropDeleteFunctionType").val();
+            if (getTypeOfDelete == "Education") {
+                deleteFunctionEducation();
+            }
+            else if (getTypeOfDelete == "Experience") {
+                deleteFunctionExperience();
+            }
+            else if (getTypeOfDelete == "PayPal") {
+                deleteFunctionPayPal();
+            }
+            else if (getTypeOfDelete == "Stripe") {
+                deleteUserStripeAccount();
+            }
+        }
+        function closeModal() {
+            $("#staticBackdropDeleteFunctionType").val("");
+            $("#deleteModal").modal("hide");
+        }
+    </script>
+
+    <script>
+
+        function checkAvailability(value) {
+            $("#checkAvailabilityLoader").css("display", "block");
+            $("#addWeeklyAvailability").css("display", "none");
+            $("#checkWeeklyAvailability").css("display", "none");
+            $.ajax({
+                type: 'GET',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "User/GetUserAvailableSlotByUserId?userId=" + getUserIdFromViewBag,
+                dataType: "json",
+                success: function (response) {
+                    $("#availabilityBody").empty().append("");
+                    var createTagsBadge = "";
+                    if (response.data.length == 0) {
+                        // $("#addWeeklyAvailabilitytbody").empty().append("");
+                        $("#addWeeklyAvailability").css("display", "block");
+                        $("#checkAvailabilityLoader").css("display", "none");
+                        $("#checkWeeklyAvailability").css("display", "none");
+                        // createAvailabilityTable();
+                    } else {
+                        var currentDate = new Date(); // Get the current date
+                        console.log(currentDate);
+                        var Slot1 = '';
+                        var Slot2 = '';
+                        var Slot3 = '';
+                        var Slot4 = '';
+                        for (var i = 0; i < response.data.length; i++) {
+                            // Check if DateTimeOfDay is less than the current day
+                            var dateTimeOfDay = new Date(response.data[i].dateTimeOfDay);
+                            var isDateTimeOfDayExpired = dateTimeOfDay < currentDate && dateTimeOfDay.getDate() !== currentDate.getDate();
+
+                            if (response.data[i].slot1 == "1") {
+                                Slot1 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots1' + response.data[i].id + '\', \'1\')" class="custom-control-input" id="customSwitchesForSlots1' + response.data[i].id + '" checked="checked">' +
+                                    '<label id="userSlotLabel1' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots1' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            } else {
+                                Slot1 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots1' + response.data[i].id + '\', \'1\')" class="custom-control-input" id="customSwitchesForSlots1' + response.data[i].id + '">' +
+                                    '<label id="userSlotLabel1' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots1' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+                            if (response.data[i].slot2 == "2") {
+                                Slot2 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots2' + response.data[i].id + '\', \'2\')" class="custom-control-input" id="customSwitchesForSlots2' + response.data[i].id + '" checked="checked">' +
+                                    '<label id="userSlotLabel2' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots2' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+                            else {
+                                Slot2 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots2' + response.data[i].id + '\', \'2\')" class="custom-control-input" id="customSwitchesForSlots2' + response.data[i].id + '">' +
+                                    '<label id="userSlotLabel2' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots2' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+                            if (response.data[i].slot3 == "3") {
+                                Slot3 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots3' + response.data[i].id + '\', \'3\')" class="custom-control-input" id="customSwitchesForSlots3' + response.data[i].id + '" checked="checked">' +
+                                    '<label id="userSlotLabel3' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots3' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+                            else {
+                                Slot3 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots3' + response.data[i].id + '\', \'3\')" class="custom-control-input" id="customSwitchesForSlots3' + response.data[i].id + '">' +
+                                    '<label id="userSlotLabel3' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots3' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+                            if (response.data[i].slot4 == "4") {
+                                Slot4 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots4' + response.data[i].id + '\', \'4\')" class="custom-control-input" id="customSwitchesForSlots4' + response.data[i].id + '" checked="checked">' +
+                                    '<label id="userSlotLabel4' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots4' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+                            else {
+                                Slot4 = '<div class="custom-control custom-switch">' +
+                                    '<input type="checkbox" onclick="updateAvailability(\'' + response.data[i].userAvailableSlotEncId + '\', \'customSwitchesForSlots4' + response.data[i].id + '\', \'4\')" class="custom-control-input" id="customSwitchesForSlots4' + response.data[i].id + '">' +
+                                    '<label id="userSlotLabel4' + response.data[i].id + '" class="custom-control-label" for="customSwitchesForSlots4' + response.data[i].id + '"></label>' +
+                                    '</div>';
+                            }
+
+                            createTagsBadge += '<tr><td>' + response.data[i].dayName + ' (' + response.data[i].dateTimeOfDay + ')</td>' +
+                                '<td>' + Slot1 + '</td>' +
+                                '<td>' + Slot2 + '</td>' +
+                                '<td>' + Slot3 + '</td>' +
+                                '<td>' + Slot4 + '</td>' +
+                                '</tr>';
+                        }
+                        $("#addAvailabilityBtn").hide();
+                        $("#addWeeklyAvailability").css("display", "none");
+                        $("#checkAvailabilityLoader").css("display", "none");
+                        $("#checkWeeklyAvailability").css("display", "block");
+                    }
+                    $("#availabilityBody").append(createTagsBadge);
+                    $("#AvailabilityModal").modal("show");
+                },
+                error: function (response) {
+                    alert("Something went Wrong Please try again later, or check your internet connection");
+                },
+                complete: function (response) {
+
+                }
+            });
+        }
+
+        function createAvailabilityTable() {
+            const today = new Date().getDay();
+            const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]; // Include "Sunday" at the end
+            const timeSlots = ["Morning", "Afternoon", "Evening", "Night"];
+
+            const tbody = document.querySelector("#addWeeklyAvailabilitytbody"); // Get the tbody element
+
+            // Loop through the days of the week
+            for (let i = 0; i < daysOfWeek.length; i++) {
+                const day = daysOfWeek[i];
+                const row = document.createElement("tr"); // Create a new table row
+
+                const dayHeader = document.createElement("td"); // Create a cell for the day name
+                const dayHeading = document.createElement("h6");
+                dayHeading.textContent = day;
+                dayHeader.appendChild(dayHeading);
+                row.appendChild(dayHeader);
+
+                // Loop through the time slots
+                for (const slot of timeSlots) {
+                    const cell = document.createElement("td"); // Create a cell for the checkbox
+
+                    const checkboxDiv = document.createElement("div");
+
+                    checkboxDiv.className = "custom-control custom-switch";
+
+                    const checkbox = document.createElement("input"); // Create the checkbox
+                    checkbox.type = "checkbox";
+                    checkbox.className = "custom-control-input";
+                    checkbox.id = `customSwitchesFor${day}${slot}`;
+
+                    const label = document.createElement("label"); // Create the label
+                    label.className = "custom-control-label";
+                    label.setAttribute("for", `customSwitchesFor${day}${slot}`);
+
+                    checkboxDiv.appendChild(checkbox);
+                    checkboxDiv.appendChild(label);
+                    cell.appendChild(checkboxDiv);
+                    //if (i < today) {
+                    //    // If the day is before today, disable the checkbox
+                    //    checkbox.disabled = true;
+                    //}
+
+                    row.appendChild(cell); // Add the cell to the row
+                }
+
+                tbody.appendChild(row); // Add the row to the tbody
+            }
+        }
+
+
+    </script>
+
+    <script>
+        function updateAvailability(slotEncId, slotDecId, slotNo) {
+            $("#checkAvailabilityLoader").css("display", "block");
+            $("#checkWeeklyAvailability").css("display", "none");
+            const isChecked = $("#" + slotDecId).prop("checked");
+            var Slot1 = "";
+            var Slot2 = "";
+            var Slot3 = "";
+            var Slot4 = "";
+            if (!isChecked) {
+                if (slotNo == "1") {
+                    Slot1 = "0";
+                }
+                if (slotNo == "2") {
+                    Slot2 = "0";
+                }
+                if (slotNo == "3") {
+                    Slot3 = "0";
+                }
+                if (slotNo == "4") {
+                    Slot4 = "0";
+                }
+            }
+            else {
+                if (slotNo == "1") {
+                    Slot1 = "1";
+                }
+                if (slotNo == "2") {
+                    Slot2 = "2";
+                }
+                if (slotNo == "3") {
+                    Slot3 = "3";
+                }
+                if (slotNo == "4") {
+                    Slot4 = "4";
+                }
+            }
+            const requestData = {
+                UserAvailableSlotEncId: slotEncId,
+                Slot1: Slot1,
+                Slot2: Slot2,
+                Slot3: Slot3,
+                Slot4: Slot4
+            };
+
+            $.ajax({
+                type: 'PUT',
+                headers: {
+                    'Authorization': Token
+                },
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(requestData),
+                url: projectBaseUrl + "User/PostUpdateUserAvailableSlot",
+                success: function (response) {
+                    triggerSweetAlert(response.message, "@ProjectVariables.SuccessColor");
+                    checkAvailability();
+                },
+                error: function (response) {
+                    triggerSweetAlert(response.message, "@ProjectVariables.DangerColor");
+                }
+            });
+        }
+
+        function addAvailability() {
+            // Disable the button
+            $("#addAvailabilityBtn").prop("disabled", true);
+            const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]; // Include "Sunday" at the end
+            const timeSlots = ["Morning", "Afternoon", "Evening", "Night"];
+            var availabilityData = [];
+
+            for (const day of daysOfWeek) {
+                var s1 = "";
+                var s2 = "";
+                var s3 = "";
+                var s4 = "";
+                for (var i = 0; i < timeSlots.length; i++) {
+                    const checkboxId = `customSwitchesFor${day}${timeSlots[i]}`;
+                    const isChecked = $("#" + checkboxId).prop("checked");
+                    if (i == 0)
+                        s1 = isChecked ? "1" : "0";
+                    if (i == 1)
+                        s2 = isChecked ? "2" : "0";
+                    if (i == 2)
+                        s3 = isChecked ? "3" : "0";
+                    if (i == 3)
+                        s4 = isChecked ? "4" : "0";
+                }
+                var x = {
+                    DateTimeOfDay: day,
+                    Slot1: s1,
+                    Slot2: s2,
+                    Slot3: s3,
+                    Slot4: s4,
+                    UserId: getUserIdFromViewBag
+                };
+                availabilityData.push(x);
+            }
+
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    'Authorization': Token
+                },
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(availabilityData),
+                url: projectBaseUrl + "User/PostAddUserAvailableSlots",
+                success: function (response) {
+                    triggerSweetAlert("The time slot for availability has been modified", "@ProjectVariables.SuccessColor");
+                    checkAvailability();
+                },
+                error: function (response) {
+                    triggerSweetAlert(response.message, "@ProjectVariables.DangerColor");
+                }
+            });
+            console.log(availabilityData);
+        }
+
+    </script>
+
+    <script>
+
+        var birthDateInput = document.getElementById("birth_date");
+
+        birthDateInput.addEventListener("change", function () {
+            var selectedDate = new Date(birthDateInput.value);
+            var currentDate = new Date();
+            var minDate = new Date(currentDate.getFullYear() - 13, currentDate.getMonth(), currentDate.getDate());
+            var maxDate = new Date(currentDate.getFullYear() - 120, currentDate.getMonth(), currentDate.getDate()); // Assuming a maximum age of 120
+
+            if (selectedDate > minDate || selectedDate < maxDate) {
+                triggerSweetAlert("You must be at least 13 years old to create an account.", "@ProjectVariables.DangerColor");
+                birthDateInput.value = "";
+                $("#updateProfileSubmitBtn").prop("disable", true);
+            } else {
+                $("#updateProfileSubmitBtn").prop("disable", false);
+            }
+        });
+
+    </script>
+
+    <!--Verify Stripe Account-->
+    <script>
+
+
+        var verifytype = 1;
+        function verifyStripeAccount() {
+            debugger;
+
+            $.ajax({
+                type: 'GET',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + 'User/GetVerified?StripeAccountId=' + getStripeId + "&verifytype=" + verifytype + "&Userid=" + getUserIdFromViewBag,
+                dataType: "json",
+                success: function (response) {
+                    debugger;
+
+                    window.open(response.data, "_blank");
+
+                },
+                error: function (response) {
+
+                    alert("Server Error");
+                },
+            });
+        }
+    </script>
+
+    <script>
+        // used incase future
+        function ValidateStripeAccount(val) {
+            debugger;
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "User/ValidateStripeAccount?val=" + val,
+
+                dataType: "json",
+                data: {},
+                success: function (response) {
+
+                    if (response == true) {
+                        $("#stripeErr").text("");
+                    }
+                    else {
+                        $("#stripeErr").text("Invalid Stripe Account!");
+                    }
+                },
+                error: function (response) {
+                    $("#updateBtn").prop("disabled", true);
+                },
+            });
+        }
+
+    </script>
+
+    <script>
+        function addExternalBankAccountToStripe(bankAccountHolder, bankAccountNumber, routingNo) {
+            debugger;
+            if (bankAccountHolder == "" || bankAccountNumber == "" || routingNo == "") {
+                $("#ErrBank").text("Please fill all fields");
+                return;
+            } else {
+                $("#ErrBank").text("");
+            }
+
+            // Create a JavaScript object with the data
+            var requestData = {
+                userid: getUserIdFromViewBag,
+                stripeAccountId: getStripeId,
+                bankAccountNumber: bankAccountNumber,
+                routingNo: routingNo,
+                accountHolderName: bankAccountHolder
+            };
+
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    'Authorization': Token
+                },
+                url: projectBaseUrl + "User/AddExternalBankAccountToStripe",
+                dataType: "json",
+                contentType: "application/json", // Set the content type to JSON
+                data: JSON.stringify(requestData), // Convert the data to JSON format
+                success: function (response) {
+                    console.log(response);
+                    if (response == true) {
+                        $("#BankModal").modal("hide");
+                        location.reload();
+                    }
+                    // Handle the success response here
+                },
+                error: function (response) {
+                    alert("Invalid Details");
+                },
+            });
+        }
+
+
+    </script>
+    <script>
+        GetGmtTimRegion();
+        function GetGmtTimRegion() {
+            $("#updRegionTimeZones").empty().append();
+            $.ajax({
+                type: "GET",
+                headers: {
+                    'AccessToken': Token
+                },
+                url: projectBaseUrl + 'Admin/GetTimeZones',
+                data: {},
+                cache: false,
+                success: function (response) {
+                    var appendOptions = '';
+                    $.each(response, function (key, value) {
+                        appendOptions += '<option value=' + key + '>' + value + '</option>';
+                    })
+                    $("#updRegionTimeZones").append(appendOptions);
+                },
+                error: function () {
+                },
+                complete: function () {
+                    $("#updRegionTimeZones").val('@ViewBag.UserRecord.Timezone').change();
+                }
+            });
+        }
+    </script>
+}

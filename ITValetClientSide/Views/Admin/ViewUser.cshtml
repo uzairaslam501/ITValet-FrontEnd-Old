@@ -1,0 +1,612 @@
+﻿@using ITValetFrontEnd.HelperClasses;
+@{
+    ViewData["Title"] = "ViewUser";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<style>
+    .table > tbody > tr > td {
+        padding: 5px !important;
+    }
+
+    .icons-list a[data-action]:after{
+        font-size:30px;
+    }
+</style>
+
+<div class="modal fade" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="text-center text-bold">Update User</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="UpdateCustomerForm" method="post" action="">
+
+                    <input type="hidden" name="UserEncId" id="updId" />
+
+                    <div class="form-group">
+                        <label class="text-bold">First Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" maxlength="15" name="FirstName" id="updFName" placeholder="Please Enter First Name">
+                        <span id="firstName_ErrMsg" class="text-danger"></span>
+                    </div>                 
+                    <div class="form-group">
+                        <label class="text-bold">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" maxlength="15" name="LastName" id="updLName" placeholder="Please Enter Last Name">
+                        <span id="lastName_ErrMsg" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Contact # </label>
+                        <input type="number" class="form-control" oninput="limitNumberDigits(this, 16)" name="Contact" id="updContact" placeholder="Please Enter User Contact Number">
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Email <span class="text-danger">*</span></label>
+                        <input type="email" readonly name="Email" id="updEmail" onkeydown="limitText(this,25)" class="form-control" onchange="validateEmail(this.value)" placeholder="Add Email Here" required>
+                        <span class="text-danger" id="updEmailErrMsg"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">Country <span class="text-danger">*</span></label>
+                        <input type="text" name="Country" id="updCountry" class="form-control" placeholder="Add Country" required>
+                        <span id="cntryName_ErrMsg" class="text-danger"></span>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Gender <span class="text-danger">*</span></label>
+                        <select class="form-control custom-select" required="" name="Gender" id="updGender" data-msg="Please select your gender." data-error-class="u-has-error" data-success-class="u-has-success">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span id="Gender_ErrMsg" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-bold">City</label>
+                        <input type="text" name="City" id="updCity" class="form-control" placeholder="Set City">
+                        <span name="UserName" id="ctyName_ErrMsg" class="text-danger"></span>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="text-bold">Zip Code<span class="text-danger">*</span></label>
+                        <input type="text" name="ZipCode" required onkeydown="limit(this);" onkeyup="limit(this);" id="updZipCode" class="form-control" placeholder="Add Zip Code">
+                        <span name="UserName" id="postalCode_ErrMsg" class="text-danger"></span>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="PostUpdateCustomer()" id="updSubBtn">Update</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <br/><span name="UserName" id="formButtonError_ErrMsg" style="margin-right:20px;" class="text-danger"></span>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="confirmActivateModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary py-4 text-left">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="modal-title">Activation</h3>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="userActiveReadyForActive"/>
+                <h6 class="text-semibold" id="confirmActivateModalText" style="font-size:17px">
+                    Do you really want to Activate this user?
+                </h6>
+            </div>
+            <div class="modal-footer border-top-1 border-top-grey-300 pt-10">
+                <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary btn-sm" onclick="updateStatus()" id="confirmActiveModalAction">Proceed</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="row py-5">
+        <div class="col-md-12">
+            <div class="panel panel-flat text-black">
+                <div class="panel-heading" style="background: #E8ECED">
+                    <h2 class="text-center text-black">
+                        Search
+                    </h2>
+                    <div class="heading-elements" style="top:40%">
+                        <ul class="icons-list">
+                            <li><a data-action="collapse" class="rotate-180"></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="panel-body pt-20 pb-20" style="display: none">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><strong>Username:</strong></label>
+                                <input type="text" maxlength="30" class="form-control" placeholder="Search username here" id="searchName">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><strong>Email:</strong></label>
+                                <input type="email" maxlength="40" class="form-control" id="searchEmail" placeholder="Search User Email Here">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><strong>Status:</strong></label>
+                                <select class="form-control" id="searchStatus">
+                                    <option value="">Select Status</option>
+                                    <option value="1">Activated</option>
+                                    <option value="3">Pending Activation</option>
+                                    <option value="2">Pending Approval</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-12 col-xs-12">
+                            <div class="form-group">
+                                <button onclick="clearSearch()" class="btn btn-danger btn-block">Reset</button><br>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12"></div>
+                        <div class="col-md-3 col-sm-12 col-xs-12">
+                            <div class="form-group text-right">
+                                <button onclick="searchTable()" class="btn btn-success btn-block">Search</button><br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="panel panel-flat p-20">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <u><h3>@(ViewBag.ValetOrCustomer == 3 ? "Customer List" : "IT Valet List")</h3></u>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-2 pull-right btn-block">
+                        <a href="@Url.Action("AddNewUser", "Admin", new { ValetOrCustomer = @ViewBag.ValetOrCustomer })" class="btn btn-primary m-5 pull-right">Add New</a>
+                    </div>
+                </div>
+
+                <input type="hidden" id="way" value="" />
+
+                <div class="table-responsive">
+                    <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
+                        <thead class="bg-indigo-800">
+                            <tr>
+                                <th class="text-bold" hidden>...</th>
+                                <th class="text-bold text-center" style="min-width: 140px;">First Name</th>
+                                <th class="text-bold text-center" style="min-width: 140px;">Last Name</th>
+                                <th class="text-bold text-center" style="min-width: 140px;">Username</th>
+                                <th class="text-bold text-center" style="min-width: 150px;">Email</th>
+                                <th class="text-bold text-center" style="min-width: 150px;">Status</th>
+                                <th class="text-bold text-center" style="min-width: 130px;">Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section CustomJs {
+    <script src="~/adminAssets//assets/js/custom.js"></script>
+    <script>
+
+        var role = "@ViewBag.ValetOrCustomer";
+
+        $(document).ready(function () {
+            if(role == 3)
+            {
+                $("#CustomerTaskSideBarDropDownArrow").addClass("active");
+                $("#AddCustomerSideBarTabLi").css('background-color', '#0150A1');
+                $("#AddCustomerSideBarTabText").css('color', '#FFFFFF');
+            }
+            else
+            {
+                $("#CustomerTaskSideBarDropDownArrow").addClass("active");
+                $("#AddUserSideBarTabLi").css('background-color', '#0150A1');
+                $("#AddUserSideBarTabText").css('color', '#FFFFFF');
+            }
+
+        });
+
+        var nameOfUser = "";
+        if(role ==3)
+        {
+            nameOfUser = "Customer";
+        }
+        else
+        {
+            nameOfUser = "IT-Valet";
+        }
+        loadTable();
+
+        function loadTable() {
+            var searchName = $('#searchName').val();
+            var searchEmail = $('#searchEmail').val();
+            var searchStatus = $('#searchStatus').val();
+
+            $('#userTable').DataTable().clear();
+            $('#userTable').DataTable().destroy();
+            $('#userTable').DataTable({
+                "ajax": {
+                    "url": "@ProjectVariables.BaseUrl" + "Admin/GetUserList?Role=" + role + "&Email=" + searchEmail + "&Name=" + searchName + "&IsActive=" + searchStatus,
+                    "type": "POST",
+                    "dataType": "json",
+                    "headers": 
+                    {
+                        'Authorization': Token
+                    },
+                    "data": 
+                    {
+
+                    }
+                },
+                'columns':
+                [
+                        { "data": "hidden", "name": "0" },
+                        { "data": "firstName", "name": "FirstName" },
+                        { "data": "lastName", "name": "LastName" },
+                        { "data": "userName", "name": "UserName" },
+                        { "data": "email", "name": "Email" },
+                        { "data": "status", "name": "Status" },
+                        { "data": "action", "name": "0" },
+                ],
+                'columnDefs':
+                [
+                        {
+                            "targets": 0,
+                            "visible": false,
+                            "searchable": false,
+                            "render": function (data, type, full, meta) {
+                                return null;
+                            }
+                        },
+                        {
+                            "targets": 1,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.firstName;
+                            }
+                        },
+                        {
+                            "targets": 2,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.lastName;
+                            }
+                        },
+                        {
+                            "targets": 3,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.userName;
+                            }
+                        },
+                        {
+                            "targets": 4,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                return full.email;
+                            }
+                        },
+                        {
+                            "targets": 5,
+                            'className': '',
+                            "render": function (data, type, full, meta) {
+                                if (full.isActive == "EmailVerificationPending") {
+                                    var userStatus = "Pending Activation";
+                                    return userStatus;
+                                }
+                                if (full.isActive == "AdminVerificationPending") {
+                                    var userStatus = "Pending Approval";
+                                    return userStatus;
+
+                                }
+                                if (full.isActive == "Active") {
+                                    var userStatus = "Activated"
+                                    return userStatus;
+                                }
+                                else {
+                                    var userStatus = "N/A"
+                                    return userStatus;
+                                }
+                            }
+                        },
+                        {
+                            "targets": 6,
+                            'className': '',
+                            'sortable': false,
+                            "render": function (data, type, full, meta) {
+                                var userActions = '';
+
+                                if (full.isActive == "EmailVerificationPending") 
+                                {
+                                    userActions += '<button class="btn btn-sm bg-primary icon-envelope mr-5" onclick="ActivationEmail(' + full.id + ')" title="Send Activation Email"></button>';
+
+
+                                } else if (full.isActive == "AdminVerificationPending") {
+                                    userActions += '<button class="btn btn-sm bg-primary icon-check mr-5" onclick="AccountActivate(' + full.id + ')" title="Activate Account"></button>';
+                                }
+
+                                userActions += '<button class="btn btn-sm bg-info icon-pencil mr-5" onclick="updateFunction(\'' + full.userEncId + '\')" title="Update"></button>' +
+                                    '<button class="btn btn-sm bg-danger icon-bin mr-5" onclick="DeleteUser(' + full.id + ')" title="Delete"></button>';
+
+                                var dropdownWidth = (full.isActive == "EmailVerificationPending" || full.isActive == "AdminVerificationPending") ? '152px' : '101px';
+                                var dropdownMenu = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:' + dropdownWidth + ';padding-left:5px !important;">' +
+                                    '<li>' + userActions + '</li>' +
+                                    '</ul>';
+
+                                return '<ul class="icons-list">' +
+                                    '<li class="dropdown">' +
+                                    '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">' +
+                                    '		<i class="icon-menu9"></i>' +
+                                    '	</a>' +
+                                    dropdownMenu +
+                                    '</li>' +
+                                    '</ul>';
+                            }
+                        }
+
+                ],
+                "serverSide": "true",
+                "processing": "true",
+                "language":
+                {
+                    "processing": "<i class='icon-spinner spinner icon-2x'></i>",
+                    "search": "<span>Search :</span> _INPUT_",
+                    "searchPlaceholder": "Filter Data",
+                    "lengthMenu": "<span>Show :</span> _MENU_",
+                    "paginate": { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+                }
+            });
+        }
+
+        function searchTable() {
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+
+        function clearSearch() {
+            $('#searchName').val("");
+            $('#searchEmail').val("");
+            $('#searchStatus').val("").change();
+
+            $('#userTable').DataTable().destroy();
+            loadTable();
+        }
+
+        function ActivationEmail(id) 
+        {
+            $.ajax({
+                type: 'PUT',
+                url: "@ProjectVariables.BaseUrl" + "Admin/SendActivationEmail?Id=" + id,
+                dataType: "json",
+                headers:
+                {
+                    'Authorization': Token
+                },
+                success: function (response) {
+                    if (response == true) {
+                        triggerSweetAlert("Activation Email Send Successfully", "@ProjectVariables.SuccessColor");
+                    }
+                    else {
+                        triggerSweetAlert("Failed To Send Activation Email ", "@ProjectVariables.DangerColor");
+                    }
+                },
+                error: function (response) {
+                    triggerSweetAlert("There is an error while Sendind Activation Email ", "@ProjectVariables.DangerColor");
+                },
+                complete: function () {
+                    ActivateUserId = 0;
+                    $('#ActivateUserButton').attr('disabled', false);
+                    loadTable();
+                    $('#confirmModal').modal('hide');
+                }
+            });
+        }
+
+        var DeleteUserId = 0;
+        function DeleteUser(id) {
+            DeleteUserId = id;
+            openConfirmationModal('Warning!', 'Do you really want to delete ' + nameOfUser + '?', 'Delete', PostDeleteUser);
+        }
+
+        function PostDeleteUser() 
+        {
+            $('#DeleteUserButton').attr('disabled', true);
+            $.ajax({
+                type: 'PUT',
+                url: "@ProjectVariables.BaseUrl" + "Admin/DeleteUser?UserId=" + DeleteUserId,
+                dataType: "json",
+                headers:
+                {
+                    'Authorization': Token
+                },
+                success: function (response) {
+                    if (response == true) 
+                    {
+                        triggerSweetAlert(nameOfUser+" Deleted Successfully", "@ProjectVariables.SuccessColor");
+                    }
+                    else 
+                    {
+                        triggerSweetAlert("Failed To Delete "+nameOfUser, "@ProjectVariables.DangerColor");
+                    }
+                },
+                error: function (response) {
+                    triggerSweetAlert("There is an error while Deleting " + nameOfUser, "@ProjectVariables.DangerColor");
+                },
+                complete: function () {
+                    $('#DeleteUserButton').attr('disabled', false);
+                    DeleteUserId = 0;
+                    $('#confirmModal').modal('hide');
+                    loadTable();
+                }
+            });
+        }
+
+        function updateFunction(id) {
+
+            $('#updEmailErrMsg').text("");
+            $('#updSubBtn').attr('disabled', false);
+
+            $("#loadImg").show();
+
+            $.ajax({
+                type: 'GET',
+                url: "@ProjectVariables.BaseUrl" + "Admin/GetUserByIdEncryptedId?userId=" + id,
+                dataType: "json",
+                headers:
+                {
+                    'Authorization': Token
+                },
+                success: function (response) 
+                {
+                    $("#updId").val(response.data.id);
+                    $("#updFName").val(response.data.firstName);
+                    $("#updLName").val(response.data.lastName);
+                    $("#updEmail").val(response.data.email);
+                    $("#updContact").val(response.data.contact);
+                    $("#updGender").val(response.data.gender).change();
+                    $("#updCountry").val(response.data.country);
+                    $("#updCity").val(response.data.city);
+                    $("#updZipCode").val(response.data.zipCode);
+
+                    $("#loadImg").hide();
+                    $("#updateModal").modal('show');
+                },
+                error: function (response) {
+                    triggerSweetAlert("There is an error while Deleting " + nameOfUser, "@ProjectVariables.DangerColor");
+                },
+                complete: function () {
+                    $("#loadImg").hide();
+                }
+            });
+        }
+
+        function PostUpdateCustomer() {
+            if (checkEmptyFields()) {
+                $('#formButtonError_ErrMsg').text('(All Fields Are Required!)');
+                return false;
+            }
+            else{
+                $('#formButtonError_ErrMsg').text('');
+            }
+            const lUserEncId = document.getElementById('updId').value;
+            const updateUrl = '@ProjectVariables.BaseUrl'+'Admin/PostUpdateUser';
+
+            const requestData = 
+            {
+                Id: lUserEncId,
+                FirstName: document.getElementById('updFName').value,
+                LastName : document.getElementById('updLName').value,
+                Contact: document.getElementById('updContact').value,
+                Email: document.getElementById('updEmail').value,
+                Country: document.getElementById('updCountry').value,
+                Gender: document.getElementById('updGender').value,
+                City: document.getElementById('updCity').value,
+                ZipCode: document.getElementById('updZipCode').value
+            };
+
+            $('#updSubBtn').prop('disabled', true);
+
+            $.ajax({
+                type: 'PUT',
+                url: updateUrl,
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    'Authorization': Token
+                },
+                data: JSON.stringify(requestData),
+                success: function (response) {
+                    const message = response ? nameOfUser + " Updated Successfully" : "Failed to Update " + nameOfUser;
+                    const color = response ? "@ProjectVariables.SuccessColor" : "@ProjectVariables.DangerColor";
+                    triggerSweetAlert(message, color);
+                    clearFields();
+                },
+                error: function () {
+                    triggerSweetAlert("There is an error while Updating " + nameOfUser, "@ProjectVariables.DangerColor");
+                },
+                complete: function () {
+                    $("#updateModal").modal('hide');
+                    loadTable();
+                    $('#updSubBtn').prop('disabled', false); // Re-enable the button
+                }
+            });
+        }
+
+        function checkEmptyFields() 
+        {
+            var requiredFields = ['updFName', 'updLName', 'updId', 'updEmail', 'updCountry', 'updGender', 'updCity', 'updZipCode'];
+            var isEmpty = false;
+
+            for (var i = 0; i < requiredFields.length; i++) {
+                var field = document.getElementById(requiredFields[i]);
+                if (field && field.value.trim() === '') {
+                    isEmpty = true;
+                    break;
+                }
+            }
+
+            return isEmpty;
+        }
+        
+        function clearFields() {
+            var fieldsToClear = ['updFName', 'updLName', 'updContact', 'updEmail', 'updCountry', 'updCity', 'updZipCode'];
+
+            for (var i = 0; i < fieldsToClear.length; i++) {
+                var field = document.getElementById(fieldsToClear[i]);
+                if (field) {
+                    field.value = null;
+                }
+            }
+
+            var genderField = document.getElementById('updGender');
+            if (genderField) {
+                genderField.selectedIndex = 0; // Reset select field to the first option
+            }
+        }
+
+    </script>
+
+    @if (ViewBag.ValetOrCustomer == 3)
+    {
+        <script>
+            $('#manageViewCustomer').addClass('active');
+            scrollToPosition(200);
+        </script>
+    }
+    else if (ViewBag.ValetOrCustomer == 4)
+    {
+        <script>
+            $('#manageViewValet').addClass('active');
+        </script>
+    }
+}
