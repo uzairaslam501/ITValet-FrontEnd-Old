@@ -4,13 +4,15 @@
     Layout = "~/Views/Shared/_UserSideLayout.cshtml";
 }
 
-<div class="bg-white">
+<div class="reqService">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 my-auto videonone">
                 <center><lottie-player class="video-tablet" src="https://assets4.lottiefiles.com/packages/lf20_zw0djhar.json" background="transparent" speed="1" style="width: 500px; height: 500px;" loop autoplay></lottie-player></center>
             </div>
-            <div class="col-lg-6 mx-auto pt-5">
+            
+            <div class="col-lg-6 mx-auto pt-5 mb-5">
+                <div class="box shadow-sm p-4">
                 <div class="osahan-login py-4">
                     <div class="text-center mb-4">
                         <p style="font-size: 15px;font-weight: bold;">Register as @ViewBag.UserType </p>
@@ -125,7 +127,7 @@
                             if (ViewBag.UserType == "Customer")
                             {
                                 setType = "ITValet";
-                                setText = "IT Valet";
+                                setText = "Tech Valet";
                             }
                             else
                             {
@@ -137,7 +139,7 @@
                                 if (ViewBag.LoginUserRole == "Customer")
                                 {
                                     setValue = "ITValet";
-                                    setText = "IT Valet";
+                                    setText = "Tech Valet";
                                 }
                                 else
                                 {
@@ -157,12 +159,12 @@
                         {
                             @if (ViewBag.LoginUserRole == "Customer")
                             {
-                                <a href="@Url.Action("Register", "Auth", new {value = "ITValet"})" class="btn btn-success btn-block text-uppercase" type="button">  Register as IT Valet </a>
+                                <a href="@Url.Action("Register", "Auth", new {value = "ITValet"})" class="btn btn-success btn-block text-uppercase" type="button">  Register as Tech Valet </a>
                             }
                             else
                             {
                                 <button id="RegisterForm" class="btn btn-success btn-block text-uppercase" type="submit">  Join as @ViewBag.UserType </button>
-                                <a href="@Url.Action("Register", "Auth", new {value = "ITValet"})" class="btn btn-success btn-block text-uppercase" type="button">  Register as IT Valet </a>
+                                <a href="@Url.Action("Register", "Auth", new {value = "ITValet"})" class="btn btn-success btn-block text-uppercase" type="button">  Register as Tech Valet </a>
                             }
 
                         }
@@ -179,9 +181,10 @@
                             }
                         } *@
                         <div class="py-3 d-flex align-item-center">
-                            <span class="mr-0"> Already on IT Valet? <a href="@Url.Action("UserLogin","Auth")">Sign in</a></span>
+                            <span class="mr-0"> Already on Tech Valet? <a href="@Url.Action("UserLogin","Auth")">Sign in</a></span>
                         </div>
                     </form>
+                </div>
                 </div>
             </div>
         </div>

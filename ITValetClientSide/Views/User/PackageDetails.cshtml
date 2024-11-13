@@ -275,7 +275,7 @@
                                         '<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bars"></i></a >' +
                                         '<ul class="dropdown-menu dropdown-menu-right p-1" > ' +
                                         '<li class="p-1">' +
-                                        '<button title="View" class="btn btn-primary mr-1 btn-md text-white" data - toggle="modal" data - target="#createOrderModal" onclick = "loadOrderTables(' + full.id + ')" >' +
+                                        '<button title="View" class="btn btn-success mr-1 btn-md text-black" data - toggle="modal" data - target="#createOrderModal" onclick = "loadOrderTables(' + full.id + ')" >' +
                                         'View Consumption'
                                     '< /button> ' +
                                         '</li>' +
@@ -376,7 +376,7 @@
                                     }
                                     else {
                                         if (full.isDelivered == 0) {
-                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-primary">In Progress</a>';
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-dark">In Progress</a>';
                                         }
                                         else if (full.isDelivered == 1) {
                                             orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Delivered</a>';

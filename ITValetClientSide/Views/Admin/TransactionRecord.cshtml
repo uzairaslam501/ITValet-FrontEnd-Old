@@ -27,7 +27,7 @@
 
                 <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
                     <div class="form-group">
-                        <label><strong>IT Valet Name:</strong></label>
+                        <label><strong>Tech Valet Name:</strong></label>
                         <input type="email" maxlength="40" class="form-control" id="searchItValet" style="background-color:white" placeholder="Search IT-Valet Here">
                     </div>
                 </div>
@@ -59,7 +59,7 @@
 
     <div class="table-responsive">
         <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
-            <thead class="bg-indigo-800">
+            <thead class="bg-dark text-white">
                 <tr>
                     <th class="text-bold" hidden>...</th>
                     <th class="text-bold text-center" style="min-width: 140px;">Customer</th>
@@ -106,7 +106,7 @@
                     [
                         { "data": "hidden", "name": "0" },
                         { "data": "customerName", "name": "CustomerName" },
-                        { "data": "itValetName", "name": "IT Valet" },
+                        { "data": "itValetName", "name": "Tech Valet" },
                         { "data": "payPalEmailAccount", "name": "PayPalEmailAccount" },
                         { "data": "orderTitle", "name": "OrderTitle" },
                         { "data": "orderPrice", "name": "OrderPrice" },
@@ -161,7 +161,7 @@
                                 var url = "../User/OrderDetail?orderId=" + orderId;
 
                                 // Create the hyperlink HTML
-                                var linkHtml = '<a href="' + url + '">' + full.orderTitle + '</a>';
+                                var linkHtml = '<a href="' + url + '" class="orderLink">' + full.orderTitle + '</a>';
 
                                 // Return the HTML
                                 return linkHtml;
@@ -202,7 +202,7 @@
                                     return transactionStatus;
                                 }
                                 else if (full.transactionStatus == "RETURNED") {
-                                    var transactionStatus = '<span class="label label-info">FUNDS_RECOVERED</span>';
+                                    var transactionStatus = '<span class="label label-secondary">FUNDS_RECOVERED</span>';
                                     return transactionStatus;
                                 }
                                 else {

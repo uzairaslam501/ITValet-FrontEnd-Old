@@ -15,7 +15,11 @@
         font-size: 11px!important;
         font-weight: bold!important;
         height: 34px!important;
-        font-family: Helvetica; 
+        font-family: Myriad Pro Regular;
+    }
+
+    .text-muted-black{
+        color:#000 !important;
     }
 </style>
 <section class="py-5">
@@ -48,44 +52,44 @@
                 <div class="bg-white rounded shadow-sm sidebar-page-right">
                     <div>
                         <div class="p-3">
-                            <p class="text-muted font-weight-bold h6 mb-3">Pay to Your IT Valet</p>
-                            <p class="text-muted font-weight-bold mb-0">Project Title : @Model.PaymentTitle</p>
+                            <p class="text-muted-black font-weight-bold h6 mb-3">Pay to Your Tech Valet</p>
+                            <p class="text-muted-black font-weight-bold mb-0">Project Title : @Model.PaymentTitle</p>
                             <div class="border mt-4 mb-2 rounded">
                                 <div class="d-flex border-bottom">
                                     <div class="p-3">
-                                        <p class="text-muted font-weight-bold mb-0" id="p1">Amount You Pay = @Model.WorkingHours * @ViewBag.hourlyRate</p>
+                                        <p class="text-muted-black font-weight-bold mb-0" id="p1">Amount You Pay = @Model.WorkingHours * @ViewBag.hourlyRate</p>
                                     </div>
                                     <div class="p-3 ml-auto">
-                                        <p class="text-muted font-weight-bold mb-0" id="v1">$@ViewBag.PayableOrderCharges</p>
+                                        <p class="text-muted-black font-weight-bold mb-0" id="v1">$@ViewBag.PayableOrderCharges</p>
                                     </div>
                                 </div>
 
                                 <div class="d-flex border-bottom">
                                     <div class="p-3">
-                                        <p class="text-muted font-weight-bold mb-0" id="p2">Credit card processing fee (4 %)</p>
+                                        <p class="text-muted-black font-weight-bold mb-0" id="p2">Credit card processing fee (4 %)</p>
                                     </div>
                                     <div class="p-3 ml-auto">
-                                        <p class="text-muted font-weight-bold mb-0" id="v2">$@Model.StripeFee</p>
+                                        <p class="text-muted-black font-weight-bold mb-0" id="v2">$@Model.StripeFee</p>
                                     </div>
                                 </div>
                                 <div class="d-flex" id="Reimbursements">
                                     <div class="p-3">
-                                        <p class="text-muted font-weight-bold mb-0">Your Reimbursements <span data-toggle="tooltip" data-placement="right" title="Funds credited back to your account for canceled orders."><i class="fa fa-question-circle" aria-hidden="true"></i></span></p>
+                                        <p class="text-muted-black font-weight-bold mb-0">Your Reimbursements <span data-toggle="tooltip" data-placement="right" title="Funds credited back to your account for canceled orders."><i class="fa fa-question-circle" aria-hidden="true"></i></span></p>
                                         <p class="mb-0 text-muted">Funds that were credited back to your account for canceled orders.Stripe refund charges may be applicable.</p>
                                     </div>
                                     <div class="p-3 ml-auto">
-                                        <p class="text-muted font-weight-bold mb-0">$@ViewBag.PayableOrderCharges</p>
+                                        <p class="text-muted-black font-weight-bold mb-0">$@ViewBag.PayableOrderCharges</p>
                                     </div>
                                 </div>
 
 
                                 <div class="bg-light d-flex border-bottom">
                                     <div class="p-3">
-                                        <p class="text-muted font-weight-bold mb-0">PAYING</p>
+                                        <p class="text-muted-black font-weight-bold mb-0">PAYING</p>
                                     </div>
                                     <div class="border-left p-3 ml-auto">
 
-                                        <p class="text-muted font-weight-bold mb-0" id="v5">TOTAL $@Model.TotalWorkCharges</p>
+                                        <p class="text-muted-black font-weight-bold mb-0" id="v5">TOTAL $@Model.TotalWorkCharges</p>
 
                                     </div>
                                 </div>
@@ -141,55 +145,55 @@
                     <div class="bg-white rounded shadow-sm sidebar-page-right">
                         <div>
                             <div class="p-3">
-                                <p class="text-muted font-weight-bold h6 mb-3">Use Your Sessions</p>
-                                <p class="text-muted font-weight-bold mb-0">Project Title : @Model.PaymentTitle</p>
+                                <p class="text-muted-black font-weight-bold h6 mb-3">Use Your Sessions</p>
+                                <p class="text-muted-black font-weight-bold mb-0">Project Title : @Model.PaymentTitle</p>
                                 <div class="border mt-4 mb-2 rounded">
 
                                     <div class="d-flex border-bottom">
                                         <div class="p-3">
-                                            <p class="text-muted font-weight-bold mb-0" id="p1">1 Session =</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="p1">1 Session =</p>
                                         </div>
                                         <div class="p-3 ml-auto">
-                                            <p class="text-muted font-weight-bold mb-0" id="v1">1 Hour</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="v1">1 Hour</p>
                                         </div>
                                     </div>
 
                                     <div class="d-flex border-bottom">
                                         <div class="p-3">
-                                            <p class="text-muted font-weight-bold mb-0" id="p1">Total Working Hours =</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="p1">Total Working Hours =</p>
                                         </div>
                                         <div class="p-3 ml-auto">
-                                            <p class="text-muted font-weight-bold mb-0" id="v1">@Model.WorkingHours</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="v1">@Model.WorkingHours</p>
                                         </div>
                                     </div>
 
                                     <div class="d-flex border-bottom">
                                         <div class="p-3">
-                                            <p class="text-muted font-weight-bold mb-0" id="p2">Using Session</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="p2">Using Session</p>
                                         </div>
                                         <div class="p-3 ml-auto">
-                                            <p class="text-muted font-weight-bold mb-0" id="v2">@Model.WorkingHours</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="v2">@Model.WorkingHours</p>
                                         </div>
                                     </div>
 
                                     <div class="d-flex border-bottom">
                                         <div class="p-3">
-                                            <p class="text-muted font-weight-bold mb-0" id="p2">Remaining Sessions After Confirmation</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="p2">Remaining Sessions After Confirmation</p>
                                         </div>
                                         <div class="p-3 ml-auto">
-                                            @*<p class="text-muted font-weight-bold mb-0" id="v2">@ViewBag.sessionDetails.RemainingSessions</p>*@
-                                            <p class="text-muted font-weight-bold mb-0" id="v2">@ViewBag.RemainingSessionsAfterOrderConfirm</p>
+                                            @*<p class="text-muted-black font-weight-bold mb-0" id="v2">@ViewBag.sessionDetails.RemainingSessions</p>*@
+                                            <p class="text-muted-black font-weight-bold mb-0" id="v2">@ViewBag.RemainingSessionsAfterOrderConfirm</p>
                                         </div>
                                     </div>
 
 
                                     <div class="bg-light d-flex border-bottom">
                                         <div class="p-3">
-                                            <p class="text-muted font-weight-bold mb-0">PAY By</p>
+                                            <p class="text-muted-black font-weight-bold mb-0">PAY By</p>
                                         </div>
                                         <div class="border-left p-3 ml-auto">
 
-                                            <p class="text-muted font-weight-bold mb-0" id="v5">Package</p>
+                                            <p class="text-muted-black font-weight-bold mb-0" id="v5">Package</p>
 
                                         </div>
                                     </div>

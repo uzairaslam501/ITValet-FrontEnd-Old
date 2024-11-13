@@ -7,6 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="google-site-verification" content="rExwVWZpC8vXzSCDzPJQjr9VkHrKUk1EW1Vs7jyR93s" />
 	<title>IT-Valet</title>
 
 	<!-- Global stylesheets -->
@@ -50,6 +51,55 @@
 
 
 	@RenderSection("CustomCss", false)
+	<style>
+		.content-wrapper {
+			background: #f3f3f3
+		}
+		.orderLink{
+            color: #000 !important;
+            font-weight: 600 !important;
+            text-decoration: underline !important;
+        }
+		a{
+			color: #fcd609;
+		}
+		a:hover{
+			color: #9b9b9b
+		}
+
+		.wnoty-notification.wnoty-error {
+			border-left: 5px solid #9b9b9b;
+			color: #000;
+		}
+		.btn-success {
+			background-color: #FCD609 !important;
+			color: #000;
+			border: 1px solid #000;
+		}
+
+			.btn-success:hover {
+				background: #000 !important;
+				color: #fcd609;
+				border: 1px solid #fcd609;
+			}
+		.btn-secondary{
+			background-color : #9b9b9b
+		}
+
+		.bg-systemclr {
+			background-color: #FCD609
+		}
+		.label-success{
+			background-color: #FCD609;
+			border: #000
+		}
+		.label-secondary{
+			background-color: #9b9b9b;
+		}
+		.btn-dark:hover{
+			color: #FCD609 !important
+		}
+	</style>
 </head>
 
 <body>
@@ -80,7 +130,7 @@
 
 
 	<!-- Main navbar -->
-	<div class="navbar navbar-inverse bg-indigo">
+	<div class="navbar navbar-inverse bg-dark">
 		<div class="navbar-header">
 			@*<a class="navbar-brand" href="index.html"><img src="assets/images/logo_light.png" alt=""></a>*@
 
@@ -171,11 +221,11 @@
 									</ul>
 								</li>
 								<li>
-									<a href="#"><i class="icon-users"></i> <span>Manage IT Valets</span></a>
+									<a href="#"><i class="icon-users"></i> <span>Manage Tech Valets</span></a>
 									<ul>
-										<li id="manageAddValet"><a href="@Url.Action("AddNewUser", "Admin", new{ valetOrCustomer = 4})"><i class="icon-plus-circle2"></i> <span>Add New IT Valet</span></a></li>
-										<li id="manageViewValet"><a href="@Url.Action("ViewUser", "Admin", new{ valetOrCustomer = 4})"><i class="icon-eye"></i> <span>View IT Valets</span></a></li>
-										<li id="manageValetUnderReview"><a href="@Url.Action("UserUnderReviews", "Admin", new{ valetOrCustomer = 4})"><i class="icon-checkmark3"></i> <span>IT Valet Under Review</span></a></li>
+										<li id="manageAddValet"><a href="@Url.Action("AddNewUser", "Admin", new{ valetOrCustomer = 4})"><i class="icon-plus-circle2"></i> <span>Add New Tech Valet</span></a></li>
+										<li id="manageViewValet"><a href="@Url.Action("ViewUser", "Admin", new{ valetOrCustomer = 4})"><i class="icon-eye"></i> <span>View Tech Valets</span></a></li>
+										<li id="manageValetUnderReview"><a href="@Url.Action("UserUnderReviews", "Admin", new{ valetOrCustomer = 4})"><i class="icon-checkmark3"></i> <span>Tech Valet Under Review</span></a></li>
 									</ul>
 								</li>
 								<li>

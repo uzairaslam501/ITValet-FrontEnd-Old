@@ -11,6 +11,7 @@
     .icons-list a[data-action]:after{
         font-size:30px;
     }
+    
 </style>
 
 <div class="modal fade" id="updateModal">
@@ -84,7 +85,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="PostUpdateCustomer()" id="updSubBtn">Update</button>
+                        <button type="button" class="btn btn-success" onclick="PostUpdateCustomer()" id="updSubBtn">Update</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <br/><span name="UserName" id="formButtonError_ErrMsg" style="margin-right:20px;" class="text-danger"></span>
 
@@ -99,7 +100,7 @@
 <div class="modal fade" id="confirmActivateModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-primary py-4 text-left">
+            <div class="modal-header bg-systemclr py-4 text-left">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h3 class="modal-title">Activation</h3>
             </div>
@@ -111,7 +112,7 @@
             </div>
             <div class="modal-footer border-top-1 border-top-grey-300 pt-10">
                 <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary btn-sm" onclick="updateStatus()" id="confirmActiveModalAction">Proceed</a>
+                <a class="btn btn-success btn-sm" onclick="updateStatus()" id="confirmActiveModalAction">Proceed</a>
             </div>
         </div>
     </div>
@@ -181,14 +182,14 @@
             <div class="panel panel-flat p-20">
                 <div class="row">
                     <div class="col-md-12 text-center">
-                        <u><h3>@(ViewBag.ValetOrCustomer == 3 ? "Customer List" : "IT Valet List")</h3></u>
+                        <u><h3>@(ViewBag.ValetOrCustomer == 3 ? "Customer List" : "Tech Valet List")</h3></u>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-8"></div>
                     <div class="col-md-2 pull-right btn-block">
-                        <a href="@Url.Action("AddNewUser", "Admin", new { ValetOrCustomer = @ViewBag.ValetOrCustomer })" class="btn btn-primary m-5 pull-right">Add New</a>
+                        <a href="@Url.Action("AddNewUser", "Admin", new { ValetOrCustomer = @ViewBag.ValetOrCustomer })" class="btn btn-success m-5 pull-right">Add New</a>
                     </div>
                 </div>
 
@@ -196,7 +197,7 @@
 
                 <div class="table-responsive">
                     <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
-                        <thead class="bg-indigo-800">
+                        <thead class="bg-dark text-white">
                             <tr>
                                 <th class="text-bold" hidden>...</th>
                                 <th class="text-bold text-center" style="min-width: 140px;">First Name</th>
@@ -349,14 +350,14 @@
 
                                 if (full.isActive == "EmailVerificationPending") 
                                 {
-                                    userActions += '<button class="btn btn-sm bg-primary icon-envelope mr-5" onclick="ActivationEmail(' + full.id + ')" title="Send Activation Email"></button>';
+                                    userActions += '<button class="btn btn-sm bg-systemclr icon-envelope mr-5" onclick="ActivationEmail(' + full.id + ')" title="Send Activation Email"></button>';
 
 
                                 } else if (full.isActive == "AdminVerificationPending") {
-                                    userActions += '<button class="btn btn-sm bg-primary icon-check mr-5" onclick="AccountActivate(' + full.id + ')" title="Activate Account"></button>';
+                                    userActions += '<button class="btn btn-sm bg-secondary icon-check mr-5" onclick="AccountActivate(' + full.id + ')" title="Activate Account"></button>';
                                 }
 
-                                userActions += '<button class="btn btn-sm bg-info icon-pencil mr-5" onclick="updateFunction(\'' + full.userEncId + '\')" title="Update"></button>' +
+                                userActions += '<button class="btn btn-sm bg-systemclr icon-pencil mr-5" onclick="updateFunction(\'' + full.userEncId + '\')" title="Update"></button>' +
                                     '<button class="btn btn-sm bg-danger icon-bin mr-5" onclick="DeleteUser(' + full.id + ')" title="Delete"></button>';
 
                                 var dropdownWidth = (full.isActive == "EmailVerificationPending" || full.isActive == "AdminVerificationPending") ? '152px' : '101px';

@@ -23,20 +23,21 @@
         table.dataTable thead > tr > th.sorting:after, table.dataTable thead > tr > th.sorting_asc:after, table.dataTable thead > tr > th.sorting_desc:after, table.dataTable thead > tr > th.sorting_asc_disabled:after, table.dataTable thead > tr > th.sorting_desc_disabled:after, table.dataTable thead > tr > td.sorting:after, table.dataTable thead > tr > td.sorting_asc:after, table.dataTable thead > tr > td.sorting_desc:after, table.dataTable thead > tr > td.sorting_asc_disabled:after, table.dataTable thead > tr > td.sorting_desc_disabled:after {
             display: none !important;
         }
+        
     </style>
 }
 
 @if (ViewBag.User.Role == "Customer")
 {
-    <div class="main-page second py-5">
+    <div class="second main-page py-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="osahan-table bg-white rounded p-4 text-center">
+                    <div class="osahan-table bg-white rounded shadow-sm p-4 text-center">
                         @if (ViewBag.User.Role == "Customer")
                         {
                             <h2 class="">
-                                Manage appointments with your IT Valet
+                                Manage appointments with your Tech Valet
                             </h2>
                         }
                         else
@@ -70,11 +71,11 @@
     </div>
 }
 <!--Manage Orders-->
-<div class="main-page second pb-5 mt-5">
+<div class="second main-page p-5">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="osahan-table bg-white rounded p-4 text-center">
+                <div class="osahan-table bg-white shadow-sm rounded p-4 text-center">
                     <h2 class="">
                         Manage Orders
                     </h2>
@@ -202,10 +203,10 @@
                                             '<a style="display:none" title="Update" class="btn btn-info btn-md mr-1 text-white" onclick="Getrequestbyid(' + full.id + ')" data-toggle="modal" data-target="#BankModal">' +
                                                 '<i class="fa fa-pencil"></i> ' +
                                             '</a>' +
-                                            '<a title="View" class="btn btn-primary mr-1 btn-md text-white" href="../User/UsersForRequestedService?requestServiceId=' + full.encId + '">' +
+                                            '<a title="View" class="btn btn-success mr-1 btn-md " href="../User/UsersForRequestedService?requestServiceId=' + full.encId + '">' +
                                                 '<i class="fa fa-eye"></i>' +
                                             '</a>' +
-                                            '<a title="Delete" class="btn btn-danger btn-md text-white" onclick="deleteService(' + full.id + ')">' +
+                                            '<a title="Delete" class="btn btn-dark btn-md text-white" onclick="deleteService(' + full.id + ')">' +
                                                 '<i class="fa fa-trash-o"></i>' +
                                             '</a>' +
                                             '</li>' +
@@ -316,7 +317,7 @@
                                     }
                                     else {
                                         if (full.isDelivered == 0) {
-                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-primary">In Progress</a>';
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-dark">In Progress</a>';
                                         }
                                         else if (full.isDelivered == 1) {
                                             orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Delivered</a>';

@@ -38,18 +38,20 @@ function fn() {
 //Menu
 // Toggle menu
 function toggleMenu() {
-    document.getElementById('isToggle').classList.toggle('open');
-    var isOpen = document.getElementById('navigation')
-    if (isOpen.style.display === "block") {
-        isOpen.style.display = "none";
+    const isToggle = document.getElementById('isToggle');
+    const navigation = document.getElementById('navigation');
+
+    isToggle.classList.toggle('open');
+
+    // Toggle the visibility of the navigation
+    if (navigation.classList.contains('open')) {
+        navigation.classList.remove('open');
     } else {
-        isOpen.style.display = "block";
+        navigation.classList.add('open');
     }
-};
-
-//Menu Active
+}
+// Menu Active
 function getClosest(elem, selector) {
-
     // Element.matches() polyfill
     if (!Element.prototype.matches) {
         Element.prototype.matches =
@@ -71,13 +73,11 @@ function getClosest(elem, selector) {
         if (elem.matches(selector)) return elem;
     }
     return null;
-
-};
+}
 
 function activateMenu() {
     var menuItems = document.getElementsByClassName("sub-menu-item");
     if (menuItems) {
-
         var matchingMenuItem = null;
         for (var idx = 0; idx < menuItems.length; idx++) {
             if (menuItems[idx].href === window.location.href) {
@@ -114,17 +114,21 @@ function activateMenu() {
 }
 
 // Clickable Menu
-if(document.getElementById("navigation")){
+if (document.getElementById("navigation")) {
     var elements = document.getElementById("navigation").getElementsByTagName("a");
-    for(var i = 0, len = elements.length; i < len; i++) {
+    for (var i = 0, len = elements.length; i < len; i++) {
         elements[i].onclick = function (elem) {
-            if(elem.target.getAttribute("href") === "javascript:void(0)") {
-                var submenu = elem.target.nextElementSibling.nextElementSibling;
-                submenu.classList.toggle('open');
+            // Check if the clicked element is intended to open a submenu
+            if (elem.target.getAttribute("href") === "javascript:void(0)") {
+                var submenu = elem.target.nextElementSibling;
+                if (submenu) {
+                    submenu.classList.toggle('open');
+                }
             }
         }
     }
 }
+
 
 // Menu sticky
 function windowScroll() {

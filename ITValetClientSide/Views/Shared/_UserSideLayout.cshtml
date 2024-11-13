@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Gurdeep singh osahan">
     <meta name="author" content="Gurdeep singh osahan">
-    <title>IT Valet - @ViewData["Title"]</title>
+    <meta name="google-site-verification" content="rExwVWZpC8vXzSCDzPJQjr9VkHrKUk1EW1Vs7jyR93s" />
+    <title>Tech Valet - @ViewData["Title"]</title>
     <!-- Favicon Icon -->
     <link rel="icon" type="image/png" href="~/Images/favicon.ico">
     <!-- Bootstrap core CSS -->
@@ -20,6 +21,7 @@
     <link href="~/frontAssets/vendor/slick-master/slick/slick.css" rel="stylesheet" type="text/css">
     <!-- Lightgallery -->
     <link href="~/frontAssets/vendor/lightgallery-master/dist/css/lightgallery.min.css" rel="stylesheet">
+    <link href="~/myriad-pro-cufonfonts-webfont/style.css" rel="stylesheet" />
     <!-- Select2 CSS -->
     <link href="~/frontAssets/vendor/select2/css/select2-bootstrap.css" />
     <link href="~/frontAssets/vendor/select2/css/select2.min.css" rel="stylesheet">
@@ -36,18 +38,36 @@
             .header-block {
                 display: none;
             }
+
+            .navbar-light .navbar-toggler {
+                color: #fff !important;
+                background: #fcd609;
+                border-color: rgba(0, 0, 0, .1);
+            }
+
+            
         }
 
         @@media only screen and (min-width: 992px) {
             .header-block-desktop {
                 display: none;
             }
+
+           
         }
 
         @@media only screen and (min-width: 768px) {
             .header-block-tab {
                 display: none;
             }
+
+            .navbar-light .navbar-toggler {
+                color: #fff !important;
+                background: #fcd609;
+                border-color: rgba(0, 0, 0, .1);
+            }
+
+            
         }
 
         @@media (min-width: 0px) and (max-width: 767px) {
@@ -63,6 +83,12 @@
                 border-bottom: 3px solid #3f424452;
                 z-index: 9;
             }
+
+            .navbar-light .navbar-toggler {
+                color: #fff !important;
+                background: #fcd609;
+                border-color: rgba(0, 0, 0, .1);
+            }
         }
 
         @@media only screen and (max-width: 768px) {
@@ -71,11 +97,82 @@
             }
         }
 
+        body{
+            font-family: "Myriad Pro Regular", Arial;
+            background: #fff !important
+        }
+
+        h1, h2, h3, h4, h5, h6, p, span {
+            font-family: "Myriad Pro Regular", Arial;
+        }
+        .navbar{
+            font-family: "Myriad Pro Semibold", Arial;
+            font-size:25px
+        }
+        .text-muted{
+            color:#fff !important
+        }
         .blackColor {
-            color: black;
-        }        
+            color: #fff;
+            font-size: 12px;
+        }
+
+        
+        .wnoty-notification.wnoty-error {
+            border-left: 5px solid #9b9b9b;
+            color: #000;
+        }
+        .btn-success:hover{
+            background: #000;
+            color: #fcd609;
+            border: 1px solid #fcd609;
+        }
+        .btn-success:focus{
+            background:#9b9b9b;
+            border-color:#000;
+        }
+
+        .btn-success:not(:disabled):not(.disabled).active, .btn-success:not(:disabled):not(.disabled):active, .show > .btn-success.dropdown-toggle{
+            color: #fff;
+            background-color: #9b9b9b;
+            border-color: #000;
+        }
+        .btn-success.disabled, .btn-success:disabled{
+            color: #000;
+            background-color: #fcd609;
+            border-color: #000;
+        }
+        .nav-link {
+            color: #9b9b9b !important
+        }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+            color: #495057 !important;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+        .btn-success:focus{
+            background:#9b9b9b !important;
+            border: 1px solid #000 !important;
+            box-shadow:none !important
+        }
         .redcolor {
             color: red;
+        }
+
+        .select2-results__option:hover{
+            background:#9b9b9b !important
+        }
+
+        .dropdown-item:focus{
+            background:#9b9b9b
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected]{
+            background-color:#9b9b9b !important
+        }
+        
+        .select2-container--default .select2-results__option[aria-selected=true]{
+          background-color:#9b9b9b;
         }
         #notificationsBody {
             max-height: 450px !important;
@@ -86,6 +183,61 @@
             right: 4px;
             position: relative;
             top: -8px;
+        }
+
+        .social{
+            display:flex;
+        }
+
+        .fc-button {
+            background-color: #fcd609 !important;
+            color: #000 !important;
+        }
+        .bg-systemclr {
+            background-color: #FCD609 !important
+        }
+        .custom-control-input:checked ~ .custom-control-label::before {
+            color: #fff;
+            border-color: #000 !important;
+            background-color: #000;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::after {
+            color: #fff;
+            border-color: #000 !important;
+            background-color: #000;
+        }
+
+        .badge-success{
+            background-color: #fcd609
+        }
+        .fa-circle:before{
+            color: #fcd609;
+        }
+        .fa-check{
+            color: #fcd609
+        }
+        .custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+            background-color: #9b9b9b;
+            -webkit-transform: translateX(.75rem);
+            transform: translateX(.75rem);
+        }
+
+        
+        .custom-control-input:focus ~ .custom-control-label::before {
+            box-shadow: 0 0 0 .2rem #fcd609;
+            background: #fcd609;
+        }
+        .social li:not(:last-child){
+            padding-bottom:3px;
+        }
+
+        .social li {
+            border-radius:50%;
+            border: 1px solid #333;
+            margin:0 2px;
+            height:fit-content;
+            padding:3px 8px;
         }
     </style>
     <!-- Bootstrap core JavaScript -->
@@ -209,16 +361,16 @@
                 var IsCompleteValetAccount = @User.Claims.First(x => x.Type == "IsCompleteValetAccount").Value;
                 if (IsCompleteValetAccount == "1")
                 {
-                    <a class="navbar-brand" href="@Url.Action("Welcome","Home")"><img src="~/frontAssets/images/CustomImages/butlerlogo.png" alt=""></a>
+                    <a class="navbar-brand" href="@Url.Action("Welcome","Home")"><img src="~/frontAssets/images/Logo Web svg.svg" alt=""></a>
                 }
                 else
                 {
-                    <a class="navbar-brand" href="#"><img src="~/frontAssets/images/CustomImages/butlerlogo.png" alt=""></a>
+                    <a class="navbar-brand" href="@Url.Action("Welcome","Home")"><img src="~/frontAssets/images/Logo Web svg.svg" alt=""></a>
                 }
             }
             else
             {
-                <a class="navbar-brand" href="@Url.Action("Welcome","Home")"><img src="~/frontAssets/images/CustomImages/butlerlogo.png" alt=""></a>
+                <a class="navbar-brand" href="@Url.Action("Welcome","Home")"><img src="~/frontAssets/images/Logo Web svg.svg" alt=""></a>
             }
         @if (User.Identity.IsAuthenticated)
         {
@@ -278,7 +430,9 @@
                                 role="button" data-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false"
+                                style="background-color:#fcd609"
                                 onclick="getNotifications()">
+                               
                                 <i class="fa fa-bell fa-lg "></i>
                                 <span id="notifiCount"
                                     class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
@@ -297,14 +451,14 @@
                             </div>
                         </li>
                         <li id="ManageOrdersIcon" class="nav-item dropdown no-arrow no-caret mr-3 dropdown-notifications">
-                            <a class="btn btn-icon btn-transparent-dark dropdown-toggle" href="@Url.Action("ManageOrders","User")" title="Manage Orders">
+                            <a class="btn btn-icon btn-transparent-dark dropdown-toggle" style="background-color:#fcd609" href="@Url.Action("ManageOrders","User")" title="Manage Orders">
                                 <i class="mt-1 fa fa-solid fa-list"></i>
                             </a>
                         </li>
                     @if (loggedInUserRole == "Customer" || loggedInUserRole == "Valet")
                         {
                             <li id="ManageMessagesIcon" class="nav-item dropdown no-arrow no-caret mr-3 dropdown-notifications">
-                                <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownMessages" href="@Url.Action("Messages","Home")" role="button">
+                                <a class="btn btn-icon btn-transparent-dark dropdown-toggle" style="background-color:#fcd609" id="navbarDropdownMessages" href="@Url.Action("Messages","Home")" role="button">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mail">
                                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                                         <polyline points="22,6 12,13 2,6"></polyline>
@@ -403,14 +557,14 @@
                             if (IsCompleteValetAccount == "1")
                             {
                                 <a class="nav-link" href="@Url.Action("Index", "Home")" id="navbarDropdownPortfolio" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-home mr-1" aria-hidden="true"></i><span class="blackColor semibold">Home</span>
+                                    <i class="fa fa-home mr-1" aria-hidden="true"></i><span class="blackColor semibold">HOME</span>
                                 </a>
                             }
                         }
                         else
                         {
                             <a class="nav-link" href="@Url.Action("Index", "Home")" id="navbarDropdownPortfolio" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-home mr-1" aria-hidden="true"></i><span class="blackColor semibold">Home</span>
+                                <i class="fa fa-home mr-1" aria-hidden="true"></i><span class="blackColor semibold">HOME</span>
                             </a>
                         }
                     </li>
@@ -461,12 +615,12 @@
                         <li class="nav-item  my-auto">
                             <a class="nav-link" href="@Url.Action("UserLogin","Auth")">
                                 <i class="fa fa-fw fa-user"></i>
-                                <span class="blackColor semibold">Sign In</span>
+                                <span class="blackColor semibold">SIGN IN</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/Auth/Register?value=Customer">
-                                <button class="btn btn-outline-secondary blackColor semibold">Join</button>
+                                <button class="btn btn-outline-secondary blackColor semibold">JOIN</button>
                             </a>
                         </li>
                 }
@@ -481,7 +635,7 @@
                         {
                             <li class="nav-item my-auto">
                                 <a class="nav-link" href="@Url.Action("Index","Admin")">
-                                    <span class="blackColor semibold">Dashboard</span>
+                                    <span class="blackColor semibold">DASHBOARD</span>
                                 </a>
                             </li>
                         }
@@ -490,7 +644,7 @@
                             <li class="nav-item my-auto">
                                 <a class="nav-link" href="@Url.Action("RequestService","User")">
                                     <i class="fa fa-fw fa-tasks"></i>
-                                    <span class="blackColor semibold">Request A Service</span>
+                                    <span class="blackColor semibold">REQUEST A SERVICE</span>
                                 </a>
                             </li>
                             @* <li class="nav-item my-auto">
@@ -510,7 +664,7 @@
                                 <div class="dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="systemPackagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa fa-cog mr-2"></i> <!-- Added icon and spacing -->
-                                        <span class="blackColor semibold">Packages</span>
+                                        <span class="blackColor semibold">PACKAGES</span>
                                     </a>
                                     <div class="dropdown-menu" aria-labelledby="systemPackagesDropdown">
                                         <a class="dropdown-item" href="@Url.Action("SystemPackages", "Home")">
@@ -527,7 +681,7 @@
                             <li class="nav-item my-auto">
                                 <a class="nav-link" href="@Url.Action("ScheduledTask", "Home")">
                                     <i class="fa fa-fw fa-calendar"></i> <!-- Replaced icon with "fa-calendar" -->
-                                    <span class="blackColor semibold">Scheduled Appointments</span>
+                                    <span class="blackColor semibold">SCHEDULED APPOINTMENTS</span>
                                 </a>
                             </li>
 
@@ -539,7 +693,7 @@
                                 <li id="ManageAppointments" class="nav-item my-auto">
                                     <a class="nav-link" href="@Url.Action("ManageAppointments", "User")">
                                         <i class="fa fa-fw fa-envelope"></i>
-                                        <span class="blackColor semibold">Manage Appointments</span>
+                                        <span class="blackColor semibold">MANAGE APPOINTMENTS</span>
                                     </a>
                                 </li>
                             }
@@ -550,7 +704,7 @@
                             <li class="nav-item my-auto">
                                 <a href="@Url.Action("Register","Auth",new{value= "ITValet"})" class="nav-link">
                                     <i class="fa fa-fw fa-trophy"></i>
-                                    <span class="blackColor semibold">Become IT Valet</span>
+                                    <span class="blackColor semibold">BECOME TECH VALET</span>
                                 </a>
                             </li>
                         }
@@ -563,20 +717,20 @@
                                     <li id="ManageEarnings" class="nav-item my-auto">
                                         <a class="nav-link" href="@Url.Action("Earnings", "User")">
                                             <i class="fa fa-money"></i>
-                                            <span class="blackColor semibold">Manage Earnings</span>
+                                            <span class="blackColor semibold">MANAGE EARNINGS</span>
                                         </a>
                                     </li>
                                 }                                   
                                 <li id="PreviewProfile" class="nav-item my-auto">
                                     <a class="nav-link" href="@Url.Action("Account","User")">
                                         <i class="fa fa-fw fa-thin fa-eye"></i>
-                                        <span class="blackColor semibold">Preview Your Profile</span>
+                                        <span class="blackColor semibold">PREVIEW YOUR PROFILE</span>
                                     </a>
                                 </li>
                                 <li class="nav-item my-auto">
                                     <a class="nav-link" href="@Url.Action("ScheduledTask", "Home")">
                                         <i class="fa fa-fw fa-calendar"></i> <!-- Replaced icon with "fa-calendar" -->
-                                        <span class="blackColor semibold">Scheduled Appointments</span>
+                                        <span class="blackColor semibold">SCHEDULED APPOINTMENTS</span>
                                     </a>
                                 </li>
                             }
@@ -585,7 +739,7 @@
                         {
                             <li class="nav-item my-auto">
                                 <button class="btn btn-outline-secondary my-2 blackColor semibold" onclick="copyToClipboard()" type="button">
-                                    Share Your Referral
+                                    SHARE YOUR REFFERAL
                                 </button>
                             </li>
                         }
@@ -598,7 +752,7 @@
 
     @RenderBody()
 
-    <footer class="bg-white">
+    <footer class="bg-dark">
         <div class="container">
             <div class="d-flex justify-content-between">
                 <div class="footer-list">
@@ -624,18 +778,32 @@
                 <div class="footer-list">
                     <h2>Community</h2>
                     <ul class="list">
-                             <li><a href="@Url.Action("Register","Auth",new{value= "ITValet"})" >Become an IT Valet</a></li>
+                        <li><a href="@Url.Action("Register","Auth",new{value= "ITValet"})" >Become an Tech Valet</a></li>
+                    </ul>
+                </div>
+                <div class="footer-list">
+                    <h2>Social</h2>
+                    <ul class="social">
+                        <li>
+                            <a href="https://www.facebook.com/people/Techvalet/61566550603175/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a href="https://www.linkedin.com/in/tech-valet-b61900331/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a href="https://www.instagram.com/tech.valet/" target="_blank"><i class="fa fa-instagram" aria-hidden="true"></i></a>
+                        </li>
                     </ul>
                 </div>
             </div>
             <div class="copyright">
                 <div class="logo">
-                    <a href="@Url.Action("Welcome","Home")">
-                        <img src="~/frontAssets/images/CustomImages/IT-LOGO-WEB.png">
+                    <a href="@Url.Action("Index","Home")">
+                        <img src="~/frontAssets/images/Logo Web svg.svg">
                     </a>
                 </div>
                 <p>
-                    © Copyright 2023 IT Valet. All Rights Reserved
+                    © Copyright 2023 Tech Valet. All Rights Reserved
                 </p>
             </div>
         </div>

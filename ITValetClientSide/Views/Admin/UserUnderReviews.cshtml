@@ -24,7 +24,7 @@
             </div>
             <div class="modal-footer border-top-1 border-top-grey-300 pt-10">
                 <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary btn-sm" onclick="updateStatus()" id="confirmActiveModalAction">Proceed</a>
+                <a class="btn btn-success btn-sm" onclick="updateStatus()" id="confirmActiveModalAction">Proceed</a>
             </div>
         </div>
     </div>
@@ -80,14 +80,14 @@
 <div class="panel p-20 m-10">
     <div class="row">
         <div class="col-md-12 text-center">
-            <u><h3>@(ViewBag.ValetOrCustomer == 3 ? "Customer Reviews Record" : "IT Valet Reviews Record")</h3></u>
+            <u><h3>@(ViewBag.ValetOrCustomer == 3 ? "Customer Reviews Record" : "Tech Valet Reviews Record")</h3></u>
         </div>
     </div>
 
     <input type="hidden" id="way" value="" />
     <div class="table-responsive">
         <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
-            <thead class="bg-indigo-800">
+            <thead class="bg-dark text-white">
                 <tr>
                     <th class="text-bold" hidden>...</th>
                     <th class="text-bold text-center" style="min-width: 140px;">First Name</th>
@@ -188,7 +188,7 @@
                             "render": function (data, type, full, meta) {
                                 var x = '';
 
-                                var userActions = '<button class="btn btn-sm bg-primary icon-check mr-5" onclick="AccountActivate(' + full.id + ')" title="Activate Account"></button>';
+                                var userActions = '<button class="btn btn-sm bg-systemclr icon-check mr-5" onclick="AccountActivate(' + full.id + ')" title="Activate Account"></button>';
 
                                 var y = '<ul class="dropdown-menu dropdown-menu-right" style="min-width:98px;padding-left:5px !important;">';
                                 return '<ul class="icons-list"> ' +

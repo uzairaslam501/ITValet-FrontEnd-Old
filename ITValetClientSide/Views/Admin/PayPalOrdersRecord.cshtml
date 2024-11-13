@@ -27,7 +27,7 @@
 
                 <div class="col-md-6 col-lg-6" style="padding: 20px;padding-top:20px;">
                     <div class="form-group">
-                        <label><strong>IT Valet Name:</strong></label>
+                        <label><strong>Tech Valet Name:</strong></label>
                         <input type="email" maxlength="40" class="form-control" id="searchItValet" style="background-color:white" placeholder="Search IT-Valet Here">
                     </div>
                 </div>
@@ -59,7 +59,7 @@
 
     <div class="table-responsive">
         <table class="table text-md-nowrap table-striped table-bordered text-center no-footer" id="userTable">
-            <thead class="bg-indigo-800">
+            <thead class="bg-dark text-white">
                 <tr>
                     <th class="text-bold" hidden>...</th>
                     <th class="text-bold text-center" style="min-width: 140px;">Customer</th>
@@ -149,10 +149,10 @@
                                 var orderStatus = '';
                                 switch (full.orderStatus) {
                                     case "0":
-                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-primary" style="padding: 4px 8px; font-size: 12px;">In Progress</a>';
+                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-dark" style="padding: 4px 8px; font-size: 12px;">In Progress</a>';
                                         break;
                                     case "1":
-                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-info" style="padding: 4px 8px; font-size: 12px;">Delivered</a>';
+                                        orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-secondary" style="padding: 4px 8px; font-size: 12px;">Delivered</a>';
                                         break;
                                     case "2":
                                         orderStatus = '<a href="../User/OrderDetail?orderId=' + full.orderEncId + '" class="btn btn-sm btn-success" style="padding: 4px 8px; font-size: 12px;">Completed</a>';
@@ -191,7 +191,7 @@
                                     return paymentStatus;
                                 }
                                 if (full.paymentStatus == "USED_SESSION") {
-                                    var paymentStatus = '<span class="label label-info">PAID-BY-PACKAGE</span>';
+                                    var paymentStatus = '<span class="label label-secondary">PAID-BY-PACKAGE</span>';
                                     return paymentStatus;
                                 }
                                 if (full.paymentStatus == "SESSION_REVERTED") {
