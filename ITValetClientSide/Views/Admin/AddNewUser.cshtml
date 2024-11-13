@@ -6,7 +6,7 @@
     }
     else if (ViewBag.ValetOrCustomer == 4)
     {
-        ViewBag.Title = "Add IT Valet";
+        ViewBag.Title = "Add Tech Valet";
     }
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -23,7 +23,7 @@
                             }
                             else if (ViewBag.ValetOrCustomer == 4)
                             {
-                                <h2 class="panel-title text-center text-bold">Add New IT Valet</h2>
+                                <h2 class="panel-title text-center text-bold">Add New Tech Valet</h2>
                             }
                         </div>
 
@@ -87,8 +87,8 @@
                                 <div class="input-group">
                                     <input type="password" class="form-control" autocomplete="new-password" placeholder="Your Password" required name="Password" id="password">
                                     <span class="input-group-btn" style="padding-left:0px;">
-                                        <button class="btn btn-default" onclick="ShowPasswords(1)" type="button" style="display:block" id="SignupShowPassword">Show</button>
-                                        <button class="btn btn-default" onclick="ShowPasswords(1)" type="button" style="display:none" id="SignupHidePassword">Hide</button>
+                                        <button class="btn btn-secondary" onclick="ShowPasswords(1)" type="button" style="display:block" id="SignupShowPassword">Show</button>
+                                        <button class="btn btn-secondary" onclick="ShowPasswords(1)" type="button" style="display:none" id="SignupHidePassword">Hide</button>
                                     </span>
                                 </div>
                             </div>
@@ -96,7 +96,7 @@
                             <input type="hidden" name="Role" value="@ViewBag.ValetOrCustomer" />
 
                             <div class="text-center">
-                                <button type="submit" id="subBtn" class="btn btn-primary">Add<i class="icon-database-insert position-right"></i></button>
+                                <button type="submit" id="subBtn" class="btn btn-success">Add<i class="icon-database-insert position-right"></i></button>
                             </div>
                         </div>
                     </div>

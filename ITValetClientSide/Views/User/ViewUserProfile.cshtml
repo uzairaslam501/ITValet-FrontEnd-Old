@@ -4,7 +4,7 @@
 @{
     var Userid = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
 
-    ViewBag.Title = "IT Valet Details";
+    ViewBag.Title = "Tech Valet Details";
     Layout = "~/Views/Shared/_UserSideLayout.cshtml";
 
     int maxSkillsToShow = 5; // Maximum number of skills to show initially
@@ -66,7 +66,7 @@
     </div>
 </div>
 
-<div class="main-page second py-5">
+<div class="second main-page py-5">
     <div class="container">
         @if (ViewBag.msg != "" && ViewBag.msg != null)
         {
@@ -77,7 +77,7 @@
         <div class="row">
             <div class="col-lg-4 left">
                 <div class="profile_info">
-                    <div class="seller-card">
+                    <div class="seller-card shadow-sm">
                         <div>
                             @if (ViewBag.UserRecord.Status == "1")
                             {
@@ -155,7 +155,7 @@
                     </div>
                 </div>
 
-                <div class="box shadow-sm rounded bg-white mb-3">
+                <div class="shadow-sm rounded bg-white mb-3">
                     <div class="box-title border-bottom p-3">
                         <div class="row">
                             <div class="col-md-12 col-12 d-flex justify-content-start">
@@ -193,7 +193,7 @@
                     </div>
                 </div>
 
-                <div class="box shadow-sm rounded bg-white mb-3">
+                <div class="shadow-sm rounded bg-white mb-3">
                     <div class="box-title border-bottom p-3">
                         <div class="row">
                             <div class="col-md-12 col-12 d-flex justify-content-start">
@@ -237,13 +237,13 @@
                             @ViewBag.UserRecord.Language
                         </div>
                         <div class="col-lg-4 text-right">
-                            <button type="button" class="btn btn-sm btn-primary float-right" onclick="checkAvailability()">Check Availability</button>
+                            <button type="button" class="btn btn-sm btn-success float-right" onclick="checkAvailability()">Check Availability</button>
                         </div>
                     </div>
 
                     <div class="row mt-2 py-2">
                         <div class="col-md-12">
-                            <b>IT Valet's Current Time:</b>
+                            <b>Tech Valet's Current Time:</b>
                             <strong class="text-danger">@ViewBag.UserRecord.CurrentTime</strong>
                         </div>
                     </div>
@@ -274,7 +274,7 @@
                                         string split = @x.SkillName;
                                         if (!@String.IsNullOrEmpty(split))
                                         {
-                                            <li class="skill-item" style="background:#138496 !important;">
+                                            <li class="skill-item" style="background:#9b9b9b !important;">
                                                 <a style="color:white !important;">@split</a>
                                             </li>
                                         }
@@ -661,7 +661,7 @@
                     success: function (data) {
                         if (data == true) {
                             $("#to_instantdatetime").val("");
-                            alert("IT Valet is booked");
+                            alert("Tech Valet is booked");
                         }
                     },
                     error: function (error) {
@@ -738,7 +738,7 @@
                 cache: false,
                 success: function (data) {
                     if (data == true) {
-                        alert("IT Valet is booked");
+                        alert("Tech Valet is booked");
                         location.reload();
                     }
                 },

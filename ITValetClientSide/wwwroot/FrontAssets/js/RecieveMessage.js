@@ -23,14 +23,14 @@ connection.on('newMessage', (sender, sndid, messageText, reciever, imgt, msg_id,
     if (reciever == LoggedinId /*&& sndid== recid*/) {
        
         console.log("id="+recid);
-        if ($(document).attr('title') != "IT Valet - Messages" && ordid == "") {
+        if ($(document).attr('title') != "Tech Valet - Messages" && ordid == "") {
             msgcount++;
             readm.show();
             $("#readm").html("" + msgcount.toString() + "");
             //Unreadmsg(recid, msgcount);
         }
 
-        else if ($(document).attr('title') != "IT Valet - Order Details" && ordid != "" || filen =="d_order") {
+        else if ($(document).attr('title') != "Tech Valet - Order Details" && ordid != "" || filen =="d_order") {
 
             debugger;
                 commentcount++;
@@ -50,7 +50,7 @@ connection.on('newMessage', (sender, sndid, messageText, reciever, imgt, msg_id,
         }
 
 
-        if ($(document).attr('title') == "IT Valet - Orders" && ordid != "")
+        if ($(document).attr('title') == "Tech Valet - Orders" && ordid != "")
         {
             var getdiv = $("[id='msgzcount_" + ordid + "']").text();
             var cmt = 0;

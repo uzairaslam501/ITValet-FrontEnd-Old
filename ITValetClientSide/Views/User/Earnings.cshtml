@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_UserSideLayout.cshtml";
 }
 
-<div class="main-page second py-5">
+<div class="second main-page py-5">
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-6 mb-3">
@@ -207,7 +207,7 @@
                            "targets": 6,
                            "className": '',
                            "render": function (data, type, full, meta){
-                                var orderDetailLink = '<a href="../User/OrderDetail?orderId=' + full.encOrderId + '" class="btn btn-sm btn-primary" style="padding: 4px 8px; font-size: 12px;">View</a>';
+                                var orderDetailLink = '<a href="../User/OrderDetail?orderId=' + full.encOrderId + '" class="btn btn-sm btn-success" style="padding: 4px 8px; font-size: 12px;">View</a>';
                                 return orderDetailLink;
                            }
                         }

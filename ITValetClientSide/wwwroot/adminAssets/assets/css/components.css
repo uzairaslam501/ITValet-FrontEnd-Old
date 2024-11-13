@@ -4490,10 +4490,10 @@ a.editable-empty:focus {
   content: '\ed63';
 }
 .alpaca-icon-required {
-  font-family: "Roboto", Helvetica Neue, Helvetica, Arial, sans-serif;
-  float: right;
-  margin-right: 0;
-  margin-left: 5px;
+    font-family: "Myriad Pro Regular",sans-serif;
+    float: right;
+    margin-right: 0;
+    margin-left: 5px;
 }
 .alpaca-icon-required:before {
   content: '*';

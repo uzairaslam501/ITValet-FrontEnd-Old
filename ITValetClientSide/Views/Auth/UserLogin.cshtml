@@ -2,15 +2,15 @@
     ViewData["Title"] = "UserLogin";
     Layout = "~/Views/Shared/_UserSideLayout.cshtml";
 }
-<div class="bg-white">
+<div>
     <div class="container">
         <div class="row justify-content-center align-items-center d-flex">
             <div class="col-lg-4 mx-auto pt-5">
-                <div class="osahan-login py-4">
+                <div class="osahan-login box shadow-sm p-4 mb-5 rounded-0" style="border-radius: 25px !important">
                     <div class="text-center mb-4">
-                        <a href="@Url.Action("Index","Home")"><img src="~/frontAssets/images/CustomImages/butlerlogo.png" alt="" style="width: 139.22px; height: 38px;"></a>
-                        <h5 class="font-weight-bold mt-3">Welcome To IT Valet</h5>
-                        <p class="text-muted">Don't miss your next opportunity. Sign in to stay updated on your professional world.</p>
+                        <a href="@Url.Action("Index","Home")"><img src="~/frontAssets/images/Logo Web Black svg.svg" alt="" style="width: 139.22px; height: 38px;"></a>
+                        <h5 class="font-weight-bold mt-3">Welcome To Tech Valet</h5>
+                        <p class="text-dark">Don't miss your next opportunity. Sign in to stay updated on your professional world.</p>
                     </div>
                     @if (ViewBag.Message != null || ViewBag.Message != "")
                     {
@@ -39,9 +39,9 @@
                         </div>
                         <button class="btn btn-success btn-block text-uppercase" type="submit"> Sign in </button>
 
-                        <a class="btn btn-success btn-block text-uppercase" href="@Url.Action("Register","Auth", new { value = "ITValet"})"><span class="ml-auto" style="margin-right: 12px;">New to IT Valet?</span>Join now</a>
+                        <a class="btn btn-success btn-block text-uppercase" href="@Url.Action("Register","Auth", new { value = "ITValet"})"><span class="ml-auto" style="margin-right: 12px;">New to Tech Valet?</span>Join now</a>
                         <div class="py-3 d-flex align-item-center">
-                            <span hidden class="ml-auto"> New to IT Valet? <a style="display: inline-block; margin-left: 30px!important;" href="@Url.Action("Register","Home", new { value = "Customer"})">Join now</a></span>
+                            <span hidden class="ml-auto"> New to Tech Valet? <a style="display: inline-block; margin-left: 30px!important;" href="@Url.Action("Register","Home", new { value = "Customer"})">Join now</a></span>
                         </div>
                     </form>
                 </div>

@@ -40,7 +40,7 @@
     pointer-events: none;
     color: rgba(250,251,255,0.95);
     font-size: 90%;
-    font-family: 'Helvetica Neue','Segoe UI',Helvetica,Arial,sans-serif;
+    font-family: 'Myriad Pro Regular',sans-serif;
     max-width: 370px;
     z-index: 9999999999999;
     box-shadow: 1px 7px 14px -5px rgba(0,0,0,0.2);
@@ -177,8 +177,8 @@
 }
 
 .wnoty-notification.wnoty-success {
-    border-left: 5px solid #3ec569;
-    color: #3ec569;
+    border-left: 5px solid #fcd609;
+    color: #fcd609;
 }
 
 .wnoty-notification.wnoty-success a {

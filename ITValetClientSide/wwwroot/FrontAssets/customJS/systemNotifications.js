@@ -58,7 +58,7 @@ function getNotifications() {
 
                 var notificationsFooter = '<div style="position: sticky; bottom: 0; " id="notificationsFooter" class="row">' +
                     '<a   style=" background-color: #ffffff; border-top: 1px solid #e3e6ec; " title="Delete All Notifications"  class="col-md-6  dropdown-item dropdown-notifications-footer pull-left" onclick="deleteAllNotifications()"> <i style="margin-left:10px; margin-right: 10px;" b-n5xx7nq1xe="" class="fa fa-trash fa-lg"></i> Delete All Notifications</a>' +
-                    '<a style=" background-color: #ffffff; border-top: 1px solid #e3e6ec;"  title="Mark all as read"  class="text-primary col-md-6 dropdown-item dropdown-notifications-footer" onclick="markAllNotifications()"><i b-n5xx7nq1xe="" style="margin-right: 10px;" class="fa fa-check fa-lg"></i> Mark All Notification</a></div>';
+                    '<a style=" background-color: #ffffff; border-top: 1px solid #e3e6ec;"  title="Mark all as read"  class="text-primary col-md-6 dropdown-item dropdown-notifications-footer" onclick="markAllNotifications()"><i b-n5xx7nq1xe="" style="margin-right: 10px; color: #fcd609" class="fa fa-check fa-lg"></i> <span style="color:#fcd609">Mark All Notification</span></a></div>';
                 var notifications = '<div id="notifications">';
 
                 for (var i = 0; i < data.length; i++) {
@@ -75,7 +75,7 @@ function getNotifications() {
                     }
 
                     notifications += '<div class="dropdown-item dropdown-notifications-item" ' + styling + '>' +
-                        '<div class="dropdown-notifications-item-icon bg-primary">' +
+                        '<div class="dropdown-notifications-item-icon bg-systemclr">' +
                         '<i class="fa fa-bell fa-solid fa-lg text-white"></i>' +
                         '</div>' +
                         '<a onclick="markNotification(\'' + data[i].notificationId + '\')" style="width:-webkit-fill-available" href="' + data[i].url + '" target="_blank"  title="Go to notification Page" class="dropdown-notifications-item-content">' +

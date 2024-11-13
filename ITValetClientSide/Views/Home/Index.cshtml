@@ -6,27 +6,101 @@
 <style>
     .trusted-by li img {
         width:100px;
+        filter: grayscale(100%);
     }
+    
 
-    .headerServiceCard{
-        background-position: center;
-        background-size: cover;
-        border-radius: 20px;
-        background: linear-gradient(to left top, #2cdd9bcf, #1DC8CC), url('../frontAssets/images/service-02.jpg') no-repeat;
-        background-size: cover;
-        background-position: center;
-        text-align:center;
-        color:#fff;
+        .c-fill-color-btn {
+            background-color: #fcd609;
+            border:1px solid #000;
+        }
+
+            .c-fill-color-btn:hover{
+                background :#000;
+                color: #fcd609;
+                border: 1px solid #fcd609;
+            }
+
+        .headerServiceCard1 {
+            background-position: center;
+            background-size: cover;
+            border-radius: 20px;
+            background: #000;
+            background-size: cover;
+            border: 1px solid #fcd609 !important;
+            border-bottom: 8px solid #fcd609 !important;
+            background-position: center;
+            text-align: center;
+            color: #fff;
+        }
+
+        .headerServiceCard{
+            background-position: center;
+            background-size: cover;
+            border-radius: 20px;
+            border: 1px solid #000 !important;
+            border-bottom: 8px solid #000 !important;
+            background: #fcd609;
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            color: #000;
+        }
+    .market-wrapper{
+        background: #fff
     }
+        .market-wrapper .categories-list li a{
+            width: 100%;
+            padding: 25px 0px;
+            border-radius: 7px;
+            border: 1px solid #000;
+            color: #222325;
+            text-decoration: none;
+            text-align: center;
+            position: relative;
+            background: #fcd609;
+            display: inline-block;
+        }
 
-    .headerServiceCard .card-body img{
+               
+
+            .market-wrapper .categories-list li a:hover{
+                color:#fcd609;
+                background-color: #000
+            }
+    .headerServiceCard1 .card-body img{
         width:70px;
     }
+    
+        .headerServiceCard1 .card-body .btn {
+            border: 1px solid #000;
+            background: #fcd609;
+            color: #000;
+        }
 
-    .headerServiceCard .card-body .btn{
-        border: 1px solid #fff;
-    }
+        .headerServiceCard .card-body img {
+            width: 70px;
+        }
 
+        .headerServiceCard .card-body .btn {
+            border: 1px solid #000;
+            background: #000;
+            color: #fcd609
+        }
+
+        hr {
+            display: block;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+            margin-left: auto;
+            margin-right: auto;
+            border-style: inset;
+            border-width: 1px;
+        }
+   .guide-wrapper{
+            background-color: #f3f3f3;
+            border-bottom: 10px solid #fcd609
+        }
     .description {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -34,20 +108,44 @@
         -webkit-line-clamp: 2; /* Number of lines to show */
         -webkit-box-orient: vertical;
     }
+    .cstmr{
+        background: #9b9b9b
+    }
+
+        .homepage-search-title h1{
+            background: #fcd609;
+            border-radius: 20px;
+            font-size: 50px;
+            padding: 25px;
+        }
+        .homepage-search-block{
+            background: #fff
+        }
+        .services-wrapper{
+           
+            background: #fff
+        }
+
+        
+        .blackColor{
+            font-family: "Myriad Pro Semibold", Arial;
+        }
 </style>
 }
 
 <!-- Begin Page Content -->
-<section class="py-5 homepage-search-block position-relative">
+<section class="py-3 homepage-search-block position-relative">
     <div class="container">
         <div class="row py-lg-5">
             <div class="col-lg-6 my-2">
                 <div class="homepage-search-title">
                     <h1 class="mb-3 text-shadow text-gray-900 font-weight-bold">Find The Perfect Freelance Services For Your Business</h1>
                     <h5 class="mb-5 text-shadow text-gray-800 font-weight-normal">
-                        Millions of individuals utilize IT Valet to help them with all they need to make their ideas a reality.
+                        Millions of individuals utilize Tech Valet to help them with all they need to make their ideas a reality.
+                        <hr>
                     </h5>
                 </div>
+
                 @if (ViewBag.LoggedInUseRole == "Customer")
                 {
                     <div class="homepage-search-form" style="">
@@ -82,11 +180,11 @@
             </div>
             
             <div class="col-lg-3 my-2">
-                <div class="card box3 card-responsive headerServiceCard">
+                <div class="card box3 card-responsive headerServiceCard1">
                     <div class="card-body">
                         <img class="card-img-top" src="~/frontAssets/images/CustomImages/1.png" alt="Card image cap">
                         <h5 class="card-title">Need Service?</h5>
-                        <p class="card-text">An IT Valet Service Provider who’s already in your area will complete your job at transparent rates you can feel good about.</p>
+                        <p class="card-text">An Tech Valet Service Provider who’s already in your area will complete your job at transparent rates you can feel good about.</p>
                         @if(ViewBag.LoggedInUseRole == "Valet")
                         {
                             <a href="/Auth/Register?value=Customer" class="btn btn-success">Get Started</a>
@@ -101,7 +199,7 @@
                         }
                         <p class="mb-0 mt-3">Already a member? 
                             <a href="/Auth/UserLogin">
-                                <u class="text-white"><b>Login</b></u>
+                                <u><b>Login</b></u>
                             </a>
                         </p>
                     </div>
@@ -111,9 +209,9 @@
             <div class="col-lg-3 mt-2">
                 <div class="card box3 card-responsive headerServiceCard">
                     <div class="card-body">
-                        <img class="card-img-top" src="~/frontAssets/images/CustomImages/2.png" alt="Card image cap">
+                        <img class="card-img-top" src="~/frontAssets/images/CustomImages/2 (1).png" alt="Card image cap">
                         <h5 class="card-title">Offering Service?</h5>
-                        <p class="card-text">IT Valet connects with top quality service professionals in real-time. IT Valet team handles all the details of each job.</p>
+                        <p class="card-text">Tech Valet connects with top quality service professionals in real-time. Tech Valet team handles all the details of each job.</p>
                         @if (ViewBag.LoggedInUseRole == "Valet")
                         {
                             <a href="/Auth/Register?value=Customer" class="btn btn-success">Join Us</a>
@@ -128,7 +226,7 @@
                         }
                         
                         <p class="mb-0 mt-3">Already offering service? 
-                            <a href="/Auth/UserLogin"><u class="text-white"><b>Login</b></u></a>
+                            <a href="/Auth/UserLogin"><u class="text-dark"><b>Login</b></u></a>
                         </p>
                     </div>
                 </div>
@@ -137,7 +235,7 @@
     </div>
 </section>
 <!--       social -->
-<ul class="trusted-by bg-white border-bottom">
+<ul class="trusted-by border-bottom">
     <li><img src="~/frontAssets/images/home/2.png" class="my-3"></li>
     <li><img src="~/frontAssets/images/home/3.png" class="my-3"></li>
     <li><img src="~/frontAssets/images/home/4.png" class="my-3"></li>
@@ -146,7 +244,7 @@
 <!--social -->
 
 <!--services-->
-<div class="services-wrapper bg-white py-5">
+<div class="services-wrapper py-5">
     <div class="container">
         <h2>Popular Professional Services</h2>
         <div class="row service-slider">
@@ -307,7 +405,7 @@
                         <p>
                             "Being a small but growing brand, we have to definitely do a lot more with less.
                             And when you want to create a business bigger than yourself, you’re going to need help.
-                            And that’s what IT Valet does"
+                            And that’s what Tech Valet does"
                         </p>
                         <span>Tim and Dan Joo, Co-founders</span>
                         <img alt="Company logo" src="~/frontAssets/images/haerfest-logo.png" loading="lazy">
@@ -320,7 +418,7 @@
                         <p>
                             "Being a small but growing brand, we have to definitely do a lot more with less.
                             And when you want to create a business bigger than yourself, you’re going to need help.
-                            And that’s what IT Valet does"
+                            And that’s what Tech Valet does"
                         </p>
                         <span>Tim and Dan Joo, Co-founders</span>
                         <img alt="Company logo" src="~/frontAssets/images/haerfest-logo.png" loading="lazy">
@@ -333,9 +431,9 @@
 <!-- End of Testimonials Carousel -->
 
 
-<div class="market-wrapper py-5 mt-5 bg-white">
+<div class="market-wrapper py-5 mt-5">
     <div class="container">
-        <h2 class="text-center">Explore the Marketplace</h2>
+        <h2 class="text-center text-white">Explore the Marketplace</h2>
         <ul class="categories-list mb-0">
             <li>
                 <a href="#">
@@ -385,26 +483,26 @@
 <div class="guide-wrapper py-5">
     <div class="container">
         <h2>
-            IT Valet
+            Tech Valet
             Guides
             <a href="#" class="float-right">See More guides></a>
         </h2>
         <div class="row">
             <div class="col-md-4">
-                <a href="#" class="guide">
+                <a href="@Url.Action("Index","Article")" class="guide">
                     <img src="~/frontAssets/images/guide-01.jpg">
                     <div class="content">
-                        <h6>Create a Website</h6>
-                        <p>Building a stunning website from A to Z</p>
+                        <h6>Why Is My Computer So Slow?</h6>
+                        <p>Have you ever experienced sitting anxious and impatiently...</p>
                     </div>
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="guide">
+                <a href="@Url.Action("whyismymobilesoslow","Article")" class="guide">
                     <img src="~/frontAssets/images/guide-02.jpg">
                     <div class="content">
-                        <h6>Grow With Digital Marketing</h6>
-                        <p>Promoting your business online</p>
+                        <h6>Why Is My Mobile So Slow?</h6>
+                        <p>Have you ever thought of how your mobile device has gradually become slow, unresponsive, and at times annoyingly slow?</p>
                     </div>
                 </a>
             </div>

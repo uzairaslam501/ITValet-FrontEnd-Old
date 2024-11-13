@@ -13,6 +13,7 @@
 	<link href="~/adminAssets/assets/css/core.css" rel="stylesheet" type="text/css">
 	<link href="~/adminAssets/assets/css/components.css" rel="stylesheet" type="text/css">
 	<link href="~/adminAssets/assets/css/colors.css" rel="stylesheet" type="text/css">
+	<link href="~/myriad-pro-cufonfonts-webfont/" rel="stylesheet" type="text/css">
 	<!-- /global stylesheets -->
 	<!-- Core JS files -->
 	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/loaders/pace.min.js"></script>
@@ -28,7 +29,24 @@
 
 	<script type="text/javascript" src="~/adminAssets/assets/js/plugins/ui/ripple.min.js"></script>
 	<!-- /theme JS files -->
-
+	<style>
+		.login-container{
+			background: #f3f3f3;
+			font-family: "Myriad Pro Regular" , Arial
+		}
+		.btn-success {
+			background-color: #FCD609 !important;
+			color: #000;
+			border: 1px solid #000;
+			width:100%
+		}
+		
+			.btn-success:hover {
+				background: #000 !important;
+				color: #fcd609;
+				border: 1px solid #fcd609;
+			}
+	</style>
 </head>
 
   <body class="login-container">
@@ -45,7 +63,7 @@
 					@RenderBody()
 					<!-- Footer -->
 					<div class="footer text-muted text-center">
-						&copy; 2023 IT Valet. All Rights Reserved.
+						&copy; 2023 Tech Valet. All Rights Reserved.
 					</div>
 					<!-- /footer -->
 				</div>

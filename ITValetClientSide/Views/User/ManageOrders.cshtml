@@ -22,11 +22,11 @@
     </style>
 }
 
-<div class="main-page second pt-5 pb-5">
+<div class="second main-page pt-5 pb-5">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="osahan-table bg-white rounded p-4 text-center">
+                <div class="osahan-table bg-white shadow-sm rounded p-4 text-center">
                     <h2 class="">
                         Manage Orders
                     </h2>
@@ -132,7 +132,7 @@
                                     }
                                     else {
                                         if (full.isDelivered == 0) {
-                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-primary">In Progress</a>';
+                                            orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-dark">In Progress</a>';
                                         }
                                         else if (full.isDelivered == 1) {
                                             orderStatus = '<a href="../User/OrderDetail?orderId=' + full.encId + '" class="btn btn-sm btn-danger">Delivered</a>';

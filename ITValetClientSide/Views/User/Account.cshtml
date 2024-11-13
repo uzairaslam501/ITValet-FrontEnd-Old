@@ -14,6 +14,16 @@
         .select2-container{
             width:100% !important;
         }
+
+        .btn-light{
+            background:#9b9b9b;
+            color:#000;
+        }
+        .btn-light:hover{
+            background: #fcd609;
+            color:#000;
+            border-color:#000
+        }
     </style>
 }
 
@@ -77,12 +87,12 @@
 <!-- End External Account Modal-->
 @if(ViewBag.UserRecord != null)
 {
-    <div class="py-5">
+    <div class="py-5 main-page">
         <div class="container">
             <div class="row">
                 <!-- Main Content -->
                 <aside class="col col-xl-4 order-xl-1 col-lg-12 order-lg-1 col-12">
-                    <div class="box mb-3 shadow-sm rounded bg-white profile-box text-center">
+                    <div class="mb-3 shadow-sm rounded bg-white profile-box text-center">
                         <div class="py-4 px-3">
                             @if (ViewBag.UserRecord.ProfilePicture != null)
                             {
@@ -96,20 +106,20 @@
                         </div>
                         <form action="@Url.Action("UploadProfileImage", "User")" id="uploadProfileImageForm" method="post" enctype="multipart/form-data">
                             <div class="pb-3" id="imageLoadSection">  
-                                <label data-toggle="tooltip" data-placement="top" data-original-title="Upload New Picture" class="btn btn-info m-0" for="fileAttachmentBtn">
+                                <label data-toggle="tooltip" data-placement="top" data-original-title="Upload New Picture" class="btn btn-success m-0" for="fileAttachmentBtn">
                                     <i class="mdi mdi-image"></i> Upload Photo
                                     <input id="fileAttachmentBtn" name="ImagePath" onchange="loadImageFile(event)" accept="image/*" type="file" class="d-none"/>
                                 </label>
                             </div>
                             <div class="pb-3" style="display:none" id="uploadImageBtnSection">
-                                <button class="btn btn-primary" onclick="uploadImage()" id="saveImage">Update Image</button>
+                                <button class="btn btn-success" onclick="uploadImage()" id="saveImage">Update Image</button>
                                 @if (ViewBag.UserRecord.ProfilePicture != null)
                                 {
-                                    <a class="btn btn-primary text-white" onclick="resetPreviewImg('@ViewBag.UserRecord.ProfilePicture')" id="imgReset">Reset</a>
+                                    <a class="btn btn-success text-white" onclick="resetPreviewImg('@ViewBag.UserRecord.ProfilePicture')" id="imgReset">Reset</a>
                                 }
                                 else
                                 {
-                                    <a class="btn btn-primary text-white" onclick="resetPreviewImg('')" id="imgReset">Reset</a>
+                                    <a class="btn btn-success text-white" onclick="resetPreviewImg('')" id="imgReset">Reset</a>
                                 }
                             </div>
                         </form>
@@ -142,18 +152,18 @@
                             }
                         </div>
                         <div class="overflow-hidden border-top">
-                            <a class="font-weight-bold p-3 d-block" href="@Url.Action("Logout","User")"> Log Out </a>
+                            <a class="font-weight-bold p-3 d-block text-dark" href="@Url.Action("Logout","User")"> Log Out </a>
                         </div>
                     </div>
 
                     @if(ViewBag.UserRecord.Role == "Valet" || ViewBag.UserRecord.Role == "Customer")
                     {
-                      <div class="box shadow-sm rounded bg-white mb-3">
+                      <div class="shadow-sm rounded bg-white mb-3">
                         <div class="box-title border-bottom p-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (ViewBag.UserRecord.Role == "Valet")
                                 {
-                                    <h5 class="font-weight-bold text-dark">Scheduled IT Valet Appointments</h5>
+                                    <h5 class="font-weight-bold text-dark">Scheduled Tech Valet Appointments</h5>
                                 }
                                 else
                                 {
@@ -173,7 +183,7 @@
                    
 
                     @if(ViewBag.UserRecord.Role == "Valet"){
-                        <div class="box shadow-sm  rounded bg-white mb-3">
+                        <div class="shadow-sm  rounded bg-white mb-3">
                             <div class="box-title border-bottom p-3">
                                 <h6 class="m-0">Skills &amp; Endorsements</h6>
                             </div>
@@ -245,7 +255,7 @@
                         </div>
 
                         <!--Stripe Accounts-->
-                        <div class="box shadow-sm  rounded bg-white mb-3">
+                        <div class="shadow-sm  rounded bg-white mb-3">
                             <div class="box-title border-bottom p-3">
                                 <h6 class="m-0">Stripe Account Connect</h6>
                             </div>
@@ -301,7 +311,7 @@
                         </div>
 
                         <!-- PayPal Account Attachment -->
-                        <div class="box shadow-sm rounded bg-white mb-3">
+                        <div class="shadow-sm rounded bg-white mb-3">
                             <div class="box-title border-bottom p-3">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <h6 class="m-0">Attach your PayPal account here</h6>
@@ -356,14 +366,14 @@
 
                         <!--end Stripe Connect Account-->
 
-                        <div class="box shadow-sm rounded bg-white mb-3">
+                        <div class="shadow-sm rounded bg-white mb-3">
                             <div class="box-title border-bottom p-3">
                                 <div class="row">
                                     <div class="col-md-6 col-6 d-flex justify-content-start">
                                         <h6 class="m-0">Education</h6>
                                     </div>
                                     <div class="col-md-6 col-6 d-flex justify-content-end">
-                                        <p class="m-0"><a onclick="addNewEducationBtn(1)" style="cursor:pointer; color:#138496;">Add New</a></p>
+                                        <p class="m-0"><a onclick="addNewEducationBtn(1)" style="cursor:pointer; color:#fcd609;">Add New</a></p>
                                     </div>
                                 </div>
                             </div>
@@ -402,7 +412,7 @@
                                         <span class="text-danger" id="educationErrorAlertMessagesSection"></span>
                                         <div class="row">
                                             <div class="col-sm-6 col-6 col-md-6">
-                                                <button type="button" onclick="hideEducationSection()" class="btn btn-outline-success w-100">Cancel</button>
+                                                <button type="button" onclick="hideEducationSection()" class="btn btn-danger w-100">Cancel</button>
                                             </div>
                                             <div class="col-sm-6 col-6 col-md-6">
                                                 <button type="button" onclick="addUpdateEducationBtn()" id="addUpdateEducationBtnLabel" class="btn btn-success w-100">Add</button>
@@ -418,14 +428,14 @@
                             </div>
                         </div>
 
-                        <div class="box shadow-sm rounded bg-white mb-3">
+                        <div class="shadow-sm rounded bg-white mb-3">
                             <div class="box-title border-bottom p-3">
                                 <div class="row">
                                     <div class="col-md-6 col-6 d-flex justify-content-start">
                                         <h6 class="m-0">Services Offered</h6>
                                     </div>
                                     <div class="col-md-6 col-6 d-flex justify-content-end">
-                                        <p class="m-0"><a onclick="addNewExperience(1)" style="cursor:pointer; color:#138496;">Add New</a></p>
+                                        <p class="m-0"><a onclick="addNewExperience(1)" style="cursor:pointer; color:#fcd609;">Add New</a></p>
                                     </div>
                                 </div>
                             </div>
@@ -443,7 +453,7 @@
                                         <span class="text-danger" id="experienceErrorAlertMessagesSection"></span>
                                         <div class="row">
                                             <div class="col-sm-6 col-6 col-md-6">
-                                                <button type="button" onclick="hideExperienceSection()" class="btn btn-outline-success w-100">Cancel</button>
+                                                <button type="button" onclick="hideExperienceSection()" class="btn btn-danger w-100">Cancel</button>
                                             </div>
                                             <div class="col-sm-6 col-6 col-md-6">
                                                 <button type="button" onclick="addUpdateExperienceBtn()" id="addUpdateExperienceBtnLabel" class="btn btn-success w-100">Add</button>
@@ -471,7 +481,7 @@
                                     <div class="col-md-6">
                                         @if (ViewBag.UserRecord.Role == "Valet")
                                         {
-                                            <button type="button" class="btn btn-sm btn-primary float-right" onclick="checkAvailability()">Check Availability</button>
+                                            <button type="button" class="btn btn-sm btn-success float-right" onclick="checkAvailability()">Check Availability</button>
                                         }
                                     </div>
                                     <div class="col-md-12">

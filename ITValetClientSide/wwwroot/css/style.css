@@ -33,7 +33,12 @@
     max-width: 1140px !important;
   }
 }
-
+@font-face {
+    font-family: 'Myriad Pro Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Myriad Pro Regular'), url('MYRIADPRO-REGULAR.woff') format('woff');
+}
 .row > * {
   position: relative;
 }
@@ -1892,10 +1897,10 @@ button:not(:disabled) {
 }
 
 body {
-  font-family: "Poppins", sans-serif;
-  overflow-x: hidden !important;
-  font-size: 15px;
-  color: #3c4858;
+    font-family: "Myriad Pro Regular", sans-serif;
+    overflow-x: hidden !important;
+    font-size: 15px;
+    color: #3c4858;
 }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
@@ -2424,15 +2429,15 @@ p {
 }
 
 #topnav {
-  position: fixed;
-  right: 0;
-  left: 0;
-  top: 0;
-  z-index: 999;
-  background-color: transparent;
-  border: 0;
-  transition: all .5s ease;
-  font-family: "Poppins", sans-serif;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    background: linear-gradient(to right, #434343 0%, black 100%);
+    border: 0;
+    transition: all .5s ease;
+    font-family: "Poppins", sans-serif;
 }
 
 #topnav .logo {
