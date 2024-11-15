@@ -14,5 +14,20 @@ namespace ITValetFrontEnd.Controllers
         {
             return View();
         }
+        [Route("turbo-charge-your-android-tablet-with-these-10-simple-fixes")]
+        public IActionResult turbochargeyourandroidtablet()
+        {
+            return View();
+        }
+        [Route("guides")]
+        public IActionResult Guides()
+        {
+            return View();
+        }
+        [Route("master-your-printer-troubles-with-these-solutions")]
+        public IActionResult MasterYourPrinter()
+        {
+            return View();
+        }
     }
 }
