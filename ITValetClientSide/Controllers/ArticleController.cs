@@ -29,5 +29,17 @@ namespace ITValetFrontEnd.Controllers
         {
             return View();
         }
+        [Route("troubleshoot-your-wifi-with-these-simple-fixes")]
+        public IActionResult TroubleshootYourWifi()
+        {
+            return View();
+        }
+
+        [Route("why-your-internet-keep-dropping-and-how-to-fix-it")]
+        public IActionResult WhyYourInternetKeepDropping()
+        {
+            return View();
+        }
+
     }
 }
