@@ -40,6 +40,45 @@ namespace ITValetFrontEnd.Controllers
         {
             return View();
         }
-
+        [Route("computer-support")]
+        public IActionResult ComputerSupport()
+        {
+            return View();
+        }
+        [Route("mobile-support")]
+        public IActionResult MobileSupport()
+        {
+            return View();
+        }
+        [Route("tablet-assistance")]
+        public IActionResult TabletAssistance()
+        {
+            return View();
+        }
+        [Route("internet-troubleshooting")]
+        public IActionResult InternetTroubleshooting()
+        {
+            return View();
+        } 
+        [Route("printer-solutions")]
+        public IActionResult PrinterSolutions()
+        {
+            return View();
+        }
+        [Route("website-support")]
+        public IActionResult WebsiteSupport()
+        {
+            return View();
+        }
+        [Route("email-support")]
+        public IActionResult EmailSupport()
+        {
+            return View();
+        }
+        [Route("device-troubleshooting")]
+        public IActionResult DeviceTroubleshooting()
+        {
+            return View();
+        }
     }
 }
