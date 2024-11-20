@@ -70,7 +70,7 @@ namespace ITValetFrontEnd.Controllers
         {
             return View();
         }
-        [Route("email-support")]
+        [Route("email-troubleshooting")]
         public IActionResult EmailSupport()
         {
             return View();

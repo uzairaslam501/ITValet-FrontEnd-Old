@@ -224,12 +224,12 @@
         .steps-container {
             font-family: Arial, sans-serif;
             color: #333;
-            margin: 20px;
         }
 
         .step {
             display: flex;
             align-items: flex-start;
+            margin-top:20px
         }
 
         .note {
@@ -274,6 +274,56 @@
             .step a:hover {
                 color: #f0c911; /* Yellow hover effect */
             }
+            .borderright{
+                border-right:1px solid #000
+            }
+        @@media only screen and (max-width: 768px){
+            .logo-center{
+                max-width : 250px;
+                margin-top:0px
+            }
+
+            .borderright {
+                border-right:none
+            }
+            .paragraphfont{
+                font-size:18px;
+            }
+            .rowsection{
+                margin:30px 0 30px 0
+            }
+
+            .howitworks {
+                background: #9b9b9b;
+                padding: 12px;
+                color: #fff;
+                display: inline-block;
+                margin-bottom: -8px;
+                font-size: 25px;
+            }
+
+            .cstmtext {
+                padding: 30px;
+                font-size: 18px;
+                line-height: 1.1;
+            }
+
+            .step-number {
+                font-size: 40px;
+                font-weight: bold;
+                color: #fcd609;
+                margin-right: 30px;
+            }
+
+            .step p {
+                margin-top: 0px;
+                font-size: 18px;
+                line-height: 1;
+            }
+            .note{
+                font-size:18px
+            }
+        }
 </style>
 <!-- btn Success Style Ends -->
 
@@ -355,13 +405,13 @@
         <div class="atyourservice">
             <h3> At Your Service_______</h3>
         </div>
-        <div class="row">
+        <div>
               <div class="container">
             <div class="row rowsection">
-                    <div class="col-md-6" style=" border-right:1px solid #000;height:auto">
+                    <div class="col-md-6 borderright">
                         <h1 class="text-center fw-semibold cstmheading">Who We Are</h1>
                         <div class="d-flex flex-column justify-content-center align-items-center">
-                        <img src="~/FrontAssets/images/Logo Web Black svg.svg" class="w-25 mb-5" />
+                        <img src="~/FrontAssets/images/Logo Web Black svg.svg" class="w-25 mb-md-5 mb-2" />
                         <p class="paragraphfont">We are a community of people who have IT know how____ with computer, Smartphones and other devices. We are here to help you</p>
                         </div>
                         
@@ -370,7 +420,7 @@
                 <div class="col-md-6">
             <h1 class="text-center fw-semibold cstmheading">What we Do</h1>
             <div class="d-flex flex-column justify-content-center align-items-center">
-                <img src="~/FrontAssets/images/Logo Web Black svg.svg" class="w-25 mb-5" />
+                <img src="~/FrontAssets/images/Logo Web Black svg.svg" class="w-25 mb-md-5 mb-2" />
                 <p class="paragraphfont">
                     We connect you with people
                     who are IT savvy, so they can

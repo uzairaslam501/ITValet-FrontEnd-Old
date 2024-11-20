@@ -1037,6 +1037,7 @@ p.help-block li {
      width: 80px;
      border-color: #2cdd9b;
 }
+
 /* market place */
 /* freelance prokect */
  .freelance-projects h2 {
@@ -3156,8 +3157,50 @@ p.help-block li {
          margin-bottom: 20px;
          text-align: center;
     }
+    .categories-list li {
+        flex: 0 0 100%; /* Full-width on smaller screens */
+    }
+    .market-wrapper .categories-list li a:hover:after {
+        width: 80px;
+        border-color: none;
+    }
+    .market-wrapper .categories-list li a:after {
+        content: none;
+        
+    }
+    .categories-list {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 20px; /* Adjust spacing between items */
+    }
+
+        .categories-list li {
+            flex: 0 0 calc(50% - 10px); /* Two columns, with spacing */
+            display: flex;
+            align-items: center;
+        }
+
+        .categories-list a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333; /* Customize text color */
+        }
+
+        .categories-list img {
+            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+        }
+
      .recommended .inner-slider {
          margin-bottom: 15px;
+    }
+    .services-wrapper h2 {
+        width:70%
     }
      .container-fluid {
          padding: 24px;
